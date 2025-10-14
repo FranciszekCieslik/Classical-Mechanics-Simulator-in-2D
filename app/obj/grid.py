@@ -72,7 +72,7 @@ class Grid:
                     continue
                 if 0 <= x < width:
                     pygame.draw.line(
-                        self.surface, (200, 200, 200, 60), (x, 0), (x, height)
+                        self.surface, (200, 200, 200, 200), (x, 0), (x, height)
                     )
             # rysuj poziome helpery
             for j in range(first_y_idx * helper_count, last_y_idx * helper_count):
@@ -81,7 +81,7 @@ class Grid:
                     continue
                 if 0 <= y < height:
                     pygame.draw.line(
-                        self.surface, (200, 200, 200, 60), (0, y), (width, y)
+                        self.surface, (200, 200, 200, 200), (0, y), (width, y)
                     )
 
         # rysuj linie główne
