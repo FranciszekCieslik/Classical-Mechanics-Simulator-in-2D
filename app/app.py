@@ -50,17 +50,19 @@ class App:
             self.axes.screen = self.screen
             self.grid.resize()
 
-        # ... w pętli Pygame event:
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+        if event.type == pygame.MOUSEWHEEL:
+            factor = (
+                self.camera.zoom_speed if event.y > 0 else 1.0 / self.camera.zoom_speed
+            )
+            self.camera.zoom_at(factor, pygame.mouse.get_pos())
+
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
+            pygame.mouse.get_rel()
             self.dragging = True
-            last_mouse = pygame.Vector2(event.pos)
-        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 2:
             self.dragging = False
-        if event.type == pygame.MOUSEMOTION and self.dragging:
-            m = pygame.Vector2(event.pos)
-            delta = m - last_mouse
-            self.camera.move(delta.x, delta.y)  # przesuwamy OFFSET w pikselach
-            last_mouse = m
+        elif event.type == pygame.MOUSEMOTION and self.dragging:
+            self.camera.move(*pygame.mouse.get_rel())
 
     def on_loop(self):
         # dt = self.clock.get_time() / 1000.0

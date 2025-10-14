@@ -50,31 +50,24 @@ class Grid:
             self.surface = pygame.Surface(size, pygame.SRCALPHA)
 
         width, height = self.surface.get_size()
-        ox, oy = self.camera.offset  # używamy tylko camera.offset
+        ox, oy = self.camera.offset
         self.surface.fill((0, 0, 0, 0))
 
-        # wybieramy "ładny" krok w jednostkach świata
         world_step = nice_world_step(self.base_cell_size, zoom, target_px=100)
         step_px = self.base_cell_size * zoom * world_step
 
-        # pomocnicze linie wewnątrz głównego kroku (np. 5 podziałek jeśli krok to 1)
-        # rysujemy helper tylko gdy główny krok jest wystarczająco duży
         helper_count = 5
         helper_px = step_px / helper_count if step_px >= 80 else None
 
-        # startujemy od indeksu kroku (liczby całkowite) obliczonego z offsetu
-        # indeks i odpowiada wartości = i * world_step (w jednostkach świata)
         first_x_idx = math.floor((-ox) / step_px) - 1
         last_x_idx = math.ceil((width - ox) / step_px) + 1
         first_y_idx = math.floor((-oy) / step_px) - 1
         last_y_idx = math.ceil((height - oy) / step_px) + 1
 
-        # rysuj pomocnicze linie (subdivisions) — ale unikamy rysowania ich tam, gdzie są linie główne
         if helper_px is not None and helper_px >= 2:
             # rysuj pionowe helpery
             for i in range(first_x_idx * helper_count, last_x_idx * helper_count):
                 x = ox + (i / helper_count) * step_px
-                # pomiń gdy jest to linia główna (i % helper_count == 0)
                 if i % helper_count == 0:
                     continue
                 if 0 <= x < width:
@@ -91,7 +84,7 @@ class Grid:
                         self.surface, (200, 200, 200, 60), (0, y), (width, y)
                     )
 
-        # rysuj linie główne (co world_step)
+        # rysuj linie główne
         for i in range(first_x_idx, last_x_idx + 1):
             x = ox + i * step_px
             if 0 <= x < width:

@@ -3,11 +3,11 @@ import pygame  # type: ignore
 
 class Camera:
     def __init__(self):
-        self.offset = pygame.Vector2(0, 0)  # ekran = world*zoom + offset
-        self.zoom = 1.0  # płynny zoom
+        self.offset = pygame.Vector2(0, 0)
+        self.zoom = 1.0
         self.min_zoom = 0.01
         self.max_zoom = 1000.0
-        self.zoom_speed = 1.12  # multiplicative factor per scroll tick
+        self.zoom_speed = 1.12
 
     def zoom_at(self, factor, pivot):
         """Zoom multiplicative wokół pivotu (pivot w pikselach ekranu)."""
@@ -20,7 +20,7 @@ class Camera:
         # world position odpowiadający pivotowi przed zoomem:
         world_pos = (pygame.Vector2(pivot) - self.offset) / old_zoom
 
-        # ustaw nowy zoom i policz offset tak, by pivot pozostał w tym samym miejscu ekranu
+        # korekta offsetu, aby pivot pozostał w tym samym miejscu ekranu
         self.zoom = new_zoom
         self.offset = pygame.Vector2(pivot) - world_pos * self.zoom
 
@@ -29,7 +29,6 @@ class Camera:
         self.offset.x += dx
         self.offset.y += dy
 
-    # pomocnicze: przekształcenia
     def world_to_screen(self, world_pos):
         return pygame.Vector2(world_pos) * self.zoom + self.offset
 
