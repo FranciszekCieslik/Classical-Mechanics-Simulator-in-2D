@@ -1,9 +1,10 @@
 import math
 
 import pygame  # type: ignore
+from obj.grid import Grid
 
 
-def format_label_value(val, step_world):
+def format_label_value(val: float, step_world: float) -> str:
     if step_world >= 1:
         return f"{int(round(val))}"
     decimals = max(0, -int(math.floor(math.log10(step_world))))
@@ -16,7 +17,7 @@ def format_label_value(val, step_world):
 
 
 class Axes:
-    def __init__(self, screen, grid):
+    def __init__(self, screen, grid: Grid):
         self.screen = screen
         self.grid = grid
         self.color = (50, 50, 50)
@@ -81,6 +82,8 @@ class Axes:
             # rysuj tuż pod osią X
             label_x = x - label.get_width() // 2
             label_y = x_axis_y + 6
+            if val == 0:
+                label_x -= label.get_width() // 2
             if 0 <= label_x + label.get_width() and label_x < width:
                 surface.blit(label, (label_x, label_y))
 
@@ -93,6 +96,8 @@ class Axes:
             if not (0 <= y < height):
                 continue
             val = -j * world_step
+            if val == 0:
+                continue
             key = round(y)
             if key in drawn_positions:
                 continue

@@ -2,20 +2,24 @@ import pygame  # type: ignore
 from obj.axes import Axes
 from obj.camera import Camera
 from obj.grid import Grid
+from pygame import Surface  # type: ignore
+from pygame.time import Clock  # type: ignore
 
 
 class App:
     def __init__(self):
-        self._running = True
-        self.screen = None
-        self.grid = None
-        self.axes = None
-        self.camera = Camera()
-        self.fullscreen = False
-        self.clock = pygame.time.Clock()
-        self.width, self.height = 640, 400
-        self.size = (self.width, self.height)
-        self.dragging = False
+        self._running: bool = True
+        self.screen: Surface = None
+        self.grid: Grid = None
+        self.axes: Axes = None
+        self.camera: Camera = Camera()
+        self.fullscreen: bool = False
+        self.clock: Clock = Clock()
+        self.width: int = 640
+        self.height: int = 400
+        self.size: tuple = (self.width, self.height)
+        self.dragging: bool = False
+        self.logo = None
 
     def on_init(self):
         pygame.init()
@@ -26,6 +30,8 @@ class App:
             screen=self.screen, cell_size=100, color=(150, 150, 150), camera=self.camera
         )
         self.axes = Axes(screen=self.screen, grid=self.grid)
+        self.logo = pygame.image.load("app//assets//logo.svg")
+        pygame.display.set_icon(self.logo)  # ustaw ikonę
         self._running = True
 
     def on_event(self, event):
