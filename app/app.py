@@ -1,4 +1,5 @@
 import pygame  # type: ignore
+import thorpy as tp  # type: ignore
 from obj.axes import Axes
 from obj.camera import Camera
 from obj.grid import Grid
@@ -8,18 +9,19 @@ from pygame.time import Clock  # type: ignore
 
 class App:
     def __init__(self):
-        self._running: bool = True
         self.screen: Surface = None
         self.grid: Grid = None
         self.axes: Axes = None
         self.camera: Camera = Camera()
-        self.fullscreen: bool = False
         self.clock: Clock = Clock()
         self.width: int = 640
         self.height: int = 400
         self.size: tuple = (self.width, self.height)
+        self._running: bool = True
         self.dragging: bool = False
+        self.fullscreen: bool = False
         self.logo = None
+        self.box = None
 
     def on_init(self):
         pygame.init()
@@ -70,8 +72,7 @@ class App:
         elif event.type == pygame.MOUSEMOTION and self.dragging:
             self.camera.move(*pygame.mouse.get_rel())
 
-    def on_loop(self):
-        # dt = self.clock.get_time() / 1000.0
+    def on_update(self):
         pass
 
     def on_render(self):
@@ -81,6 +82,7 @@ class App:
         pygame.display.flip()
 
     def on_cleanup(self):
+        tp.quit()
         pygame.quit()
 
     def on_execute(self):
@@ -90,7 +92,6 @@ class App:
         while self._running:
             for event in pygame.event.get():
                 self.on_event(event)
-            self.on_loop()
+            self.on_update()
             self.on_render()
-            self.clock.tick(90)
         self.on_cleanup()
