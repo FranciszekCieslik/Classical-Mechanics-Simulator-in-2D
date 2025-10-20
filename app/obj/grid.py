@@ -36,10 +36,6 @@ class Grid:
             pygame.display.get_desktop_sizes()[0], pygame.SRCALPHA
         )
 
-    def resize(self):
-        size = self.screen.get_size()
-        self.surface = pygame.Surface(size, pygame.SRCALPHA)
-
     def draw(self):
         if not self.visible or self.camera is None:
             return
