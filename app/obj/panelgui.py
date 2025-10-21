@@ -12,82 +12,92 @@ class Panel_GUI:
 
         self.group_draw: Optional[tp.Group] = None
         self.group_simulation: Optional[tp.Group] = None
-        self.group_views: Optional[tp.Group] = None
         self.group_ext: Optional[tp.Group] = None
 
         self.checkbox_gravity: Optional[tp.Checkbox] = None
-        self.input_gravity: Optional[tp.Checkbox] = None
+        self.checkbox_obj_as_points: Optional[tp.Checkbox] = None
 
         self.helpers: list[tp.Helper] = []
         self.on_init()
 
     def on_init(self):
         tp.init(self.screen, theme=tp.theme_text_dark)
+        tp.set_default_font(font_name="console", font_size=12)
+        ico_paths = [
+            "app/assets/icons/line.svg",
+            "app/assets/icons/rectangle.svg",
+            "app/assets/icons/circle.svg",
+            "app/assets/icons/triangle.svg",
+            "app/assets/icons/rubber.svg",
+        ]
 
-        # icons_path = [
-        #     "app/assets/icons/line.svg",
-        #     "app/assets/icons/rectangle.svg",
-        #     "app/assets/icons/circle.svg",
-        #     "app/assets/icons/triangle.svg",
-        #     "app/assets/icons/rubber.svg",
-        # ]
-        # draw_labels = [
-        #     "Line tool",
-        #     "Rectangle tool",
-        #     "Circle tool",
-        #     "Triangle tool",
-        #     "Rubber",
-        # ]
+        draw_labels = [
+            "Line",
+            "Rectangle",
+            "Circle",
+            "Triangle",
+            "Rubber",
+        ]
 
-        # draw_buttons = []
-        # for icon, label in zip(icons_path, draw_labels):
-        #     ico = pygame.image.load(icon).convert_alpha()
-        #     ico.set_colorkey(ico.get_at((0, 0)))
-        #     pure_ico = tp.Image(ico)
-        #     pure_ico.set_size((20, 20))
+        draw_buttons = []
+        for icon_path, label in zip(ico_paths, draw_labels):
+            my_img = pygame.image.load(icon_path)
+            my_img = pygame.transform.smoothscale(my_img, (30, 30))
+            variant = tp.graphics.change_color_on_img(
+                my_img, my_img.get_at((0, 0)), (100, 100, 100)
+            )
+            btn = tp.ImageButton("", my_img.copy(), img_hover=variant)
+            helper = tp.Helper(label, btn, countdown=30, offset=(0, 40))
+            helper.set_font_size(12)
+            self.helpers.append(helper)
+            draw_buttons.append(btn)
 
-        #     variant = tp.graphics.change_color_on_img(
-        #         ico, ico.get_at((50, 25)), (200, 200, 255)
-        #     )
-        #     variant.set_colorkey(variant.get_at((0, 0)))
-
-        #     btn = tp.ImageButton("", ico.copy(), img_hover=variant)
-        #     helper = tp.Helper(label, btn, countdown=30)
-        #     self.helpers.append(helper)
-        #     draw_buttons.append(btn)
-
-        # self.group_draw = tp.Group(draw_buttons, "h")
+        self.group_draw = tp.Group(draw_buttons, "h")
 
         # ================================
 
-        sim_icons = ["", "", "", ""]
-        sim_labels = ["Start simulation", "Pause", "Stop", "Restart"]
+        sim_icons = [
+            "app/assets/icons/play.svg",
+            "app/assets/icons/check_point.svg",
+            "app/assets/icons/vector-two-fill.svg",
+        ]
+        sim_labels = ["Start/Pause simulation", "Add check point", "Simulation Space"]
 
         sim_buttons = []
-
-        for icon, label in zip(sim_icons, sim_labels):
-            btn = tp.Button(icon)
-            helper = tp.Helper(label, btn, countdown=30)
+        for icon_path, label in zip(sim_icons, sim_labels):
+            my_img = pygame.image.load(icon_path)
+            my_img = pygame.transform.smoothscale(my_img, (30, 30))
+            variant = tp.graphics.change_color_on_img(
+                my_img, my_img.get_at((0, 0)), (100, 100, 100)
+            )
+            btn = tp.ImageButton("", my_img.copy(), img_hover=variant)
+            helper = tp.Helper(label, btn, countdown=30, offset=(0, 40))
+            helper.set_font_size(12)
             self.helpers.append(helper)
             sim_buttons.append(btn)
 
-        # ================================
-
         self.group_simulation = tp.Group(sim_buttons, "h")
-        self.checkbox_grid = tp.Checkbox()
-        self.checkbox_vectors = tp.Checkbox()
-        self.group_views = tp.Group([self.checkbox_grid, self.checkbox_vectors], "v")
+        # ================================
         self.checkbox_gravity = tp.Checkbox()
+        text_group1 = tp.Group(
+            [tp.Text("GRAVITY", font_size=12), self.checkbox_gravity], "h", gap=10
+        )
+        self.checkbox_obj_as_points = tp.Checkbox()
+        text_group2 = tp.Group(
+            [
+                tp.Text("TREAT OBJECTS AS POINTS", font_size=12),
+                self.checkbox_obj_as_points,
+            ],
+            "h",
+            gap=10,
+        )
 
-        self.checkbox_points = tp.Checkbox()
-
-        self.group_ext = tp.Group([self.checkbox_points])
-        self.group_ext.sort_children("v")
+        self.group_ext = tp.Group([text_group1, text_group2], "v", gap=5, align="right")
 
         # ================================
 
         self.metagroup = tp.Group(
-            [self.group_simulation, self.group_views, self.group_ext]
+            [self.group_draw, self.group_simulation, self.group_ext]
         )
         self.metagroup.sort_children("h", gap=30)
         self.metagroup.set_size(self.screen.get_size())
