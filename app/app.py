@@ -1,3 +1,6 @@
+import threading
+import time
+
 import pygame  # type: ignore
 import thorpy as tp  # type: ignore
 from obj.axes import Axes
@@ -22,6 +25,11 @@ class App:
         self.logo: Surface = None
         self._running: bool = True
         self.dragging: bool = False
+        # ===============================
+        self._resize_lock: threading.Lock = threading.Lock()
+        self._last_resize: float = 0.0
+        self.minimized: bool = False
+        self._resize_cooldown: float = 0.2
 
     def on_init(self):
         pygame.init()
@@ -32,7 +40,7 @@ class App:
         pygame.display.set_icon(self.logo)
         # GUI
         self.panel_surface = pygame.Surface(
-            (self.screen.get_width(), 100), flags=pygame.RESIZABLE
+            (self.screen.get_width(), 80), flags=pygame.RESIZABLE
         )
         self.panelgui = Panel_GUI(self.panel_surface)
         # GRID and AXES
@@ -43,11 +51,28 @@ class App:
         return True
 
     def resize(self, event):
-        if event.type == pygame.VIDEORESIZE:
+        now = time.time()
+        if now - getattr(self, "_last_resize", 0) < self._resize_cooldown:
+            return  # zbyt szybkie kolejne wywołanie — throttle
+        self._last_resize = now
+
+        # ustal rozmiar okna niezależnie od typu eventu
+        if hasattr(event, "size"):
+            width, height = event.size
+        elif hasattr(event, "data1") and hasattr(event, "data2"):
+            width, height = event.data1, event.data2
+        else:
+            return
+
+        with self._resize_lock:
             flags = pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE
-            self.screen = pygame.display.set_mode(event.size, flags)
+            self.size = (width, height)
+            self.screen = pygame.display.set_mode(self.size, flags)
+
+            # --- aktualizacja panelu ---
+            panel_height = 80
             self.panel_surface = pygame.Surface(
-                (self.screen.get_width(), 100), flags=pygame.RESIZABLE
+                (self.screen.get_width(), panel_height), flags=pygame.RESIZABLE
             )
             self.panelgui.screen = self.panel_surface
             self.panelgui.resize_panel(self.panel_surface)
@@ -56,12 +81,28 @@ class App:
         if event.type == pygame.QUIT:
             self._running = False
             return
-        self.resize(event)
+
+        if event.type in (pygame.VIDEORESIZE, pygame.WINDOWRESIZED):
+            self.resize(event)
+            return
+
+        elif event.type in (pygame.WINDOWRESTORED, pygame.WINDOWMAXIMIZED):
+            if self.panelgui:
+                self.panelgui.render()
+                self.panel_dirty = True
+            self.minimized = False
+            return
+
+        elif event.type == pygame.WINDOWMINIMIZED:
+            self.minimized = True
+            return
+
         if event.type == pygame.MOUSEWHEEL:
             factor = (
                 self.camera.zoom_speed if event.y > 0 else 1.0 / self.camera.zoom_speed
             )
             self.camera.zoom_at(factor, pygame.mouse.get_pos())
+
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
             pygame.mouse.get_rel()
             self.dragging = True
@@ -78,6 +119,9 @@ class App:
         self.screen.blit(self.panel_surface, (0, 0))
 
     def on_render(self):
+        if getattr(self, "minimized", False):
+            return
+
         self.screen.fill((220, 220, 220))
         self.grid.draw()
         self.axes.draw()
