@@ -2,14 +2,14 @@ import pygame  # type: ignore
 
 
 class Camera:
-    def __init__(self):
+    def __init__(self) -> None:
         self.offset = pygame.Vector2(0, 0)
         self.zoom: float = 1.0
         self.min_zoom: float = 0.01
         self.max_zoom: float = 1000.0
         self.zoom_speed: float = 1.12
 
-    def zoom_at(self, factor: float, pivot: tuple):
+    def zoom_at(self, factor: float, pivot: tuple[float, float]) -> None:
         old_zoom = self.zoom
         new_zoom = max(self.min_zoom, min(self.max_zoom, old_zoom * factor))
 
@@ -23,12 +23,12 @@ class Camera:
         self.zoom = new_zoom
         self.offset = pygame.Vector2(pivot) - world_pos * self.zoom
 
-    def move(self, dx: float = 0.0, dy: float = 0.0):
+    def move(self, dx: float = 0.0, dy: float = 0.0) -> None:
         self.offset.x += dx
         self.offset.y += dy
 
-    def world_to_screen(self, world_pos: tuple):
+    def world_to_screen(self, world_pos: tuple) -> pygame.Vector2:
         return pygame.Vector2(world_pos) * self.zoom + self.offset
 
-    def screen_to_world(self, screen_pos: tuple):
+    def screen_to_world(self, screen_pos: tuple) -> pygame.Vector2:
         return (pygame.Vector2(screen_pos) - self.offset) / self.zoom

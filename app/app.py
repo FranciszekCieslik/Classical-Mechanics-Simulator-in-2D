@@ -5,6 +5,7 @@ import pygame  # type: ignore
 import thorpy as tp  # type: ignore
 from obj.axes import Axes
 from obj.camera import Camera
+from obj.drawn.rectangle import Rectangle
 from obj.grid import Grid
 from obj.panelgui import Panel_GUI
 from pygame import Rect, Surface  # type: ignore
@@ -12,54 +13,50 @@ from pygame.time import Clock  # type: ignore
 
 
 class App:
-    def __init__(self):
-        # --- WINDOW ---
-        self.screen: Surface = None
-        self.panel_surface: Surface = None
-        self.panel_rect: Rect = None
-        self.size: tuple = None
-        self.logo: Surface = None
+    def __init__(self) -> None:
+        # --- WINDOW INIT ---
+        pygame.init()
+        info = pygame.display.Info()
+        self.size: tuple[int, int] = (info.current_w, info.current_h)
         self.fullscreen: bool = True
-        # --- MAIN COMPONENTS ---
-        self.clock: Clock = Clock()
+        self.screen: Surface = pygame.display.set_mode(self.size, pygame.NOFRAME)
+        pygame.display.set_caption("Classical-Mechanics-Simulator-in-2D")
+
+        # logo
+        self.logo: Surface = pygame.image.load("app/assets/logo.svg")
+        pygame.display.set_icon(self.logo)
+
+        # --- GUI PANEL ---
+        self.panel_surface: Surface = pygame.Surface(
+            (self.screen.get_width(), 80), flags=pygame.SRCALPHA
+        )
+        self.panel_rect: Rect = self.panel_surface.get_rect(topleft=(0, 0))
+        self.panelgui: Panel_GUI = Panel_GUI(self.panel_surface)
+
+        # --- CAMERA ---
         self.camera: Camera = Camera()
-        self.panelgui: Panel_GUI = None
-        self.grid: Grid = None
-        self.axes: Axes = None
+
+        # --- GRID and AXES ---
+        self.grid: Grid = Grid(
+            screen=self.screen,
+            cell_size=100,
+            color=(150, 150, 150),
+            camera=self.camera,
+        )
+        self.axes: Axes = Axes(screen=self.screen, grid=self.grid)
+
+        # --- TIMING ---
+        self.clock: Clock = Clock()
+        self._resize_lock: threading.Lock = threading.Lock()
+        self._last_resize: float = 0.0
+        self._resize_cooldown: float = 0.2
+
         # --- FLAGS ---
         self._running: bool = True
         self.dragging: bool = False
-        # --- resize of window ---
-        self._resize_lock: threading.Lock = threading.Lock()
-        self._last_resize: float = 0.0
         self.minimized: bool = False
-        self._resize_cooldown: float = 0.2
 
-    def on_init(self):
-        pygame.init()
-        info = pygame.display.Info()
-        self.size = (info.current_w, info.current_h)
-        self.screen = pygame.display.set_mode(self.size, pygame.NOFRAME)
-        # if resaizeable window is needed
-        # flags = pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE
-        # self.screen = pygame.display.set_mode(self.size, flags)
-        pygame.display.set_caption("Classical-Mechanics-Simulator-in-2D")
-        self.logo = pygame.image.load("app//assets//logo.svg")
-        pygame.display.set_icon(self.logo)
-        # --- GUI ---
-        self.panel_surface = pygame.Surface(
-            (self.screen.get_width(), 80), flags=pygame.RESIZABLE
-        )
-        self.panel_rect = self.panel_surface.get_rect(topleft=(0, 0))
-        self.panelgui = Panel_GUI(self.panel_surface)
-        # --- GRID and AXES ---
-        self.grid = Grid(
-            screen=self.screen, cell_size=100, color=(150, 150, 150), camera=self.camera
-        )
-        self.axes = Axes(screen=self.screen, grid=self.grid)
-        return True
-
-    def resize(self, event):
+    def resize(self, event) -> None:
         now = time.time()
         if now - getattr(self, "_last_resize", 0) < self._resize_cooldown:
             return
@@ -87,7 +84,7 @@ class App:
             self.panelgui.screen = self.panel_surface
             self.panelgui.resize_panel(self.panel_surface)
 
-    def on_event(self, event):
+    def on_event(self, event) -> None:
         # --- WINDOW EVENTS ---
         if event.type == pygame.QUIT:
             self._running = False
@@ -133,30 +130,33 @@ class App:
             elif event.type == pygame.MOUSEMOTION and self.dragging:
                 self.camera.move(*pygame.mouse.get_rel())
 
-    def on_update(self):
+    def on_update(self) -> None:
         pass
 
     def draw_panel(self):
         self.panelgui.render()
         self.screen.blit(self.panel_surface, self.panel_rect)
 
-    def on_render(self):
+    def on_render(self) -> None:
         if getattr(self, "minimized", False):
             return
+
+        # rec = Rectangle(self.screen, self.camera, (-10,10), (255,0,0), (5,8), cell_size = 100)
 
         self.screen.fill((220, 220, 220))
         self.grid.draw()
         self.axes.draw()
+
+        # rec.draw()
+
         self.draw_panel()
         pygame.display.flip()
         self.clock.tick(60)
 
-    def on_cleanup(self):
+    def on_cleanup(self) -> None:
         pygame.quit()
 
-    def on_execute(self):
-        if self.on_init() is False:
-            self._running = False
+    def on_execute(self) -> None:
 
         while self._running:
             for event in pygame.event.get():
