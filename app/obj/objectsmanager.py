@@ -1,4 +1,4 @@
-from .rel_obj.realobject import RealObject
+from .realobject import RealObject
 
 
 class ObjecstManager:

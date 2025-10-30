@@ -3,11 +3,14 @@ import time
 
 import pygame  # type: ignore
 import thorpy as tp  # type: ignore
+from Box2D import b2World
 from obj.axes import Axes
 from obj.camera import Camera
 from obj.drawn.rectangle import Rectangle
 from obj.grid import Grid
 from obj.panelgui import Panel_GUI
+from obj.physicobject import Features
+from obj.realobject import RealObject
 from pygame import Rect, Surface  # type: ignore
 from pygame.time import Clock  # type: ignore
 
@@ -141,27 +144,122 @@ class App:
         if getattr(self, "minimized", False):
             return
 
-        # rec = Rectangle(self.screen, self.camera, (-10,10), (255,0,0), (5,8), cell_size = 100)
-
         self.screen.fill((220, 220, 220))
         self.grid.draw()
         self.axes.draw()
 
-        # rec.draw()
-
         self.draw_panel()
-        pygame.display.flip()
-        self.clock.tick(60)
 
     def on_cleanup(self) -> None:
         pygame.quit()
 
     def on_execute(self) -> None:
+        world = b2World(gravity=(0, -2))
+        static_rectangle = RealObject(
+            world=world,
+            surface=self.screen,
+            camera=self.camera,
+            type="static",
+            shape="rectangle",
+            size=(2, 2),
+            position=(0, 0),
+            angle=40.0,
+            color=pygame.Vector3(150, 150, 255),
+            cell_size=100,
+        )
+
+        static_circle = RealObject(
+            world=world,
+            surface=self.screen,
+            camera=self.camera,
+            type="static",
+            shape="circle",
+            size=1.0,
+            position=(3, 3),
+            angle=35.0,
+            color=pygame.Vector3(255, 200, 100),
+            cell_size=100,
+        )
+
+        static_triangle = RealObject(
+            world=world,
+            surface=self.screen,
+            camera=self.camera,
+            type="static",
+            shape="triangle",
+            size=[(-1, 0), (1, 0), (0, 1.5)],
+            position=(0, -1),
+            angle=25.0,
+            color=pygame.Vector3(100, 255, 100),
+            cell_size=100,
+        )
+
+        # 🔶 Dynamiczne obiekty (poruszające się ciała)
+        dyn_features = Features(density=1.0, friction=0.4, restitution=0.3)
+
+        # dynamic_rectangle = RealObject(
+        #     world=world,
+        #     surface=self.screen,
+        #     camera=self.camera,
+        #     type="dynamic",
+        #     shape="rectangle",
+        #     size=(2, 1),
+        #     position=(8, 10),
+        #     angle=90.0,
+        #     color=pygame.Vector3(255, 80, 80),
+        #     cell_size=100,
+        #     features=dyn_features,
+        # )
+
+        # dynamic_circle = RealObject(
+        #     world=world,
+        #     surface=self.screen,
+        #     camera=self.camera,
+        #     type="dynamic",
+        #     shape="circle",
+        #     size=0.8,
+        #     position=(13, 12),
+        #     angle=90.0,
+        #     color=pygame.Vector3(255, 200, 0),
+        #     cell_size=100,
+        #     features=dyn_features,
+        # )
+
+        # dynamic_triangle = RealObject(
+        #     world=world,
+        #     surface=self.screen,
+        #     camera=self.camera,
+        #     type="dynamic",
+        #     shape="triangle",
+        #     size=[(-0.8, 0), (0.8, 0), (0, 1.4)],
+        #     position=(18, 14),
+        #     angle=0.0,
+        #     color=pygame.Vector3(80, 255, 80),
+        #     cell_size=100,
+        #     features=dyn_features,
+        # )
+
+        # Lista wszystkich obiektów
+        objects = [
+            static_rectangle,
+            static_circle,
+            static_triangle,
+            # dynamic_rectangle,
+            # dynamic_circle,
+            # dynamic_triangle,
+        ]
 
         while self._running:
             for event in pygame.event.get():
                 self.on_event(event)
             self.on_update()
             self.on_render()
+            # Update physics world
+            world.Step(timeStep=1.0 / 60.0, velocityIterations=8, positionIterations=3)
+            for obj in objects:
+                obj.draw()
+            # end of render function
+            pygame.display.flip()
+            self.clock.tick(60)
 
         self.on_cleanup()

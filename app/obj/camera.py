@@ -6,7 +6,7 @@ class Camera:
         self.offset = pygame.Vector2(0, 0)
         self.zoom: float = 1.0
         self.min_zoom: float = 0.01
-        self.max_zoom: float = 1000.0
+        self.max_zoom: float = 100.0
         self.zoom_speed: float = 1.12
 
     def zoom_at(self, factor: float, pivot: tuple[float, float]) -> None:
