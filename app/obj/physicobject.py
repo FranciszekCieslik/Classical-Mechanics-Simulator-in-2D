@@ -1,11 +1,6 @@
 from typing import List, Optional, Tuple, Union
 
-from Box2D import (
-    b2CircleShape,
-    b2PolygonShape,
-    b2Vec2,
-    b2World,
-)
+from Box2D import b2CircleShape, b2PolygonShape, b2Shape, b2Vec2, b2World
 
 # Typy geometryczne
 RectangleSize = Tuple[float, float]
@@ -45,16 +40,16 @@ class PhysicObject:
 
     def __init__(
         self,
-        type: str,
-        shape: str,
+        obj_type: str,
+        shape_type: str,
         size: ShapeSize,
         position: Tuple[float, float],
         angle: float,
         world: b2World,
         features: Optional[Features] = None,
-    ) -> None:
-        self.is_static = type.lower() == "static"
-        self.shape_type = shape.lower()
+    ):
+        self.is_static = obj_type.lower() == "static"
+        self.shape_type = shape_type.lower()
         self.world = world
         self.position = position
         self.angle = angle
@@ -62,12 +57,41 @@ class PhysicObject:
         if features is None:
             features = Features()
 
-        # Create body
+        # === TRIANGLE SPECIAL CASE ===
+        offset_y = 0.0
+        local_vertices = None
+        if self.shape_type == "triangle":
+            if not isinstance(size, list):
+                raise TypeError(
+                    f"Expected list for triangle size, got {type(size).__name__}"
+                )
+            verts = [b2Vec2(v[0], v[1]) for v in size]
+            centroid_y = sum(v.y for v in verts) / 3.0
+            local_vertices = [b2Vec2(v.x, v.y - centroid_y) for v in verts]
+            min_y = min(v.y for v in verts)
+            offset_y = centroid_y - min_y
+        elif self.shape_type == "rectangle":
+            if not isinstance(size, tuple):
+                raise TypeError(
+                    f"Expected tuple for rectangle size, got {type(size).__name__}"
+                )
+            width, height = size
+            # używaj width, height
+        elif self.shape_type == "circle":
+            if not isinstance(size, float):
+                raise TypeError(
+                    f"Expected float for circle radius, got {type(size).__name__}"
+                )
+            radius = size
+
+        body_pos = (self.position[0], self.position[1] + offset_y)
+
+        # === BODY ===
         if self.is_static:
-            self.body = world.CreateStaticBody(position=position, angle=angle)
+            self.body = world.CreateStaticBody(position=body_pos, angle=angle)
         else:
             self.body = world.CreateDynamicBody(
-                position=position,
+                position=body_pos,
                 angle=angle,
                 linearVelocity=b2Vec2(*features.linearVelocity),
                 angularVelocity=features.angularVelocity,
@@ -77,10 +101,11 @@ class PhysicObject:
                 active=features.active,
             )
 
-        # Create shape depending on type
-        shape_obj = self._create_shape(shape=self.shape_type, size=size)
+        # === SHAPE ===
+        shape_obj = self._create_shape(self.shape_type, size, local_vertices)
+        shape_obj.radius = 0.0022
 
-        # Create fixture
+        # === FIXTURE ===
         self.fixture = self.body.CreateFixture(
             shape=shape_obj,
             density=features.density if not self.is_static else 0.0,
@@ -88,30 +113,36 @@ class PhysicObject:
             restitution=features.restitution,
         )
 
-    # -------------------------------------------
-    def _create_shape(self, shape: str, size: ShapeSize):
-        """Internal helper to create a Box2D shape object."""
+    def _create_shape(
+        self, shape: str, size: ShapeSize, local_vertices=None
+    ) -> b2Shape:
         if shape == "rectangle":
-            if not (isinstance(size, (tuple, list)) and len(size) == 2):
-                raise TypeError("Rectangle shape requires size=(width, height).")
-            return b2PolygonShape(box=size)
+            if not isinstance(size, tuple):
+                raise TypeError(
+                    f"Expected tuple for rectangle size, got {type(size).__name__}"
+                )
+            half_size = (size[0] / 2, size[1] / 2)
+            return b2PolygonShape(box=half_size)
 
         elif shape == "circle":
-            if not isinstance(size, (int, float)):
-                raise TypeError("Circle shape requires size=radius (float).")
-            return b2CircleShape(radius=size)
+            if not isinstance(size, float):
+                raise TypeError(
+                    f"Expected float for circle radius, got {type(size).__name__}"
+                )
+            return b2CircleShape(radius=size, pos=b2Vec2(0, size))
 
         elif shape == "triangle":
-            if not (isinstance(size, list) and len(size) == 3):
+            if not isinstance(size, list):
                 raise TypeError(
-                    "Triangle shape requires 3 vertex points [(x1,y1),(x2,y2),(x3,y3)]."
+                    f"Expected list for triangle size, got {type(size).__name__}"
                 )
-            return b2PolygonShape(vertices=size)
+            if local_vertices is None:
+                local_vertices = [b2Vec2(v[0], v[1]) for v in size]
+            return b2PolygonShape(vertices=local_vertices)
 
         else:
             raise ValueError(f"Unsupported shape type: {shape}")
 
-    # -------------------------------------------
     def set_body_mass(self, mass: float) -> None:
         """Adjusts body mass by scaling its density proportionally."""
         if not hasattr(self, "body") or self.body is None:

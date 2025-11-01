@@ -1,3 +1,4 @@
+import math
 from typing import List, Optional, Tuple, Union
 
 import pygame  # type: ignore
@@ -18,8 +19,8 @@ class RealObject:
         world: b2World,
         surface: pygame.Surface,
         camera: Camera,
-        type: str,
-        shape: str,
+        obj_type: str,
+        shape_type: str,
         size: Union[Tuple[float, float], float, List[Tuple[float, float]]],
         position: Tuple[float, float],
         angle: float,
@@ -35,7 +36,7 @@ class RealObject:
             surface: pygame.Surface — rendering target
             camera: Camera object
             type: 'static' or 'dynamic'
-            shape: 'rectangle', 'circle', or 'triangle'
+            shape_type: 'rectangle', 'circle', or 'triangle'
             size: geometric shape definition
             position: (x, y) position in Box2D world (meters)
             angle: initial rotation (radians)
@@ -43,10 +44,13 @@ class RealObject:
             cell_size: scaling factor between physics world units and visual world
             features: optional physics parameters
         """
+        self.start_position = position
+        self.start_angle = angle
+
         # physics setup
         self.physics = PhysicObject(
-            type=type,
-            shape=shape,
+            obj_type=obj_type,
+            shape_type=shape_type,
             size=size,
             position=position,
             angle=angle,
@@ -58,13 +62,13 @@ class RealObject:
         # convert Box2D position → pygame.Vector2 for drawn object
         pygame_position = pygame.Vector2(position[0], position[1])
 
-        if shape == "rectangle":
+        if shape_type == "rectangle":
             pygame_size = pygame.Vector2(size)
         else:
             pygame_size = size
 
         self.visual = DrawnObject(
-            shape=shape,
+            shape=shape_type,
             size=pygame_size,
             position=pygame_position,
             color=color,
@@ -74,7 +78,7 @@ class RealObject:
         )
 
         self.cell_size = cell_size
-        self.shape = shape
+        self.shape_type = shape_type
 
     # -------------------------------------------------------
     def sync(self) -> None:
@@ -83,14 +87,38 @@ class RealObject:
         Converts Box2D world coordinates to visual world coordinates.
         """
         body = self.physics.body
-        pos = body.position
+        pos = body.worldCenter
         angle = body.angle
 
-        # Box2D units (usually meters) → world units (e.g. tiles)
-        self.visual.object.position = pygame.Vector2(pos.x, pos.y)
-        self.visual.object.angle = (
-            angle if hasattr(self.visual.object, "angle") else 0.0
-        )
+        # Domyślnie synchronizujemy ze środkiem masy (centroid)
+        corrected_pos = pygame.Vector2(pos.x, pos.y)
+
+        # Dla trójkąta — korekta pozycji, żeby dolny wierzchołek był tam, gdzie w fizyce
+        if self.shape_type == "triangle":
+            vertices = [v for v in self.physics.fixture.shape.vertices]
+            # centroid w lokalnych współrzędnych (0,0)
+            centroid_y = sum(v[1] for v in vertices) / 3.0
+            min_y = min(v[1] for v in vertices)
+            offset_y = centroid_y - min_y
+
+            # Korekta pozycji w dół o offset_y (po transformacji przez kąt obrotu)
+            sin_a = math.sin(angle)
+            cos_a = math.cos(angle)
+            dx, dy = 0, -offset_y  # przesunięcie lokalne w dół
+            # obracamy wektor przesunięcia zgodnie z kątem ciała
+            rotated_offset = pygame.Vector2(
+                dx * cos_a - dy * sin_a,
+                dx * sin_a + dy * cos_a,
+            )
+            corrected_pos += rotated_offset
+            # --- Korekta dla kół ---
+        elif self.shape_type == "circle":
+            radius = self.visual.size
+            corrected_pos.y += radius  # obniżenie środka o promień
+
+        # Synchronizuj pozycję i obrót rysowanego obiektu
+        self.visual.object.set_position(corrected_pos)
+        self.visual.object.set_angle(math.degrees(angle))
 
     # -------------------------------------------------------
     def draw(self) -> None:
@@ -98,7 +126,6 @@ class RealObject:
         Updates synchronization and draws the object to the screen.
         """
         self.sync()
-        self.visual.update()
         self.visual.draw()
 
     # -------------------------------------------------------

@@ -58,11 +58,6 @@ class Triangle:
         self.position.y += dy
 
     # ------------------------------------------------------------
-    def rotate(self, delta_angle: float) -> None:
-        """Rotates the triangle by a given delta angle (in degrees)."""
-        self.angle = (self.angle + delta_angle) % 360
-
-    # ------------------------------------------------------------
     def set_angle(self, angle: float) -> None:
         """Sets an absolute rotation angle (in degrees)."""
         self.angle = angle % 360
@@ -106,3 +101,7 @@ class Triangle:
         visible = max_x >= 0 and min_x <= screen_w and max_y >= 0 and min_y <= screen_h
 
         return visible
+
+    def set_position(self, position: pygame.Vector2) -> None:
+        """Sets the absolute position of the triangle in world coordinates."""
+        self.position = pygame.Vector2(position)

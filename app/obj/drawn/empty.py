@@ -39,3 +39,9 @@ class Empty:
 
     def rotate(self, da: float) -> None:
         return
+
+    def set_position(self, position: pygame.Vector2) -> None:
+        return
+
+    def set_angle(self, angle: float) -> None:
+        return

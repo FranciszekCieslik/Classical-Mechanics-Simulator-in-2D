@@ -75,3 +75,13 @@ class DrawnObject:
     def update(self) -> bool:
         """Updates shape position and returns visibility flag."""
         return self.object.update()
+
+    def set_position(self, position: pygame.Vector2) -> None:
+        """Sets the absolute position of the shape in world coordinates."""
+        if hasattr(self.object, "set_position"):
+            self.object.set_position(position)
+
+    def set_angle(self, angle: float) -> None:
+        """Sets the absolute rotation angle (in degrees) if supported."""
+        if hasattr(self.object, "set_angle"):
+            self.object.set_angle(angle)

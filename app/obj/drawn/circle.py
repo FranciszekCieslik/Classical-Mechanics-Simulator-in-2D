@@ -101,3 +101,7 @@ class Circle:
         visible = x + r >= 0 and x - r <= screen_w and y + r >= 0 and y - r <= screen_h
 
         return visible
+
+    def set_position(self, position: pygame.Vector2) -> None:
+        """Sets the absolute position of the triangle in world coordinates."""
+        self.position = pygame.Vector2(position)

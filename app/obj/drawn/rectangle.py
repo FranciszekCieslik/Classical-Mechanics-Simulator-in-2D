@@ -105,12 +105,12 @@ class Rectangle:
     # ------------------------------------------------------
     def draw(self) -> None:
         """Draw the rectangle if visible."""
-        if self.update():
-            pygame.gfxdraw.filled_polygon(self.surface, self.points_screen, self.color)
-            pygame.gfxdraw.aapolygon(self.surface, self.points_screen, self.color)
-            pygame.gfxdraw.aapolygon(
-                self.surface, self.points_screen, self.border_color
-            )
+        if not self.update():
+            return
+
+        pygame.gfxdraw.filled_polygon(self.surface, self.points_screen, self.color)
+        pygame.gfxdraw.aapolygon(self.surface, self.points_screen, self.color)
+        pygame.gfxdraw.aapolygon(self.surface, self.points_screen, self.border_color)
 
     # ------------------------------------------------------
     def move(self, dx: float, dy: float) -> None:
@@ -118,6 +118,16 @@ class Rectangle:
         self.position.x += dx
         self.position.y += dy
 
-    def rotate(self, da: float) -> None:
-        """Increment rotation angle by `da` degrees."""
-        self.angle = (self.angle + da) % 360
+    def set_position(self, position: pygame.Vector2) -> None:
+        """
+        Sets the position from Box2D coordinates.
+        Converts meters → pixels and flips Y for Pygame.
+        """
+        # Box2D: Y rośnie w górę, Pygame: Y w dół
+        self.position = position
+
+    def set_angle(self, angle_radians: float) -> None:
+        """
+        Sets the rotation angle based on Box2D body angle (radians → degrees).
+        """
+        self.angle = (angle_radians) % 360
