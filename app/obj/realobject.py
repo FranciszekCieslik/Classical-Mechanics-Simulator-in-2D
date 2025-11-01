@@ -138,3 +138,13 @@ class RealObject:
         Sets the mass of the physics body.
         """
         self.physics.set_body_mass(mass)
+
+    def reset(self) -> None:
+        """
+        Resets the object to its initial position and angle.
+        """
+        body = self.physics.body
+        body.position = self.start_position
+        body.angle = self.start_angle
+        body.linearVelocity = (0, 0)
+        body.angularVelocity = 0

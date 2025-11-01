@@ -1,13 +1,13 @@
 import threading
 import time
+from typing import Callable
 
 import pygame  # type: ignore
-import thorpy as tp  # type: ignore
-from Box2D import b2World
 from obj.axes import Axes
 from obj.camera import Camera
 from obj.drawn.rectangle import Rectangle
 from obj.grid import Grid
+from obj.objectsmanager import ObjecstManager
 from obj.panelgui import Panel_GUI
 from obj.physicobject import Features
 from obj.realobject import RealObject
@@ -29,13 +29,6 @@ class App:
         self.logo: Surface = pygame.image.load("app/assets/logo.svg")
         pygame.display.set_icon(self.logo)
 
-        # --- GUI PANEL ---
-        self.panel_surface: Surface = pygame.Surface(
-            (self.screen.get_width(), 80), flags=pygame.SRCALPHA
-        )
-        self.panel_rect: Rect = self.panel_surface.get_rect(topleft=(0, 0))
-        self.panelgui: Panel_GUI = Panel_GUI(self.panel_surface)
-
         # --- CAMERA ---
         self.camera: Camera = Camera()
 
@@ -47,6 +40,22 @@ class App:
             camera=self.camera,
         )
         self.axes: Axes = Axes(screen=self.screen, grid=self.grid)
+
+        # --- OBJECTS MANAGER ---
+        self.objmanager: ObjecstManager = ObjecstManager(
+            surface=self.screen,
+            camera=self.camera,
+            cell_size=self.grid.base_cell_size,
+            gravity=(0.0, -9.8),
+        )
+
+        # --- GUI PANEL ---
+        self.panel_surface: Surface = pygame.Surface(
+            (self.screen.get_width(), 80), flags=pygame.SRCALPHA
+        )
+        self.panel_rect: Rect = self.panel_surface.get_rect(topleft=(0, 0))
+        self.panelgui: Panel_GUI = Panel_GUI(self.panel_surface)
+        self.panelgui.toggle_simulation: Callable[[bool], None] = self.toggle_simulation  # type: ignore
 
         # --- TIMING ---
         self.clock: Clock = Clock()
@@ -134,7 +143,7 @@ class App:
                 self.camera.move(*pygame.mouse.get_rel())
 
     def on_update(self) -> None:
-        pass
+        self.objmanager.step_simulation()
 
     def draw_panel(self):
         self.panelgui.render()
@@ -147,133 +156,72 @@ class App:
         self.screen.fill((220, 220, 220))
         self.grid.draw()
         self.axes.draw()
-
+        self.objmanager.draw_objects()
         self.draw_panel()
 
     def on_cleanup(self) -> None:
         pygame.quit()
 
     def on_execute(self) -> None:
-        world = b2World(gravity=(0, -2))
-        static_rectangle = RealObject(
-            world=world,
-            surface=self.screen,
-            camera=self.camera,
+
+        self.objmanager.add_object(
             obj_type="static",
             shape_type="rectangle",
             size=(8, 1),
             position=(0, 0),
             angle=00.0,
             color=pygame.Vector3(150, 150, 255),
-            cell_size=100,
         )
 
-        # static_circle = RealObject(
-        #     world=world,
-        #     surface=self.screen,
-        #     camera=self.camera,
-        #     type="static",
-        #     shape="circle",
-        #     size=1.0,
-        #     position=(3, 3),
-        #     angle=35.0,
-        #     color=pygame.Vector3(255, 200, 100),
-        #     cell_size=100,
-        # )
-
-        # static_triangle = RealObject(
-        #     world=world,
-        #     surface=self.screen,
-        #     camera=self.camera,
-        #     type="static",
-        #     shape="triangle",
-        #     size=[(-1, 0), (1, 0), (0, 1.5)],
-        #     position=(0, -1),
-        #     angle=25.0,
-        #     color=pygame.Vector3(100, 255, 100),
-        #     cell_size=100,
-        # )
-
         dyn_features = Features(density=1.0, friction=0.4, restitution=0.3)
-
-        dynamic_rectangle3 = RealObject(
-            world=world,
-            surface=self.screen,
-            camera=self.camera,
+        self.objmanager.add_object(
             obj_type="dynamic",
             shape_type="rectangle",
             size=(1, 1),
             position=(-5, 3),
             angle=45.0,
             color=pygame.Vector3(255, 80, 80),
-            cell_size=100,
             features=dyn_features,
         )
-
-        dynamic_rectangle4 = RealObject(
-            world=world,
-            surface=self.screen,
-            camera=self.camera,
+        self.objmanager.add_object(
             obj_type="dynamic",
             shape_type="rectangle",
             size=(1, 1),
             position=(0, 3),
             angle=45.0,
             color=pygame.Vector3(255, 80, 80),
-            cell_size=100,
             features=dyn_features,
         )
 
-        dynamic_circle = RealObject(
-            world=world,
-            surface=self.screen,
-            camera=self.camera,
+        self.objmanager.add_object(
             obj_type="dynamic",
             shape_type="circle",
             size=0.8,
-            position=(0, 14),
+            position=(0, 20),
             angle=45.0,
             color=pygame.Vector3(255, 200, 0),
-            cell_size=100,
             features=dyn_features,
         )
 
-        # dynamic_triangle = RealObject(
-        #     world=world,
-        #     surface=self.screen,
-        #     camera=self.camera,
-        #     type="dynamic",
-        #     shape="triangle",
-        #     size=[(-2, 0), (2, 0), (0, 3)],
-        #     position=(0, 14),
-        #     angle=45.0,
-        #     color=pygame.Vector3(80, 255, 80),
-        #     cell_size=100,
-        #     features=dyn_features,
-        # )
-
-        # Lista wszystkich obiektów
-        objects = [
-            static_rectangle,
-            # static_circle,
-            # static_triangle,
-            dynamic_rectangle3,
-            dynamic_rectangle4,
-            dynamic_circle,
-            # dynamic_triangle,
-        ]
+        self.objmanager.add_object(
+            obj_type="dynamic",
+            shape_type="triangle",
+            size=[(-2, 0), (2, 0), (0, 3)],
+            position=(0, 14),
+            angle=45.0,
+            color=pygame.Vector3(80, 255, 80),
+            features=dyn_features,
+        )
 
         while self._running:
             for event in pygame.event.get():
                 self.on_event(event)
             self.on_update()
             self.on_render()
-            # Update physics world
-            world.Step(timeStep=1.0 / 60.0, velocityIterations=8, positionIterations=3)
-            for obj in objects:
-                obj.draw()
-            # end of render function
             pygame.display.flip()
             self.clock.tick(60)
 
         self.on_cleanup()
+
+    def toggle_simulation(self, running: bool) -> None:
+        self.objmanager.is_simulation_running = running
