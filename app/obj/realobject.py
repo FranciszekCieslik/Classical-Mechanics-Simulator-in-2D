@@ -112,9 +112,6 @@ class RealObject:
             )
             corrected_pos += rotated_offset
             # --- Korekta dla kół ---
-        elif self.shape_type == "circle":
-            radius = self.visual.size
-            corrected_pos.y += radius  # obniżenie środka o promień
 
         # Synchronizuj pozycję i obrót rysowanego obiektu
         self.visual.object.set_position(corrected_pos)

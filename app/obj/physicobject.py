@@ -103,7 +103,8 @@ class PhysicObject:
 
         # === SHAPE ===
         shape_obj = self._create_shape(self.shape_type, size, local_vertices)
-        shape_obj.radius = 0.0022
+        if self.shape_type != "circle":
+            shape_obj.radius = 0.0022
 
         # === FIXTURE ===
         self.fixture = self.body.CreateFixture(
@@ -129,7 +130,7 @@ class PhysicObject:
                 raise TypeError(
                     f"Expected float for circle radius, got {type(size).__name__}"
                 )
-            return b2CircleShape(radius=size, pos=b2Vec2(0, size))
+            return b2CircleShape(radius=size)
 
         elif shape == "triangle":
             if not isinstance(size, list):
