@@ -9,7 +9,7 @@ from obj.physicobject import Features
 from .realobject import RealObject
 
 
-class ObjecstManager:
+class ObjectsManager:
     def __init__(
         self,
         surface: pygame.Surface,

@@ -2,11 +2,13 @@ from typing import Optional
 
 import pygame
 import thorpy as tp
+from obj.objectsmanager import ObjectsManager
+from obj.toggleimagebutton import ToggleImageButton
 
 
 class Panel_GUI:
-    def __init__(self, screen: pygame.Surface = None):
-        self.screen: Optional[pygame.Surface] = screen
+    def __init__(self, screen: pygame.Surface, objmanager: ObjectsManager):
+        self.screen = screen
         self.metagroup: Optional[tp.Group] = None
         self.launcher: Optional[tp.Loop] = None
 
@@ -20,8 +22,7 @@ class Panel_GUI:
 
         self.helpers: list[tp.Helper] = []
 
-        # Callback zewnętrzny (np. App.toggle_simulation)
-        self.toggle_simulation = lambda: None
+        self.objects_manager = objmanager
         self.button_play: Optional[tp.ImageButton] = None
         self.on_init()
 
@@ -59,10 +60,10 @@ class Panel_GUI:
         # === Przyciski symulacji (Play/Stop + inne) ===
         sim_icons = [
             "app/assets/icons/play.svg",
-            "app/assets/icons/check_point.svg",
+            "app/assets/icons/reset.svg",
             "app/assets/icons/vector-two-fill.svg",
         ]
-        sim_labels = ["Start/Pause simulation", "Add check point", "Simulation Space"]
+        sim_labels = ["Start/Pause", "Reset", "Simulation Space"]
 
         sim_buttons = []
 
@@ -88,42 +89,38 @@ class Panel_GUI:
                     img_stop, img_stop.get_at((0, 0)), (100, 100, 100)
                 )
 
-                # --- Tworzenie przycisku ---
-                self.button_play = tp.ImageButton(
-                    "", img_play.copy(), img_hover=img_play_hover
-                )
-                self.button_play.playing = False  # stan początkowy
-
-                def toggle_play():
-                    # Przełącz stan
-                    self.button_play.playing = not self.button_play.playing
-
-                    if self.button_play.playing:
-                        # Zmień na ikonę stop
-                        self.button_play.img = img_stop.copy()
-                        self.button_play.img_hover = img_stop_hover
-                        self.button_play.generate_surfaces()
+                def on_simulation_toggle(is_running: bool):
+                    if is_running:
+                        self.objects_manager.is_simulation_running = True
                     else:
-                        # Zmień na ikonę play
-                        self.button_play.img = img_play.copy()
-                        self.button_play.img_hover = img_play_hover
-                        self.button_play.generate_surfaces()
+                        self.objects_manager.is_simulation_running = False
 
-                    # Odśwież obrazek na przycisku
-                    self.button_play.blit_img = self.button_play.img.copy()
+                # --- Tworzenie przycisku ---
+                self.button_play = ToggleImageButton(
+                    text="",
+                    img=img_play,
+                    img_hover=img_play_hover,
+                    img_pressed=img_stop,
+                    img_pressed_hover=img_stop_hover,
+                    no_copy=False,
+                    value=False,
+                    on_toggle=on_simulation_toggle,
+                )
 
-                    # Wywołaj callback zewnętrzny
-                    self.toggle_simulation(self.button_play.playing)
-
-                self.button_play._at_click = toggle_play
                 btn = self.button_play
 
             else:
                 btn = tp.ImageButton("", img.copy(), img_hover=variant)
-                helper = tp.Helper(label, btn, countdown=30, offset=(0, 40))
-                helper.set_font_size(12)
-                self.helpers.append(helper)
+            helper = tp.Helper(label, btn, countdown=30, offset=(0, 40))
+            helper.set_font_size(12)
+            self.helpers.append(helper)
+            if label == "Reset":
 
+                def on_reset_click():
+                    if self.objects_manager:
+                        self.objects_manager.reset_simulation()
+
+                btn._at_click = on_reset_click
             sim_buttons.append(btn)
 
         self.group_simulation = tp.Group(sim_buttons, "h")

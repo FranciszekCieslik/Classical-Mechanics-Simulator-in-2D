@@ -5,12 +5,10 @@ from typing import Callable
 import pygame  # type: ignore
 from obj.axes import Axes
 from obj.camera import Camera
-from obj.drawn.rectangle import Rectangle
 from obj.grid import Grid
-from obj.objectsmanager import ObjecstManager
+from obj.objectsmanager import ObjectsManager
 from obj.panelgui import Panel_GUI
 from obj.physicobject import Features
-from obj.realobject import RealObject
 from pygame import Rect, Surface  # type: ignore
 from pygame.time import Clock  # type: ignore
 
@@ -42,7 +40,7 @@ class App:
         self.axes: Axes = Axes(screen=self.screen, grid=self.grid)
 
         # --- OBJECTS MANAGER ---
-        self.objmanager: ObjecstManager = ObjecstManager(
+        self.objmanager: ObjectsManager = ObjectsManager(
             surface=self.screen,
             camera=self.camera,
             cell_size=self.grid.base_cell_size,
@@ -54,8 +52,7 @@ class App:
             (self.screen.get_width(), 80), flags=pygame.SRCALPHA
         )
         self.panel_rect: Rect = self.panel_surface.get_rect(topleft=(0, 0))
-        self.panelgui: Panel_GUI = Panel_GUI(self.panel_surface)
-        self.panelgui.toggle_simulation: Callable[[bool], None] = self.toggle_simulation  # type: ignore
+        self.panelgui: Panel_GUI = Panel_GUI(self.panel_surface, self.objmanager)
 
         # --- TIMING ---
         self.clock: Clock = Clock()
