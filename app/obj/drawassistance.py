@@ -76,6 +76,14 @@ class DrawAssistance:
         pygame.gfxdraw.filled_circle(self.surface, x1, y1, radius, self.color)
         pygame.gfxdraw.aacircle(self.surface, x1, y1, radius, self.color)
         pygame.gfxdraw.aacircle(self.surface, x1, y1, radius, self.border_color)
+        pygame.gfxdraw.line(
+            self.surface,
+            int(x1),
+            int(y1),
+            int(x2),
+            int(y2),
+            self.border_color,
+        )
 
     def draw_triangle(self):
         if self.start_pos is None or self.current_pos is None:
@@ -111,3 +119,7 @@ class DrawAssistance:
 
         pygame.gfxdraw.line(self.surface, x1, y1, x2, y2, self.color)
         pygame.gfxdraw.line(self.surface, x1, y1, x2, y2, self.border_color)
+
+    def set_color(self, color: pygame.Vector3):
+        self.color = color
+        self.border_color = pygame.Vector3(color / 2)

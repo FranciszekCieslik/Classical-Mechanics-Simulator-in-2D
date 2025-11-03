@@ -2,6 +2,7 @@ from typing import Optional
 
 import pygame
 import thorpy as tp
+from obj.colorpalette import ColorPalette
 from obj.drawassistance import DrawAssistance
 from obj.objectsmanager import ObjectsManager
 from obj.toggleimagebutton import ToggleImageButton
@@ -175,14 +176,8 @@ class Panel_GUI:
         self.group_ext = tp.Group([text_group1, text_group2], "v", gap=5, align="right")
 
         # === Color Picker (wbudowany w panel, nie popup) ===
-        label_color = tp.Text("COLOR PICKER", font_size=12)
-        picker_predef = tp.ColorPickerPredefined(
-            [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 255, 255)],
-            mode="h",
-            col_size=(20, 20),
-        )
-        self.group_color = tp.Group([label_color, picker_predef], "v", gap=1)
-
+        self.color_palette = ColorPalette()
+        self.group_color = self.color_palette.get()
         # === Łączenie wszystkich grup ===
         self.metagroup = tp.Group(
             [self.group_draw, self.group_simulation, self.group_ext, self.group_color]
@@ -192,10 +187,14 @@ class Panel_GUI:
         self.metagroup.set_topleft(0, 10)
         self.launcher = self.metagroup.get_updater()
 
+    def after_update(self):
+        self.draw_assistance.set_color(self.color_palette.selected_color)
+        self.color_palette.update_color_preview()
+
     def render(self):
         self.screen.fill((30, 30, 30))
         if self.launcher:
-            self.launcher.update()
+            self.launcher.update(func_after=self.after_update)
 
     def resize_panel(self, panel_surface: pygame.Surface):
         self.screen = panel_surface
