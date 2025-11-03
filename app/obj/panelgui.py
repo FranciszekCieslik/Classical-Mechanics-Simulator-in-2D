@@ -64,6 +64,24 @@ class Panel_GUI:
                     self.draw_assistance.active_drawing("rectangle")
 
                 btn._at_click = on_rectangle_click
+            elif "circle" in icon_path:
+
+                def on_circle_click():
+                    self.draw_assistance.active_drawing("circle")
+
+                btn._at_click = on_circle_click
+            elif "triangle" in icon_path:
+
+                def on_triangle_click():
+                    self.draw_assistance.active_drawing("triangle")
+
+                btn._at_click = on_triangle_click
+            elif "line" in icon_path:
+
+                def on_line_click():
+                    self.draw_assistance.active_drawing("line")
+
+                btn._at_click = on_line_click
             helper = tp.Helper(label, btn, countdown=30, offset=(0, 40))
             helper.set_font_size(12)
             self.helpers.append(helper)

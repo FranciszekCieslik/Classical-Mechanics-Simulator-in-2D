@@ -130,7 +130,13 @@ class App:
         # --- OUTSIDE THE PANEL ---
         if not self.panel_rect.collidepoint(pygame.mouse.get_pos()):
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                self.draw_assistance.set_start_position(event.pos)
+                if self.draw_assistance.start_pos is None:
+                    self.draw_assistance.set_start_position(event.pos)
+                elif (
+                    self.draw_assistance.state == 'triangle'
+                    and self.draw_assistance.third_triangel_point is None
+                ):
+                    self.draw_assistance.set_third_triangle_point(event.pos)
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 self.draw_assistance.deactivate_drawing()
             elif event.type == pygame.MOUSEMOTION and self.draw_assistance.is_drawing:
