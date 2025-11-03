@@ -2,12 +2,18 @@ from typing import Optional
 
 import pygame
 import thorpy as tp
+from obj.drawassistance import DrawAssistance
 from obj.objectsmanager import ObjectsManager
 from obj.toggleimagebutton import ToggleImageButton
 
 
 class Panel_GUI:
-    def __init__(self, screen: pygame.Surface, objmanager: ObjectsManager):
+    def __init__(
+        self,
+        screen: pygame.Surface,
+        objmanager: ObjectsManager,
+        draw_assistance: DrawAssistance,
+    ):
         self.screen = screen
         self.metagroup: Optional[tp.Group] = None
         self.launcher: Optional[tp.Loop] = None
@@ -23,6 +29,7 @@ class Panel_GUI:
         self.helpers: list[tp.Helper] = []
 
         self.objects_manager = objmanager
+        self.draw_assistance = draw_assistance
         self.button_play: Optional[tp.ImageButton] = None
         self.on_init()
 
@@ -51,6 +58,12 @@ class Panel_GUI:
                 img, img.get_at((0, 0)), (100, 100, 100)
             )
             btn = tp.ImageButton("", img.copy(), img_hover=variant)
+            if "rectangle" in icon_path:
+
+                def on_rectangle_click():
+                    self.draw_assistance.active_drawing("rectangle")
+
+                btn._at_click = on_rectangle_click
             helper = tp.Helper(label, btn, countdown=30, offset=(0, 40))
             helper.set_font_size(12)
             self.helpers.append(helper)

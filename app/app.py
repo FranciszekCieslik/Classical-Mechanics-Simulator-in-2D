@@ -5,6 +5,7 @@ from typing import Callable
 import pygame  # type: ignore
 from obj.axes import Axes
 from obj.camera import Camera
+from obj.drawassistance import DrawAssistance
 from obj.grid import Grid
 from obj.objectsmanager import ObjectsManager
 from obj.panelgui import Panel_GUI
@@ -47,12 +48,17 @@ class App:
             gravity=(0.0, -9.8),
         )
 
+        # --- Draw Assistance ---
+        self.draw_assistance = DrawAssistance(self.screen)
+
         # --- GUI PANEL ---
         self.panel_surface: Surface = pygame.Surface(
             (self.screen.get_width(), 80), flags=pygame.SRCALPHA
         )
         self.panel_rect: Rect = self.panel_surface.get_rect(topleft=(0, 0))
-        self.panelgui: Panel_GUI = Panel_GUI(self.panel_surface, self.objmanager)
+        self.panelgui: Panel_GUI = Panel_GUI(
+            self.panel_surface, self.objmanager, self.draw_assistance
+        )
 
         # --- TIMING ---
         self.clock: Clock = Clock()
@@ -123,6 +129,13 @@ class App:
         # --- MOUSE EVENTS ---
         # --- OUTSIDE THE PANEL ---
         if not self.panel_rect.collidepoint(pygame.mouse.get_pos()):
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                self.draw_assistance.set_start_position(event.pos)
+            elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                self.draw_assistance.deactivate_drawing()
+            elif event.type == pygame.MOUSEMOTION and self.draw_assistance.is_drawing:
+                self.draw_assistance.set_current_position(event.pos)
+
             if event.type == pygame.MOUSEWHEEL:
                 factor = (
                     self.camera.zoom_speed
@@ -154,6 +167,7 @@ class App:
         self.grid.draw()
         self.axes.draw()
         self.objmanager.draw_objects()
+        self.draw_assistance.draw()
         self.draw_panel()
 
     def on_cleanup(self) -> None:
