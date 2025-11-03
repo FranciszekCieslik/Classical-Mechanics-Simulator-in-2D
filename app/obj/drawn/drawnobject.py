@@ -1,5 +1,5 @@
 import typing
-from typing import Union
+from typing import Tuple, Union
 
 import pygame  # type: ignore
 from obj.camera import Camera
@@ -85,3 +85,9 @@ class DrawnObject:
         """Sets the absolute rotation angle (in degrees) if supported."""
         if hasattr(self.object, "set_angle"):
             self.object.set_angle(angle)
+
+    def is_point_inside(self, point: Tuple[int, int]) -> bool:
+        """Checks if a given point (in screen coordinates) is inside the shape."""
+        if hasattr(self.object, "is_point_inside"):
+            return self.object.is_point_inside(point)
+        return False

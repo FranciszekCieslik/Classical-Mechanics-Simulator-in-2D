@@ -70,3 +70,11 @@ class ObjectsManager:
         with ThreadPoolExecutor(max_workers=8) as executor:
             list(executor.map(lambda obj: obj.reset(), self.objects))
         self.time = 0.0
+
+    def select_object_at_position(
+        self, position: Tuple[int, int]
+    ) -> Optional[RealObject]:
+        for obj in self.objects:
+            if obj.is_point_inside(position):
+                return obj
+        return None

@@ -148,3 +148,17 @@ class RealObject:
         body.angle = self.start_angle
         body.linearVelocity = (0, 0)
         body.angularVelocity = 0
+
+    def is_point_inside(self, position) -> bool:
+        """
+        Checks if a given point (in pixels) is inside the drawn object.
+        """
+        return self.visual.is_point_inside(position)
+
+    def get_self_if_point_inside(self, position) -> Optional["RealObject"]:
+        """
+        Returns self if the given point (in pixels) is inside the drawn object, else None.
+        """
+        if self.visual.is_point_inside(position):
+            return self
+        return None

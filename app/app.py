@@ -65,6 +65,8 @@ class App:
         self._resize_lock: threading.Lock = threading.Lock()
         self._last_resize: float = 0.0
         self._resize_cooldown: float = 0.2
+        self.DOUBLE_CLICK_TIME = 400  # maksymalny odstęp (ms) między kliknięciami
+        self.last_click_time = 0.0
 
         # --- FLAGS ---
         self._running: bool = True
@@ -130,13 +132,25 @@ class App:
         # --- OUTSIDE THE PANEL ---
         if not self.panel_rect.collidepoint(pygame.mouse.get_pos()):
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if self.draw_assistance.start_pos is None:
-                    self.draw_assistance.set_start_position(event.pos)
-                elif (
-                    self.draw_assistance.state == 'triangle'
-                    and self.draw_assistance.third_triangel_point is None
-                ):
-                    self.draw_assistance.set_third_triangle_point(event.pos)
+                if self.draw_assistance.is_drawing:
+                    if self.draw_assistance.start_pos is None:
+                        self.draw_assistance.set_start_position(event.pos)
+                    elif (
+                        self.draw_assistance.state == 'triangle'
+                        and self.draw_assistance.third_triangel_point is None
+                    ):
+                        self.draw_assistance.set_third_triangle_point(event.pos)
+                else:
+                    now = time.time() * 1000.0
+                    if now - self.last_click_time <= self.DOUBLE_CLICK_TIME:
+                        obj = self.objmanager.select_object_at_position(event.pos)
+                        if obj:
+                            print(
+                                "Obj state:",
+                                obj.physics.is_static,
+                                obj.physics.shape_type,
+                            )
+                    self.last_click_time = now
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 self.draw_assistance.deactivate_drawing()
             elif event.type == pygame.MOUSEMOTION and self.draw_assistance.is_drawing:

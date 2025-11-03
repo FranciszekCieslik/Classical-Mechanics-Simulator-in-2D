@@ -1,4 +1,5 @@
 import math
+from typing import Tuple
 
 import pygame  # type: ignore
 import pygame.gfxdraw
@@ -27,6 +28,7 @@ class Circle:
         self.angle = angle
         self.border_color = pygame.Vector3(color / 2)
         self.border_width = 4
+        self.is_visible: bool = True
 
     def draw(self) -> None:
         if not self.update():
@@ -99,9 +101,19 @@ class Circle:
         r = self.screen_radius
 
         visible = x + r >= 0 and x - r <= screen_w and y + r >= 0 and y - r <= screen_h
-
+        self.is_visible = visible
         return visible
 
     def set_position(self, position: pygame.Vector2) -> None:
         """Sets the absolute position of the triangle in world coordinates."""
         self.position = pygame.Vector2(position)
+
+    def is_point_inside(self, point: Tuple[int, int]) -> bool:
+        """Checks if a given point (in screen coordinates) is inside the circle."""
+        if not self.is_visible:
+            return False
+
+        dx = point[0] - self.screen_center.x
+        dy = point[1] - self.screen_center.y
+        distance_sq = dx * dx + dy * dy
+        return distance_sq <= self.screen_radius * self.screen_radius

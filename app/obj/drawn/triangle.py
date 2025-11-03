@@ -1,4 +1,5 @@
 import math
+from typing import Tuple
 
 import pygame  # type: ignore
 import pygame.gfxdraw
@@ -36,6 +37,7 @@ class Triangle:
         self.border_color: pygame.Vector3 = pygame.Vector3(color / 2)
         self.border_width: int = 2
         self.screen_points: list[pygame.Vector2] = []
+        self.is_visible: bool = True
 
     # ------------------------------------------------------------
     def draw(self) -> None:
@@ -99,9 +101,42 @@ class Triangle:
 
         screen_w, screen_h = self.surface.get_size()
         visible = max_x >= 0 and min_x <= screen_w and max_y >= 0 and min_y <= screen_h
-
+        self.is_visible = visible
         return visible
 
     def set_position(self, position: pygame.Vector2) -> None:
         """Sets the absolute position of the triangle in world coordinates."""
         self.position = pygame.Vector2(position)
+
+    def is_point_inside(self, point: Tuple[int, int]) -> bool:
+        """Checks if a given point (in screen coordinates) is inside the triangle."""
+        if not self.is_visible:
+            return False
+
+        # Using barycentric coordinates to check if the point is inside the triangle
+        p = pygame.Vector2(point)
+        a, b, c = self.screen_points
+
+        # Vectors
+        v0 = c - a
+        v1 = b - a
+        v2 = p - a
+
+        # Dot products
+        dot00 = v0.dot(v0)
+        dot01 = v0.dot(v1)
+        dot02 = v0.dot(v2)
+        dot11 = v1.dot(v1)
+        dot12 = v1.dot(v2)
+
+        # Barycentric coordinates
+        denom = dot00 * dot11 - dot01 * dot01
+        if denom == 0:
+            return False  # Degenerate triangle
+
+        inv_denom = 1 / denom
+        u = (dot11 * dot02 - dot01 * dot12) * inv_denom
+        v = (dot00 * dot12 - dot01 * dot02) * inv_denom
+
+        # Check if point is in triangle
+        return (u >= 0) and (v >= 0) and (u + v <= 1)
