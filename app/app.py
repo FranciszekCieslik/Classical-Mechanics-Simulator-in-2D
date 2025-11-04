@@ -65,7 +65,7 @@ class App:
         self._resize_lock: threading.Lock = threading.Lock()
         self._last_resize: float = 0.0
         self._resize_cooldown: float = 0.2
-        self.DOUBLE_CLICK_TIME = 400  # maksymalny odstęp (ms) między kliknięciami
+        self.DOUBLE_CLICK_TIME = 500  # maksymalny odstęp (ms) między kliknięciami
         self.last_click_time = 0.0
 
         # --- FLAGS ---
@@ -144,8 +144,9 @@ class App:
                     ):
                         self.draw_assistance.set_third_triangle_point(event.pos)
                 else:
-                    now = time.time() * 1000.0
+                    now = pygame.time.get_ticks()
                     if now - self.last_click_time <= self.DOUBLE_CLICK_TIME:
+                        print("DOUBLE CLICK!!!")
                         obj = self.objmanager.select_object_at_position(event.pos)
                         if obj:
                             self.objmanager.selected_obj_is_being_dragged = True
@@ -183,7 +184,7 @@ class App:
                 pos = pygame.Vector2(pygame.mouse.get_pos())
                 if pos != self.prev_mouse_pos and self.objmanager.selected_obj:
                     d = self.prev_mouse_pos - pygame.Vector2(pos)
-                    self.objmanager.selected_obj.move(d)
+                    self.objmanager.move_selected_obj(d)
                     self.prev_mouse_pos = pos
 
             if event.type == pygame.MOUSEWHEEL:

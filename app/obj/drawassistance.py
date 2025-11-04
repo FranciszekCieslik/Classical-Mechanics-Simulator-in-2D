@@ -91,8 +91,8 @@ class DrawAssistance:
             self.surface,
             int(x1),
             int(y1),
-            int(x2),
-            int(y2),
+            int(x1 + radius),
+            int(y1),
             self.border_color,
         )
 

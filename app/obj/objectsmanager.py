@@ -89,3 +89,11 @@ class ObjectsManager:
     def end_dragging_obj(self):
         self.selected_obj_is_being_dragged = False
         self.selected_obj = None
+
+    def move_selected_obj(self, vec: pygame.Vector2):
+        obj = self.selected_obj
+        if obj:
+            obj.move(vec)
+            if self.time == 0.00:
+                obj.start_position = obj.physics.body.position.copy()
+                obj.sync()
