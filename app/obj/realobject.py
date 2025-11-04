@@ -78,28 +78,11 @@ class RealObject:
         Converts Box2D world coordinates to visual world coordinates.
         """
         body = self.physics.body
-        pos = body.position  # środek masy (Box2D)
-        angle = body.angle
+        pos = pygame.Vector2(body.position.x, body.position.y)
+        angle = math.degrees(body.angle)
 
-        corrected_pos = pygame.Vector2(pos.x, pos.y)
-
-        # --- Korekta dla trójkąta (różnica COM vs centroid geometryczny) ---
-        if self.shape_type == "triangle":
-            shape = self.physics.fixture.shape
-            world_vertices = [body.GetWorldPoint(v) for v in shape.vertices]
-
-            # centroid w świecie (geometryczny)
-            centroid_x = sum(v[0] for v in world_vertices) / 3.0
-            centroid_y = sum(v[1] for v in world_vertices) / 3.0
-            centroid_world = pygame.Vector2(centroid_x, centroid_y)
-
-            # różnica między COM (pos) a centroidem geometrycznym
-            correction = centroid_world - pygame.Vector2(pos.x, pos.y)
-            corrected_pos += correction
-
-        # Synchronizuj pozycję i obrót rysowanego obiektu
-        self.visual.object.set_position(corrected_pos)
-        self.visual.object.set_angle(math.degrees(angle))
+        self.visual.object.set_position(pos)
+        self.visual.object.set_angle(angle)
 
     # -------------------------------------------------------
     def draw(self) -> None:
