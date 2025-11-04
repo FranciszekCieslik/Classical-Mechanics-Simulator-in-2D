@@ -189,17 +189,7 @@ class DrawAssistance:
             if self.third_triangel_point is not None:
                 point3 = self.third_triangel_point
             points = [point1, point2, point3]
-            points = [pygame.Vector2(p) for p in points]
-            # --- sort ---
-            centroid = sum(points, pygame.Vector2()) / 3
-            points_sorted = sorted(
-                points, key=lambda p: math.atan2(p.y - centroid.y, p.x - centroid.x)
-            )
-            top_point = min(points_sorted, key=lambda p: p.y)
-            while points_sorted[0] != top_point:
-                points_sorted.append(points_sorted.pop(0))
-            # ---
-            screen_points = points_sorted
+            screen_points = points
             world_points = [
                 (p - cam.offset) / cam.zoom / cell_size for p in screen_points
             ]

@@ -89,8 +89,10 @@ class Triangle:
             rotated_v = self._rotate_vertex(v, self.angle)
 
             # Transform to world space and then to pixels
-            world_vertex = (self.position + rotated_v) * self.base_cell_size_world
-            screen_vertex = self.cam.world_to_screen(world_vertex)
+            world_vertex = self.position + rotated_v
+            screen_vertex = self.cam.world_to_screen(
+                world_vertex * self.base_cell_size_world
+            )
             self.screen_points.append(screen_vertex)
 
         # Visibility check (bounding box)

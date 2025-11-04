@@ -253,7 +253,7 @@ class App:
             shape_type="triangle",
             size=[(-2, 0), (2, 0), (0, 3)],
             position=(0, 14),
-            angle=45.0,
+            angle=00.0,
             color=pygame.Vector3(80, 255, 80),
             features=dyn_features,
         )

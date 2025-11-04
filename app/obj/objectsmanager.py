@@ -63,12 +63,16 @@ class ObjectsManager:
             self.time += self.time_step
 
     def draw_objects(self) -> None:
-        with ThreadPoolExecutor(max_workers=8) as executor:
-            list(executor.map(lambda obj: obj.draw(), self.objects))
+        # with ThreadPoolExecutor(max_workers=8) as executor:
+        #     list(executor.map(lambda obj: obj.draw(), self.objects))
+        for obj in self.objects:
+            obj.draw()
 
     def reset_simulation(self) -> None:
-        with ThreadPoolExecutor(max_workers=8) as executor:
-            list(executor.map(lambda obj: obj.reset(), self.objects))
+        # with ThreadPoolExecutor(max_workers=8) as executor:
+        #     list(executor.map(lambda obj: obj.reset(), self.objects))
+        for obj in self.objects:
+            obj.reset()
         self.time = 0.0
 
     def select_object_at_position(

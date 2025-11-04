@@ -2,7 +2,7 @@ import math
 from typing import List, Optional, Tuple, Union
 
 import pygame  # type: ignore
-from Box2D import b2World
+from Box2D import b2Vec2, b2World
 from obj.camera import Camera
 from obj.drawn.drawnobject import DrawnObject
 from obj.physicobject import Features, PhysicObject
@@ -28,26 +28,12 @@ class RealObject:
         cell_size: int,
         features: Optional[Features] = None,
     ) -> None:
-        """
-        Creates a new RealObject that links physical and visual components.
 
-        Args:
-            world: Box2D world instance
-            surface: pygame.Surface — rendering target
-            camera: Camera object
-            type: 'static' or 'dynamic'
-            shape_type: 'rectangle', 'circle', or 'triangle'
-            size: geometric shape definition
-            position: (x, y) position in Box2D world (meters)
-            angle: initial rotation (radians)
-            color: RGB color (0–255)
-            cell_size: scaling factor between physics world units and visual world
-            features: optional physics parameters
-        """
-        self.start_position = position
+        self.shape_type = shape_type
+        self.cell_size = cell_size
         self.start_angle = angle
 
-        # physics setup
+        # --- 1️⃣ Inicjalizacja fizyki ---
         self.physics = PhysicObject(
             obj_type=obj_type,
             shape_type=shape_type,
@@ -58,10 +44,16 @@ class RealObject:
             features=features,
         )
 
-        # drawing setup
-        # convert Box2D position → pygame.Vector2 for drawn object
-        pygame_position = pygame.Vector2(position[0], position[1])
+        # Pozycja startowa (anchor, NIE centroid)
+        self.start_position = self.physics.body.position.copy()
 
+        # 🔹 Obliczamy offset między środkiem masy a punktem anchor
+        wc = self.physics.body.worldCenter
+        bp = self.physics.body.position
+        self.center_offset = b2Vec2(wc.x - bp.x, wc.y - bp.y)
+
+        # --- 2️⃣ Inicjalizacja wizualna ---
+        pygame_position = pygame.Vector2(position)
         if shape_type == "rectangle":
             pygame_size = pygame.Vector2(size)
         else:
@@ -77,8 +69,7 @@ class RealObject:
             cell_size=cell_size,
         )
 
-        self.cell_size = cell_size
-        self.shape_type = shape_type
+        self.sync()
 
     # -------------------------------------------------------
     def sync(self) -> None:
@@ -87,31 +78,24 @@ class RealObject:
         Converts Box2D world coordinates to visual world coordinates.
         """
         body = self.physics.body
-        pos = body.worldCenter
+        pos = body.position  # środek masy (Box2D)
         angle = body.angle
 
-        # Domyślnie synchronizujemy ze środkiem masy (centroid)
         corrected_pos = pygame.Vector2(pos.x, pos.y)
 
-        # Dla trójkąta — korekta pozycji, żeby dolny wierzchołek był tam, gdzie w fizyce
+        # --- Korekta dla trójkąta (różnica COM vs centroid geometryczny) ---
         if self.shape_type == "triangle":
-            vertices = [v for v in self.physics.fixture.shape.vertices]
-            # centroid w lokalnych współrzędnych (0,0)
-            centroid_y = sum(v[1] for v in vertices) / 3.0
-            min_y = min(v[1] for v in vertices)
-            offset_y = centroid_y - min_y
+            shape = self.physics.fixture.shape
+            world_vertices = [body.GetWorldPoint(v) for v in shape.vertices]
 
-            # Korekta pozycji w dół o offset_y (po transformacji przez kąt obrotu)
-            sin_a = math.sin(angle)
-            cos_a = math.cos(angle)
-            dx, dy = 0, -offset_y  # przesunięcie lokalne w dół
-            # obracamy wektor przesunięcia zgodnie z kątem ciała
-            rotated_offset = pygame.Vector2(
-                dx * cos_a - dy * sin_a,
-                dx * sin_a + dy * cos_a,
-            )
-            corrected_pos += rotated_offset
-            # --- Korekta dla kół ---
+            # centroid w świecie (geometryczny)
+            centroid_x = sum(v[0] for v in world_vertices) / 3.0
+            centroid_y = sum(v[1] for v in world_vertices) / 3.0
+            centroid_world = pygame.Vector2(centroid_x, centroid_y)
+
+            # różnica między COM (pos) a centroidem geometrycznym
+            correction = centroid_world - pygame.Vector2(pos.x, pos.y)
+            corrected_pos += correction
 
         # Synchronizuj pozycję i obrót rysowanego obiektu
         self.visual.object.set_position(corrected_pos)
@@ -119,35 +103,20 @@ class RealObject:
 
     # -------------------------------------------------------
     def draw(self) -> None:
-        """
-        Updates synchronization and draws the object to the screen.
-        """
         self.sync()
         self.visual.draw()
 
     # -------------------------------------------------------
-    def apply_force(self, force: Tuple[float, float]) -> None:
-        """
-        Applies a force to the physics body (if dynamic).
-        """
-        self.physics.apply_force(force)
-
-    # -------------------------------------------------------
-    def set_mass(self, mass: float) -> None:
-        """
-        Sets the mass of the physics body.
-        """
-        self.physics.set_body_mass(mass)
-
     def reset(self) -> None:
-        """
-        Resets the object to its initial position and angle.
-        """
+        """Resets the object to its initial position and angle."""
         body = self.physics.body
         body.position = self.start_position
         body.angle = self.start_angle
         body.linearVelocity = (0, 0)
         body.angularVelocity = 0
+        body.awake = True  # <- bez tego ciało pozostaje „uśpione”
+
+        self.sync()
 
     def is_point_inside(self, position) -> bool:
         """
