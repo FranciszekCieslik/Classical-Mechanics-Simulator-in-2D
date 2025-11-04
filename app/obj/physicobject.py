@@ -57,7 +57,6 @@ class PhysicObject:
         if features is None:
             features = Features()
 
-        # === TRIANGLE SPECIAL CASE ===
         offset_y = 0.0
         local_vertices = None
         body_pos = (self.position[0], self.position[1])
@@ -71,7 +70,6 @@ class PhysicObject:
             centroid_y = sum(v.y for v in verts) / 3.0
 
             if self.is_static:
-                # Dla statycznych – przesuwamy ręcznie
                 local_vertices = [
                     b2Vec2(v.x - centroid_x, v.y - centroid_y) for v in verts
                 ]
@@ -80,7 +78,6 @@ class PhysicObject:
                     self.position[1] + centroid_y,
                 )
             else:
-                # Dla dynamicznych – Box2D sam uwzględnia centroid
                 local_vertices = verts
                 body_pos = self.position
         elif self.shape_type == "rectangle":
@@ -96,7 +93,6 @@ class PhysicObject:
                 )
             radius = size
 
-        # === BODY ===
         if self.is_static:
             self.body = world.CreateStaticBody(position=body_pos, angle=angle)
         else:
@@ -111,12 +107,10 @@ class PhysicObject:
                 active=features.active,
             )
 
-        # === SHAPE ===
         shape_obj = self._create_shape(self.shape_type, size, local_vertices)
         if self.shape_type != "circle":
             shape_obj.radius = 0.0022
 
-        # === FIXTURE ===
         self.fixture = self.body.CreateFixture(
             shape=shape_obj,
             density=features.density if not self.is_static else 0.0,

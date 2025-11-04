@@ -33,7 +33,6 @@ class RealObject:
         self.cell_size = cell_size
         self.start_angle = angle
 
-        # --- 1️⃣ Inicjalizacja fizyki ---
         self.physics = PhysicObject(
             obj_type=obj_type,
             shape_type=shape_type,
@@ -44,15 +43,12 @@ class RealObject:
             features=features,
         )
 
-        # Pozycja startowa (anchor, NIE centroid)
         self.start_position = self.physics.body.position.copy()
 
-        # 🔹 Obliczamy offset między środkiem masy a punktem anchor
         wc = self.physics.body.worldCenter
         bp = self.physics.body.position
         self.center_offset = b2Vec2(wc.x - bp.x, wc.y - bp.y)
 
-        # --- 2️⃣ Inicjalizacja wizualna ---
         pygame_position = pygame.Vector2(position)
         if shape_type == "rectangle":
             pygame_size = pygame.Vector2(size)
