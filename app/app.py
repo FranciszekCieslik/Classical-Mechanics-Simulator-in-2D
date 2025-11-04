@@ -1,6 +1,6 @@
 import threading
 import time
-from typing import Callable
+from typing import Callable, Optional
 
 import pygame  # type: ignore
 from obj.axes import Axes
@@ -72,6 +72,9 @@ class App:
         self._running: bool = True
         self.dragging: bool = False
         self.minimized: bool = False
+
+        # --- PREV MOUSE POS ---
+        self.prev_mouse_pos: Optional[pygame.Vector2] = None
 
     def resize(self, event) -> None:
         now = time.time()
@@ -145,6 +148,8 @@ class App:
                     if now - self.last_click_time <= self.DOUBLE_CLICK_TIME:
                         obj = self.objmanager.select_object_at_position(event.pos)
                         if obj:
+                            self.objmanager.selected_obj_is_being_dragged = True
+                            self.prev_mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
                             print(
                                 "Obj state:",
                                 obj.physics.is_static,
@@ -167,8 +172,19 @@ class App:
                         color=color,
                         features=None,
                     )
+                #  --- dragging obj ---
+                self.objmanager.end_dragging_obj()
+                self.prev_mouse_pos = None
             elif event.type == pygame.MOUSEMOTION and self.draw_assistance.is_drawing:
                 self.draw_assistance.set_current_position(event.pos)
+
+                # --- POSITION UPDATE ---
+            if self.objmanager.selected_obj_is_being_dragged:
+                pos = pygame.Vector2(pygame.mouse.get_pos())
+                if pos != self.prev_mouse_pos and self.objmanager.selected_obj:
+                    d = self.prev_mouse_pos - pygame.Vector2(pos)
+                    self.objmanager.selected_obj.move(d)
+                    self.prev_mouse_pos = pos
 
             if event.type == pygame.MOUSEWHEEL:
                 factor = (

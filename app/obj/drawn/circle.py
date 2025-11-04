@@ -70,9 +70,9 @@ class Circle:
             self.border_color,
         )
 
-    def move(self, dx: float, dy: float) -> None:
-        self.position.x += dx
-        self.position.y += dy
+    def move(self, vec: pygame.Vector2) -> None:
+        """Move the rectangle by dx, dy in world coordinates."""
+        self.position += vec
 
     def rotate(self, delta_angle: float) -> None:
         """Rotates the circle by a given angle (in degrees)."""

@@ -34,7 +34,7 @@ class Empty:
         return False
 
     # ------------------------------------------------------
-    def move(self, dx: float, dy: float) -> None:
+    def move(self, vec: pygame.Vector2) -> None:
         return
 
     def rotate(self, da: float) -> None:

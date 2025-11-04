@@ -110,3 +110,25 @@ class RealObject:
         if self.visual.is_point_inside(position):
             return self
         return None
+
+    def move(self, vec: pygame.Vector2) -> None:
+        """
+        Moves the object by a given vector (in screen pixels).
+        Automatically converts to world coordinates using self.cell_size.
+        Keeps both physics (Box2D) and visual (Pygame) states synchronized.
+        """
+        if vec.length_squared() == 0:
+            return
+
+        zoom = getattr(self.visual.camera, "zoom", 1.0)
+        world_vec = vec / (self.cell_size * zoom)
+
+        body = self.physics.body
+
+        new_pos = body.position - (world_vec.x, world_vec.y)
+        body.position = new_pos
+
+        if not self.physics.is_static:
+            body.awake = True
+
+        self.visual.object.move(vec)

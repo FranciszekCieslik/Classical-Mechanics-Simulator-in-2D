@@ -66,10 +66,9 @@ class DrawnObject:
         """Draws the underlying shape."""
         self.object.draw()
 
-    # ----------------------------------------------
-    def move(self, dx: float, dy: float) -> None:
+    def move(self, vec: pygame.Vector2) -> None:
         """Moves the shape in world coordinates."""
-        self.object.move(dx, dy)
+        self.object.move(vec)
 
     # ----------------------------------------------
     def update(self) -> bool:

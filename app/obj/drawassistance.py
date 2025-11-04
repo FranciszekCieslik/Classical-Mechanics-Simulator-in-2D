@@ -160,10 +160,6 @@ class DrawAssistance:
             return world_p1, world_p2
 
         elif self.state == "rectangle":
-            left = min(x1, x2)
-            right = max(x1, x2)
-            top = min(y1, y2)
-            bottom = max(y1, y2)
             screen_points = [
                 pygame.Vector2(x1, y1),
                 pygame.Vector2(x2, y1),

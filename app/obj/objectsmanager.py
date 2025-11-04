@@ -27,6 +27,8 @@ class ObjectsManager:
         self.velocity_iterations: int = 8
         self.position_iterations: int = 3
         self.time: float = 0.00
+        self.selected_obj: Optional[RealObject] = None
+        self.selected_obj_is_being_dragged: bool = False
 
     def add_object(
         self,
@@ -80,5 +82,10 @@ class ObjectsManager:
     ) -> Optional[RealObject]:
         for obj in self.objects:
             if obj.is_point_inside(position):
+                self.selected_obj = obj
                 return obj
         return None
+
+    def end_dragging_obj(self):
+        self.selected_obj_is_being_dragged = False
+        self.selected_obj = None

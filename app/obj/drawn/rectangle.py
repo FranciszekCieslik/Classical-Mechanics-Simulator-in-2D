@@ -116,10 +116,9 @@ class Rectangle:
         pygame.gfxdraw.aapolygon(self.surface, self.points_screen, self.border_color)
 
     # ------------------------------------------------------
-    def move(self, dx: float, dy: float) -> None:
+    def move(self, vec: pygame.Vector2) -> None:
         """Move the rectangle by dx, dy in world coordinates."""
-        self.position.x += dx
-        self.position.y += dy
+        self.position += vec
 
     def set_position(self, position: pygame.Vector2) -> None:
         """
