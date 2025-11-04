@@ -1,5 +1,8 @@
+import math
+
 import pygame
 import pygame.gfxdraw
+from obj.camera import Camera
 
 
 class DrawAssistance:
@@ -31,15 +34,23 @@ class DrawAssistance:
         self.is_drawing = True
         self.state = state
 
-    def deactivate_drawing(self):
+    def deactivate_drawing(self, cam: Camera, cell_size: float):
         '''Deactivate drawing mode.'''
+        if self.start_pos is None or self.current_pos is None:
+            return None
         if self.state == 'triangle' and self.third_triangel_point is None:
-            return
+            return None
+        data = self._prep_data(cam, cell_size)
+        if data is None:
+            return None
+        pos, size = data
+        state = self.state
         self.is_drawing = False
         self.state = "empty"
         self.start_pos = None
         self.current_pos = None
         self.third_triangel_point = None
+        return state, pos, size, self.color
 
     def set_start_position(self, pos: tuple[int, int]):
         self.start_pos = pos
@@ -123,3 +134,77 @@ class DrawAssistance:
     def set_color(self, color: pygame.Vector3):
         self.color = color
         self.border_color = pygame.Vector3(color / 2)
+
+    def _prep_data(self, cam: Camera, cell_size: float):
+        if self.state == "empty":
+            return None
+
+        if not self.start_pos or not self.current_pos:
+            return None
+
+        x1, y1 = self.start_pos
+        x2, y2 = self.current_pos
+        if self.state == "circle":
+            r = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
+            world_pos_px = (pygame.Vector2(x1, y1) - cam.offset) / cam.zoom
+            world_radius_px = r / cam.zoom
+            position = world_pos_px / cell_size
+            radius = world_radius_px / cell_size
+            return position, radius
+
+        elif self.state == "line":
+            world_p1_px = (pygame.Vector2(self.start_pos) - cam.offset) / cam.zoom
+            world_p2_px = (pygame.Vector2(self.current_pos) - cam.offset) / cam.zoom
+            world_p1 = world_p1_px / cell_size
+            world_p2 = world_p2_px / cell_size
+            return world_p1, world_p2
+
+        elif self.state == "rectangle":
+            left = min(x1, x2)
+            right = max(x1, x2)
+            top = min(y1, y2)
+            bottom = max(y1, y2)
+            screen_points = [
+                pygame.Vector2(x1, y1),
+                pygame.Vector2(x2, y1),
+                pygame.Vector2(x2, y2),
+                pygame.Vector2(x1, y2),
+            ]
+            world_points = [
+                (p - cam.offset) / cam.zoom / cell_size for p in screen_points
+            ]
+            min_x = min(p.x for p in world_points)
+            max_x = max(p.x for p in world_points)
+            min_y = min(p.y for p in world_points)
+            max_y = max(p.y for p in world_points)
+            width = max_x - min_x
+            height = max_y - min_y
+            position = pygame.Vector2((min_x + max_x) / 2, (min_y + max_y) / 2)
+            return position, (width, height)
+
+        elif self.state == "triangle":
+            point1 = pygame.Vector2(x1, y1)
+            point2 = pygame.Vector2(x2, y2)
+            point3 = pygame.Vector2(x2, y1)
+            if self.third_triangel_point is not None:
+                point3 = self.third_triangel_point
+            points = [point1, point2, point3]
+            points = [pygame.Vector2(p) for p in points]
+            # --- sort ---
+            centroid = sum(points, pygame.Vector2()) / 3
+            points_sorted = sorted(
+                points, key=lambda p: math.atan2(p.y - centroid.y, p.x - centroid.x)
+            )
+            top_point = min(points_sorted, key=lambda p: p.y)
+            while points_sorted[0] != top_point:
+                points_sorted.append(points_sorted.pop(0))
+            # ---
+            screen_points = points_sorted
+            world_points = [
+                (p - cam.offset) / cam.zoom / cell_size for p in screen_points
+            ]
+            position = sum(world_points, pygame.Vector2()) / 3
+            vertices = [wp - position for wp in world_points]
+            return position, vertices
+
+        return None

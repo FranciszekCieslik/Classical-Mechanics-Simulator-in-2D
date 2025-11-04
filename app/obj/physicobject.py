@@ -51,7 +51,7 @@ class PhysicObject:
         self.is_static = obj_type.lower() == "static"
         self.shape_type = shape_type.lower()
         self.world = world
-        self.position = position
+        self.position = (position[0], position[1])
         self.angle = angle
 
         if features is None:

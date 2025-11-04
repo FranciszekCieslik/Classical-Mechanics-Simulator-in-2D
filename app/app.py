@@ -152,7 +152,21 @@ class App:
                             )
                     self.last_click_time = now
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                self.draw_assistance.deactivate_drawing()
+                result = self.draw_assistance.deactivate_drawing(
+                    self.camera, self.grid.base_cell_size
+                )
+                if result is not None:
+                    state, pos, size, color = result
+                    # print("DEBUG:", state, pos, size, color)
+                    self.objmanager.add_object(
+                        obj_type="static",
+                        shape_type=state,
+                        size=size,
+                        position=pos,
+                        angle=0.00,
+                        color=color,
+                        features=None,
+                    )
             elif event.type == pygame.MOUSEMOTION and self.draw_assistance.is_drawing:
                 self.draw_assistance.set_current_position(event.pos)
 

@@ -53,7 +53,7 @@ class Circle:
     def _draw_radius_line(self) -> None:
         """Draws a line representing the radius direction."""
         radius_px = self.radius * self.base_cell_size_world * self.cam.zoom
-        angle_rad = math.radians(self.angle)
+        angle_rad = -1 * math.radians(self.angle)
 
         start = pygame.Vector2(self.screen_center)
         end = pygame.Vector2(
