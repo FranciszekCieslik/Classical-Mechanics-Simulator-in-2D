@@ -2,10 +2,11 @@ from typing import Optional
 
 import pygame
 import thorpy as tp
-from obj.colorpalette import ColorPalette
 from obj.drawassistance import DrawAssistance
+from obj.guielements.colorpalette import ColorPalette
+from obj.guielements.numinputoncheckbox import NumberInputOnCheckbox
+from obj.guielements.toggleimagebutton import ToggleImageButton
 from obj.objectsmanager import ObjectsManager
-from obj.toggleimagebutton import ToggleImageButton
 
 
 class Panel_GUI:
@@ -24,7 +25,7 @@ class Panel_GUI:
         self.group_ext: Optional[tp.Group] = None
         self.group_color: Optional[tp.Group] = None
 
-        self.checkbox_gravity: Optional[tp.Checkbox] = None
+        self.gravity_input: Optional[NumberInputOnCheckbox] = None
         self.checkbox_obj_as_points: Optional[tp.Checkbox] = None
 
         self.helpers: list[tp.Helper] = []
@@ -37,10 +38,8 @@ class Panel_GUI:
 
     def on_init(self):
         # --- inicjalizacja Thorpy ---
-        main_screen = pygame.display.get_surface()
-        tp.init(main_screen, theme=tp.theme_text_dark)
+        tp.init(self.screen, theme=tp.theme_text_dark)
         tp.set_default_font(font_name="console", font_size=12)
-        tp.set_screen(self.screen)
 
         # === Przyciski rysowania ===
         ico_paths = [
@@ -89,7 +88,8 @@ class Panel_GUI:
                 def on_rubber_click():
                     self.is_rubber_on = not self.is_rubber_on
 
-                btn._at_click = on_rubber_click()
+                btn._at_click = on_rubber_click
+
             helper = tp.Helper(label, btn, countdown=30, offset=(0, 40))
             helper.set_font_size(12)
             self.helpers.append(helper)
@@ -145,14 +145,9 @@ class Panel_GUI:
                     value=False,
                     on_toggle=on_simulation_toggle,
                 )
-
                 btn = self.button_play
-
             else:
                 btn = tp.ImageButton("", img.copy(), img_hover=variant)
-            helper = tp.Helper(label, btn, countdown=30, offset=(0, 40))
-            helper.set_font_size(12)
-            self.helpers.append(helper)
             if label == "Reset":
 
                 def on_reset_click():
@@ -160,21 +155,30 @@ class Panel_GUI:
                         self.objects_manager.reset_simulation()
 
                 btn._at_click = on_reset_click
+            helper = tp.Helper(label, btn, countdown=30, offset=(0, 40))
+            helper.set_font_size(12)
+            self.helpers.append(helper)
             sim_buttons.append(btn)
 
         self.group_simulation = tp.Group(sim_buttons, "h")
 
-        # === Checkboxy ===
-        self.checkbox_gravity = tp.Checkbox()
-        text_group1 = tp.Group(
-            [tp.Text("GRAVITY", font_size=12), self.checkbox_gravity], "h", gap=10
+        # === SET GRAVITY ===
+        def set_gravity(n: float):
+            self.objects_manager.set_gravity_force(n)
+
+        self.gravity_input = NumberInputOnCheckbox(
+            checkbox_text="GRAVITY",
+            input_text="9.8",
+            fun=set_gravity,
+            input_placeholder="9.8",
         )
+        text_group1 = self.gravity_input.get()
 
         self.checkbox_obj_as_points = tp.Checkbox()
         text_group2 = tp.Group(
             [
-                tp.Text("TREAT OBJECTS AS POINTS", font_size=12),
                 self.checkbox_obj_as_points,
+                tp.Text("TREAT OBJECTS AS POINTS", font_size=12),
             ],
             "h",
             gap=10,
@@ -191,15 +195,15 @@ class Panel_GUI:
         )
         self.metagroup.sort_children("h", gap=30)
         self.metagroup.set_size(self.screen.get_size())
-        self.metagroup.set_topleft(0, 10)
-        self.launcher = self.metagroup.get_updater()
+        self.mainbox = tp.Box([self.metagroup])
+        self.mainbox.set_topleft(0, 0)
+        self.launcher = self.mainbox.get_updater()
 
     def after_update(self):
         self.draw_assistance.set_color(self.color_palette.selected_color)
         self.color_palette.update_color_preview()
 
     def render(self):
-        self.screen.fill((30, 30, 30))
         if self.launcher:
             self.launcher.update(func_after=self.after_update)
 

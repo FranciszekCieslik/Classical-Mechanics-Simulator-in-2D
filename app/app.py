@@ -45,19 +45,15 @@ class App:
             surface=self.screen,
             camera=self.camera,
             cell_size=self.grid.base_cell_size,
-            gravity=(0.0, -9.8),
+            gravity=(0.0, 9.8),
         )
 
         # --- Draw Assistance ---
         self.draw_assistance = DrawAssistance(self.screen)
 
         # --- GUI PANEL ---
-        self.panel_surface: Surface = pygame.Surface(
-            (self.screen.get_width(), 80), flags=pygame.SRCALPHA
-        )
-        self.panel_rect: Rect = self.panel_surface.get_rect(topleft=(0, 0))
         self.panelgui: Panel_GUI = Panel_GUI(
-            self.panel_surface, self.objmanager, self.draw_assistance
+            self.screen, self.objmanager, self.draw_assistance
         )
 
         # --- TIMING ---
@@ -96,13 +92,7 @@ class App:
             self.screen = pygame.display.set_mode(self.size, flags)
 
             # --- aktualizacja panelu ---
-            panel_height = 80
-            self.panel_surface = pygame.Surface(
-                (self.screen.get_width(), panel_height), flags=pygame.RESIZABLE
-            )
-            self.panel_rect = self.panel_surface.get_rect(topleft=(0, 0))
-            self.panelgui.screen = self.panel_surface
-            self.panelgui.resize_panel(self.panel_surface)
+            self.panelgui.resize_panel(self.screen)
 
     def on_event(self, event) -> None:
         # --- WINDOW EVENTS ---
@@ -133,90 +123,81 @@ class App:
 
         # --- MOUSE EVENTS ---
         # --- OUTSIDE THE PANEL ---
-        if not self.panel_rect.collidepoint(pygame.mouse.get_pos()):
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if self.panelgui.is_rubber_on:
-                    print('rubber is on')
-                    selected = self.objmanager.select_object_at_position(
-                        pygame.mouse.get_pos()
-                    )
-                    if selected:
-                        self.objmanager.objects.remove(selected)
-                        self.panelgui.is_rubber_on = False
 
-                elif self.draw_assistance.is_drawing:
-                    if self.draw_assistance.start_pos is None:
-                        self.draw_assistance.set_start_position(event.pos)
-                    elif (
-                        self.draw_assistance.state == 'triangle'
-                        and self.draw_assistance.third_triangel_point is None
-                    ):
-                        self.draw_assistance.set_third_triangle_point(event.pos)
-                else:
-                    now = pygame.time.get_ticks()
-                    if now - self.last_click_time <= self.DOUBLE_CLICK_TIME:
-                        obj = self.objmanager.select_object_at_position(event.pos)
-                        if obj:
-                            self.objmanager.selected_obj_is_being_dragged = True
-                            self.prev_mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
-                            # print(
-                            #     "Obj state:",
-                            #     obj.physics.is_static,
-                            #     obj.physics.shape_type,
-                            # )
-                    self.last_click_time = now
-            elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                result = self.draw_assistance.deactivate_drawing(
-                    self.camera, self.grid.base_cell_size
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if self.panelgui.is_rubber_on:
+                selected = self.objmanager.select_object_at_position(
+                    pygame.mouse.get_pos()
                 )
-                if result is not None:
-                    state, pos, size, color = result
-                    # print("DEBUG:", state, pos, size, color)
-                    self.objmanager.add_object(
-                        obj_type="static",
-                        shape_type=state,
-                        size=size,
-                        position=pos,
-                        angle=0.00,
-                        color=color,
-                        features=None,
-                    )
-                #  --- dragging obj ---
-                self.objmanager.end_dragging_obj()
-                self.prev_mouse_pos = None
-            elif event.type == pygame.MOUSEMOTION and self.draw_assistance.is_drawing:
-                self.draw_assistance.set_current_position(event.pos)
+                if selected:
+                    self.objmanager.objects.remove(selected)
+                    self.panelgui.is_rubber_on = False
 
-                # --- POSITION UPDATE ---
-            if self.objmanager.selected_obj_is_being_dragged:
-                pos = pygame.Vector2(pygame.mouse.get_pos())
-                if pos != self.prev_mouse_pos and self.objmanager.selected_obj:
-                    d = self.prev_mouse_pos - pygame.Vector2(pos)
-                    self.objmanager.move_selected_obj(d)
-                    self.prev_mouse_pos = pos
-
-            if event.type == pygame.MOUSEWHEEL:
-                factor = (
-                    self.camera.zoom_speed
-                    if event.y > 0
-                    else 1.0 / self.camera.zoom_speed
+            elif self.draw_assistance.is_drawing:
+                if self.draw_assistance.start_pos is None:
+                    self.draw_assistance.set_start_position(event.pos)
+                elif (
+                    self.draw_assistance.state == 'triangle'
+                    and self.draw_assistance.third_triangel_point is None
+                ):
+                    self.draw_assistance.set_third_triangle_point(event.pos)
+            else:
+                now = pygame.time.get_ticks()
+                if now - self.last_click_time <= self.DOUBLE_CLICK_TIME:
+                    obj = self.objmanager.select_object_at_position(event.pos)
+                    if obj:
+                        self.objmanager.selected_obj_is_being_dragged = True
+                        self.prev_mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
+                self.last_click_time = now
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            result = self.draw_assistance.deactivate_drawing(
+                self.camera, self.grid.base_cell_size
+            )
+            if result is not None:
+                state, pos, size, color = result
+                self.objmanager.add_object(
+                    obj_type="static",
+                    shape_type=state,
+                    size=size,
+                    position=pos,
+                    angle=0.00,
+                    color=color,
+                    features=None,
                 )
-                self.camera.zoom_at(factor, pygame.mouse.get_pos())
+            #  --- dragging obj ---
+            self.objmanager.end_dragging_obj()
+            self.prev_mouse_pos = None
+        elif event.type == pygame.MOUSEMOTION and self.draw_assistance.is_drawing:
+            self.draw_assistance.set_current_position(event.pos)
 
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
-                pygame.mouse.get_rel()
-                self.dragging = True
-            elif event.type == pygame.MOUSEBUTTONUP and event.button == 2:
-                self.dragging = False
-            elif event.type == pygame.MOUSEMOTION and self.dragging:
-                self.camera.move(*pygame.mouse.get_rel())
+            # --- POSITION UPDATE ---
+        if self.objmanager.selected_obj_is_being_dragged:
+            pos = pygame.Vector2(pygame.mouse.get_pos())
+            if pos != self.prev_mouse_pos and self.objmanager.selected_obj:
+                d = self.prev_mouse_pos - pygame.Vector2(pos)
+                self.objmanager.move_selected_obj(d)
+                self.prev_mouse_pos = pos
+
+        if event.type == pygame.MOUSEWHEEL:
+            factor = (
+                self.camera.zoom_speed if event.y > 0 else 1.0 / self.camera.zoom_speed
+            )
+            self.camera.zoom_at(factor, pygame.mouse.get_pos())
+
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
+            pygame.mouse.get_rel()
+            self.dragging = True
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 2:
+            self.dragging = False
+        elif event.type == pygame.MOUSEMOTION and self.dragging:
+            self.camera.move(*pygame.mouse.get_rel())
 
     def on_update(self) -> None:
         self.objmanager.step_simulation()
 
     def draw_panel(self):
         self.panelgui.render()
-        self.screen.blit(self.panel_surface, self.panel_rect)
+        # self.screen.blit(self.panel_surface, self.panel_rect)
 
     def on_render(self) -> None:
         if getattr(self, "minimized", False):

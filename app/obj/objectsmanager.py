@@ -2,7 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import List, Optional, Tuple, Union
 
 import pygame  # type: ignore
-from Box2D import b2World
+from Box2D import b2Vec2, b2World
 from obj.camera import Camera
 from obj.physicobject import Features
 
@@ -15,7 +15,7 @@ class ObjectsManager:
         surface: pygame.Surface,
         camera: Camera,
         cell_size: int,
-        gravity: tuple[float, float] = (0.0, -9.8),
+        gravity: tuple[float, float] = (0.0, 9.8),
     ) -> None:
         self.world: b2World = b2World(gravity=gravity)
         self.surface: pygame.Surface = surface
@@ -97,3 +97,6 @@ class ObjectsManager:
             if self.time == 0.00:
                 obj.start_position = obj.physics.body.position.copy()
                 obj.sync()
+
+    def set_gravity_force(self, val: float = 0.0):
+        self.world.gravity = b2Vec2(0.0, val)
