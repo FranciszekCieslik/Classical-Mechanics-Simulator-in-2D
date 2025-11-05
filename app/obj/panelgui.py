@@ -32,6 +32,7 @@ class Panel_GUI:
         self.objects_manager = objmanager
         self.draw_assistance = draw_assistance
         self.button_play: Optional[tp.ImageButton] = None
+        self.is_rubber_on: bool = False
         self.on_init()
 
     def on_init(self):
@@ -83,6 +84,12 @@ class Panel_GUI:
                     self.draw_assistance.active_drawing("line")
 
                 btn._at_click = on_line_click
+            elif "rubber" in icon_path:
+
+                def on_rubber_click():
+                    self.is_rubber_on = not self.is_rubber_on
+
+                btn._at_click = on_rubber_click()
             helper = tp.Helper(label, btn, countdown=30, offset=(0, 40))
             helper.set_font_size(12)
             self.helpers.append(helper)

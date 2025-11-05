@@ -65,7 +65,7 @@ class App:
         self._resize_lock: threading.Lock = threading.Lock()
         self._last_resize: float = 0.0
         self._resize_cooldown: float = 0.2
-        self.DOUBLE_CLICK_TIME = 500  # maksymalny odstęp (ms) między kliknięciami
+        self.DOUBLE_CLICK_TIME = 550  # maksymalny odstęp (ms) między kliknięciami
         self.last_click_time = 0.0
 
         # --- FLAGS ---
@@ -135,7 +135,16 @@ class App:
         # --- OUTSIDE THE PANEL ---
         if not self.panel_rect.collidepoint(pygame.mouse.get_pos()):
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if self.draw_assistance.is_drawing:
+                if self.panelgui.is_rubber_on:
+                    print('rubber is on')
+                    selected = self.objmanager.select_object_at_position(
+                        pygame.mouse.get_pos()
+                    )
+                    if selected:
+                        self.objmanager.objects.remove(selected)
+                        self.panelgui.is_rubber_on = False
+
+                elif self.draw_assistance.is_drawing:
                     if self.draw_assistance.start_pos is None:
                         self.draw_assistance.set_start_position(event.pos)
                     elif (
@@ -146,16 +155,15 @@ class App:
                 else:
                     now = pygame.time.get_ticks()
                     if now - self.last_click_time <= self.DOUBLE_CLICK_TIME:
-                        print("DOUBLE CLICK!!!")
                         obj = self.objmanager.select_object_at_position(event.pos)
                         if obj:
                             self.objmanager.selected_obj_is_being_dragged = True
                             self.prev_mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
-                            print(
-                                "Obj state:",
-                                obj.physics.is_static,
-                                obj.physics.shape_type,
-                            )
+                            # print(
+                            #     "Obj state:",
+                            #     obj.physics.is_static,
+                            #     obj.physics.shape_type,
+                            # )
                     self.last_click_time = now
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 result = self.draw_assistance.deactivate_drawing(
