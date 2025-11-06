@@ -10,12 +10,14 @@ class NumberInputOnCheckbox:
         input_text: str,
         fun: Callable[[float], None],
         input_placeholder: str = "",
+        max_value: float = 83.85,
     ):
         if not callable(fun):
             raise TypeError("'fun' must be a function or lambda expression")
 
         self.fun = fun
         self.active = True
+        self.max_value = max_value
 
         self.checkbox = tp.Checkbox()
         self.checkbox.set_value(True)
@@ -30,7 +32,7 @@ class NumberInputOnCheckbox:
         self.group = tp.Group([self.checkbox, self.label_checkbox, self.input], "h")
 
         self.checkbox._at_click = self.on_checkbox_toggle
-        self.input.at_cancel = self.on_input_entered
+        self.input.at_unhover = self.on_input_entered
 
     def _set_input_visual(self, active: bool):
         color = (80, 80, 80) if active else (150, 150, 150)
@@ -38,7 +40,6 @@ class NumberInputOnCheckbox:
         self.active = active
 
     def on_checkbox_toggle(self):
-        """Zmieniaj stan logiczny pola przy zmianie checkboxa."""
         active = not self.checkbox.get_value()
         self._set_input_visual(active=active)
         self.input.set_locked(not active)
@@ -54,11 +55,13 @@ class NumberInputOnCheckbox:
             self.input.set_value("")
             return
 
+        if val > self.max_value:
+            self.input.value = str(self.max_value)
+            return
         try:
             self.fun(val)
         except Exception as e:
             print(f"{e}")
 
     def get(self) -> tp.Group:
-        """Zwraca grupę GUI do wstawienia do menu Thorpy."""
         return self.group

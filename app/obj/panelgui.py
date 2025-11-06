@@ -60,29 +60,13 @@ class Panel_GUI:
             )
             btn = tp.ImageButton("", img.copy(), img_hover=variant)
             if "rectangle" in icon_path:
-
-                def on_rectangle_click():
-                    self.draw_assistance.active_drawing("rectangle")
-
-                btn._at_click = on_rectangle_click
+                btn._at_click = lambda: self.draw_assistance.active_drawing("rectangle")
             elif "circle" in icon_path:
-
-                def on_circle_click():
-                    self.draw_assistance.active_drawing("circle")
-
-                btn._at_click = on_circle_click
+                btn._at_click = lambda: self.draw_assistance.active_drawing("circle")
             elif "triangle" in icon_path:
-
-                def on_triangle_click():
-                    self.draw_assistance.active_drawing("triangle")
-
-                btn._at_click = on_triangle_click
+                btn._at_click = lambda: self.draw_assistance.active_drawing("triangle")
             elif "line" in icon_path:
-
-                def on_line_click():
-                    self.draw_assistance.active_drawing("line")
-
-                btn._at_click = on_line_click
+                btn._at_click = lambda: self.draw_assistance.active_drawing("line")
             elif "rubber" in icon_path:
 
                 def on_rubber_click():
@@ -128,13 +112,6 @@ class Panel_GUI:
                     img_stop, img_stop.get_at((0, 0)), (100, 100, 100)
                 )
 
-                def on_simulation_toggle(is_running: bool):
-                    if is_running:
-                        self.objects_manager.is_simulation_running = True
-                    else:
-                        self.objects_manager.is_simulation_running = False
-
-                # --- Tworzenie przycisku ---
                 self.button_play = ToggleImageButton(
                     text="",
                     img=img_play,
@@ -143,18 +120,13 @@ class Panel_GUI:
                     img_pressed_hover=img_stop_hover,
                     no_copy=False,
                     value=False,
-                    on_toggle=on_simulation_toggle,
+                    on_toggle=self.objects_manager.run_simulation,
                 )
                 btn = self.button_play
             else:
                 btn = tp.ImageButton("", img.copy(), img_hover=variant)
             if label == "Reset":
-
-                def on_reset_click():
-                    if self.objects_manager:
-                        self.objects_manager.reset_simulation()
-
-                btn._at_click = on_reset_click
+                btn._at_click = self.objects_manager.reset_simulation()
             helper = tp.Helper(label, btn, countdown=30, offset=(0, 40))
             helper.set_font_size(12)
             self.helpers.append(helper)
@@ -162,14 +134,10 @@ class Panel_GUI:
 
         self.group_simulation = tp.Group(sim_buttons, "h")
 
-        # === SET GRAVITY ===
-        def set_gravity(n: float):
-            self.objects_manager.set_gravity_force(n)
-
         self.gravity_input = NumberInputOnCheckbox(
             checkbox_text="GRAVITY",
             input_text="9.8",
-            fun=set_gravity,
+            fun=self.objects_manager.set_gravity_force,
             input_placeholder="9.8",
         )
         text_group1 = self.gravity_input.get()

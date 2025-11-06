@@ -77,6 +77,14 @@ class ObjectsManager:
             obj.reset()
         self.time = 0.0
 
+    def run_simulation(self, run: bool) -> None:
+        if run:
+            for obj in self.objects:
+                obj.physics.body.awake = True
+            self.is_simulation_running = True
+        else:
+            self.is_simulation_running = False
+
     def select_object_at_position(
         self, position: Tuple[int, int]
     ) -> Optional[RealObject]:
