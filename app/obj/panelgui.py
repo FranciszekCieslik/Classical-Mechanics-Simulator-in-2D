@@ -12,11 +12,11 @@ from obj.objectsmanager import ObjectsManager
 class Panel_GUI:
     def __init__(
         self,
-        screen: pygame.Surface,
         objmanager: ObjectsManager,
         draw_assistance: DrawAssistance,
     ):
-        self.screen = screen
+        self.screen: pygame.Surface = pygame.display.get_surface()
+
         self.metagroup: Optional[tp.Group] = None
         self.launcher: Optional[tp.Loop] = None
 
@@ -37,11 +37,7 @@ class Panel_GUI:
         self.on_init()
 
     def on_init(self):
-        # --- inicjalizacja Thorpy ---
-        tp.init(self.screen, theme=tp.theme_text_dark)
-        tp.set_default_font(font_name="console", font_size=12)
 
-        # === Przyciski rysowania ===
         ico_paths = [
             "app/assets/icons/line.svg",
             "app/assets/icons/rectangle.svg",
@@ -126,7 +122,7 @@ class Panel_GUI:
             else:
                 btn = tp.ImageButton("", img.copy(), img_hover=variant)
             if label == "Reset":
-                btn._at_click = self.objects_manager.reset_simulation()
+                btn._at_click = self.objects_manager.reset_simulation
             helper = tp.Helper(label, btn, countdown=30, offset=(0, 40))
             helper.set_font_size(12)
             self.helpers.append(helper)

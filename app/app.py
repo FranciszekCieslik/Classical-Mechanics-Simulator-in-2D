@@ -1,16 +1,18 @@
 import threading
 import time
-from typing import Callable, Optional
+from typing import Optional
 
 import pygame  # type: ignore
+import thorpy as tp
 from obj.axes import Axes
 from obj.camera import Camera
 from obj.drawassistance import DrawAssistance
 from obj.grid import Grid
+from obj.guielements.sidebar import SideBar
 from obj.objectsmanager import ObjectsManager
 from obj.panelgui import Panel_GUI
 from obj.physicobject import Features
-from pygame import Rect, Surface  # type: ignore
+from pygame import Surface  # type: ignore
 from pygame.time import Clock  # type: ignore
 
 
@@ -51,11 +53,16 @@ class App:
         # --- Draw Assistance ---
         self.draw_assistance = DrawAssistance(self.screen)
 
+        # --- Thorpy Init ---
+        tp.init(self.screen, theme=tp.theme_text_dark)
+        tp.set_default_font(font_name="console", font_size=12)
+
         # --- GUI PANEL ---
         self.panelgui: Panel_GUI = Panel_GUI(
-            self.screen, self.objmanager, self.draw_assistance
+            objmanager=self.objmanager, draw_assistance=self.draw_assistance
         )
-
+        # --- Side Bar ---
+        self.objsidebar: SideBar = SideBar()
         # --- TIMING ---
         self.clock: Clock = Clock()
         self._resize_lock: threading.Lock = threading.Lock()
@@ -146,6 +153,7 @@ class App:
                 if now - self.last_click_time <= self.DOUBLE_CLICK_TIME:
                     obj = self.objmanager.select_object_at_position(event.pos)
                     if obj:
+                        self.objsidebar.toggle()
                         self.objmanager.selected_obj_is_being_dragged = True
                         self.prev_mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
                 self.last_click_time = now
@@ -209,6 +217,7 @@ class App:
         self.objmanager.draw_objects()
         self.draw_assistance.draw()
         self.draw_panel()
+        self.objsidebar.update()
 
     def on_cleanup(self) -> None:
         pygame.quit()
