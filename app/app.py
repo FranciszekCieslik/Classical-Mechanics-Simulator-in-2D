@@ -129,8 +129,6 @@ class App:
             return
 
         # --- MOUSE EVENTS ---
-        # --- OUTSIDE THE PANEL ---
-
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.panelgui.is_rubber_on:
                 selected = self.objmanager.select_object_at_position(
@@ -153,7 +151,7 @@ class App:
                     obj = self.objmanager.select_object_at_position(event.pos)
                     if obj:
                         self.objsidebar.get_data_from_real_obj(obj)
-                        self.objsidebar.toggle()
+                        self.objsidebar.show()
                         self.objmanager.selected_obj_is_being_dragged = True
                         self.prev_mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
                 self.last_click_time = now
