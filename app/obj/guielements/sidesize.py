@@ -6,10 +6,7 @@ import thorpy as tp
 
 class SideSize:
     def __init__(
-        self,
-        shape_type: Literal["triangle", "circle", "rectangle"],
-        rect: pygame.Rect,
-        top_margin: int,
+        self, shape_type: Literal["triangle", "circle", "rectangle"], rect: pygame.Rect
     ):
         self.screen: pygame.Surface = pygame.display.get_surface()
         self.visible: bool = False
@@ -18,7 +15,7 @@ class SideSize:
         self.rect = rect
         self.width: int = rect.size[0]
         self.offset: int = self.width
-        self.top_margin = rect.size[1] + top_margin
+        self.top_margin = rect.bottom
 
         if shape_type == "triangle":
             self.angle1 = tp.TextInput("", placeholder="0.00")
@@ -33,11 +30,15 @@ class SideSize:
         else:
             if shape_type == "circle":
                 self.radius = tp.TextInput("", placeholder="0.00")
-                elements = [
-                    tp.Text("Radius:"),
-                    self.radius,
-                ]
-                self.group = tp.Group(elements, mode="h")
+                self.group1 = tp.Group(
+                    [
+                        tp.Text("Radius:"),
+                        self.radius,
+                    ],
+                    mode="h",
+                )
+                self.group2 = tp.Group([tp.Text("")])
+                self.group = tp.Group([self.group1, self.group2])
             elif shape_type == "rectangle":
                 self.w = tp.TextInput("", placeholder="0.00")
                 self.h = tp.TextInput("", placeholder="0.00")
@@ -47,24 +48,24 @@ class SideSize:
                     tp.Text("Height:"),
                     self.h,
                 ]
-                self.group = tp.Group(elements, mode="h")
+                self.group1 = tp.Group(elements, mode="h")
+                self.group2 = tp.Group([tp.Text("")])
+                self.group = tp.Group([self.group1, self.group2])
             else:
                 elements = [tp.Text("Unsupported shape type")]
                 self.group = tp.Group(elements, mode="h")
         self.box = tp.Box([self.group])
         self.launcher = self.box.get_updater()
 
-    def on__init(self, rect: pygame.Rect, top_margin):
-        self.rect = rect
+    def on__init(self, rect: pygame.Rect):
+        self.rect = pygame.Rect(rect.left, rect.bottom, rect.width, rect.height)
         self.width = rect.width
         self.offset = self.width
         self.top_margin = rect.bottom
+        self.box.set_topleft(self.rect.left, self.top_margin)
+        self.box.set_size((self.width, self.box.rect.height))
 
-    def update(self):
-        target_offset = 0 if self.visible else self.screen.get_width()
-        if abs(self.offset - target_offset) > 1:
-            self.offset += (target_offset - self.offset) / self.speed
-        x = self.screen.get_width() - self.width + int(self.offset)
+    def update(self, x: int):
         self.box.set_topleft(x, self.top_margin)
         self.launcher.reaction(pygame.event.get())
         self.launcher.update()

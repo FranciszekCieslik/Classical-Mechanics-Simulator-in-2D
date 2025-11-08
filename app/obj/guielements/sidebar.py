@@ -1,9 +1,12 @@
-from typing import Optional
+from typing import Optional, Union
 
 import pygame
 import thorpy as tp
+from obj.guielements.selectortype import SelectorType
 from obj.guielements.sidesize import SideSize
 from obj.realobject import RealObject
+
+PanelType = Union["SideBar", "SideSize", "SelectorType"]
 
 
 class SideBar:
@@ -24,9 +27,12 @@ class SideBar:
         )
 
         # --- Size Bars ---
-        self.size_rectangle = SideSize("rectangle", self.rect, self.top_margin)
-        self.size_triangle = SideSize("triangle", self.rect, self.top_margin)
-        self.size_circle = SideSize("circle", self.rect, self.top_margin)
+        self.size_rectangle = SideSize("rectangle", self.rect)
+        self.size_triangle = SideSize("triangle", self.rect)
+        self.size_circle = SideSize("circle", self.rect)
+
+        # --- SelectorType ---
+        self.selectortype = SelectorType(self.rect)
 
         # --- Thorpy Elements ---
         ico_path = "app/assets/icons/x-square.svg"
@@ -71,7 +77,6 @@ class SideBar:
             ],
             "h",
         )
-        # --- Static/Dynamic ---
         # --- main group ---
         self.main_group = tp.Group(
             elements=[
@@ -90,9 +95,10 @@ class SideBar:
         self.launcher = self.box.get_updater()
 
         self.rect = self.box.rect
-        self.size_rectangle.on__init(self.rect, self.top_margin)
-        self.size_triangle.on__init(self.rect, self.top_margin)
-        self.size_circle.on__init(self.rect, self.top_margin)
+        self.size_rectangle.on__init(self.rect)
+        self.size_triangle.on__init(self.rect)
+        self.size_circle.on__init(self.rect)
+        self.selectortype.on__init(self.size_circle.box.rect)
 
     def show(self) -> None:
         if self.visible:
@@ -100,30 +106,47 @@ class SideBar:
             self.update()
             return
         self.visible = True
-        if self.obj:
-            shape_type = self.obj.shape_type
-            self.size_rectangle.show(shape_type)
-            self.size_triangle.show(shape_type)
-            self.size_circle.show(shape_type)
+        if not self.obj:
+            return
+        shape_type = self.obj.shape_type
+        self.size_rectangle.show(shape_type)
+        self.size_triangle.show(shape_type)
+        self.size_circle.show(shape_type)
+        self.selectortype.show()
 
     def hide(self) -> None:
         self.visible = False
         self.size_rectangle.hide()
         self.size_triangle.hide()
         self.size_circle.hide()
+        self.selectortype.hide()
 
     def update(self) -> None:
         target_offset = 0 if self.visible else self.screen.get_width()
         if abs(self.offset - target_offset) > 1:
             self.offset += int((target_offset - self.offset) / self.speed)
+        else:
+            self.offset = target_offset
         x = self.screen.get_width() - self.width + int(self.offset)
         self.box.set_topleft(x, self.top_margin)
 
         self.reset_width()
 
-        self.size_rectangle.update()
-        self.size_triangle.update()
-        self.size_circle.update()
+        visible_panels = [
+            p
+            for p in (
+                self.size_rectangle,
+                self.size_triangle,
+                self.size_circle,
+                self.selectortype,
+            )
+            if p.visible
+        ]
+
+        x = self.box.rect.left
+        for panel in visible_panels:
+            panel.offset = self.offset
+            panel.update(x)
 
         self.launcher.reaction(pygame.event.get())
         self.launcher.update()
@@ -138,25 +161,23 @@ class SideBar:
         self.rotation.value = str(round(body.angle, 3))
 
     def reset_width(self) -> None:
-        max_width = max(
-            [
-                self.box.rect.width,
-                self.size_rectangle.box.rect.width,
-                self.size_triangle.box.rect.width,
-                self.size_circle.box.rect.width,
-            ]
-        )
+        panels: list[PanelType] = [
+            self,
+            self.size_rectangle,
+            self.size_triangle,
+            self.size_circle,
+            self.selectortype,
+        ]
 
-        # Ustawienie wspólnej szerokości
-        self.box.set_size((max_width, self.box.rect.height))
-        self.size_rectangle.box.set_size(
-            (max_width, self.size_rectangle.box.rect.height)
-        )
-        self.size_triangle.box.set_size((max_width, self.size_triangle.box.rect.height))
-        self.size_circle.box.set_size((max_width, self.size_circle.box.rect.height))
+        boxes = [p.box for p in panels]
+        max_width = max(box.rect.width for box in boxes)
+        visible_offsets = [panel.offset for panel in panels if panel.visible]
+        min_offset = min(visible_offsets) if visible_offsets else self.offset
+        for box in boxes:
+            box.set_size((max_width, box.rect.height))
 
-        # Synchronizacja atrybutów
-        self.width = max_width
-        self.size_rectangle.width = max_width
-        self.size_triangle.width = max_width
-        self.size_circle.width = max_width
+        for panel in panels:
+            panel.width = max_width
+            panel.rect.width = max_width
+            if panel.visible:
+                panel.offset = min_offset
