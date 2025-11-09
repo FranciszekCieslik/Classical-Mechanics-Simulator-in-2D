@@ -1,21 +1,19 @@
-from typing import Literal
+from typing import Literal, Optional
 
 import pygame
 import thorpy as tp
 
 
 class SideSize:
-    def __init__(
-        self, shape_type: Literal["triangle", "circle", "rectangle"], rect: pygame.Rect
-    ):
+    def __init__(self, shape_type: Literal["triangle", "circle", "rectangle"]):
+        self.shape_type = shape_type
         self.screen: pygame.Surface = pygame.display.get_surface()
         self.visible: bool = False
-        self.shape_type = shape_type
         self.speed: int = 12
-        self.rect = rect
-        self.width: int = rect.size[0]
-        self.offset: int = self.width
-        self.top_margin = rect.bottom
+        self.rect: Optional[pygame.Rect] = None
+        self.width: Optional[int] = None
+        self.offset: Optional[int] = self.width
+        self.top_margin: Optional[int] = None
 
         if shape_type == "triangle":
             self.angle1 = tp.TextInput("", placeholder="0.00")
@@ -57,7 +55,7 @@ class SideSize:
         self.box = tp.Box([self.group])
         self.launcher = self.box.get_updater()
 
-    def on__init(self, rect: pygame.Rect):
+    def rebuild(self, rect: pygame.Rect):
         self.rect = pygame.Rect(rect.left, rect.bottom, rect.width, rect.height)
         self.width = rect.width
         self.offset = self.width

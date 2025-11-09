@@ -1,28 +1,24 @@
-from typing import Callable, Optional
+from typing import Optional
 
 import pygame
 import thorpy as tp
-from obj.guielements.checkboxpool import CheckboxPool
 
 
-class SelectorType:
-    def __init__(self, fun: Callable):
+class FeaturesPanel:
+    def __init__(self) -> None:
         self.screen: pygame.Surface = pygame.display.get_surface()
         self.visible: bool = False
         self.speed: int = 12
         self.rect: Optional[pygame.Rect] = None
         self.width: Optional[int] = None
-        self.offset: Optional[int] = self.width
+        self.offset: Optional[int] = None
         self.top_margin: Optional[int] = None
-        self.checkboxpool = CheckboxPool(['static', 'dynamic'], fun, "h")
-
-        elements = [self.checkboxpool.get()]
-
+        elements = [tp.Text("FEATURES")]
         self.group = tp.Group(elements, mode="h")
         self.box = tp.Box([self.group])
         self.launcher = self.box.get_updater()
 
-    def rebuild(self, rect: pygame.Rect):
+    def rebuild(self, rect: pygame.Rect) -> None:
         self.rect = rect
         self.width = rect.width
         self.offset = self.width
@@ -30,14 +26,15 @@ class SelectorType:
         self.box.set_size((self.width, self.box.rect.height))
         self.box.set_topleft(self.rect.left, self.top_margin)
 
-    def update(self, x: int):
+    def update(self, x: int) -> None:
         self.box.set_topleft(x, self.top_margin)
         self.launcher.reaction(pygame.event.get())
-        self.checkboxpool.toggle()
         self.launcher.update()
 
-    def show(self) -> None:
-        self.visible = True
+    def show(self, val: str) -> None:
+        if isinstance(val, list):
+            val = val[0] if val else ''
+        self.visible = val != 'static'
 
-    def hide(self):
+    def hide(self) -> None:
         self.visible = False

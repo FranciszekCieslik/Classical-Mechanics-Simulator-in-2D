@@ -2,11 +2,12 @@ from typing import Optional, Union
 
 import pygame
 import thorpy as tp
+from obj.guielements.featurespanel import FeaturesPanel
 from obj.guielements.selectortype import SelectorType
 from obj.guielements.sidesize import SideSize
 from obj.realobject import RealObject
 
-PanelType = Union["SideBar", "SideSize", "SelectorType"]
+PanelType = Union["SideBar", "SideSize", "SelectorType", "FeaturesPanel"]
 
 
 class SideBar:
@@ -19,21 +20,20 @@ class SideBar:
         self.width: int = 300
         self.height: int = 165
         self.offset: int = self.width
-        self.rect = pygame.Rect(
-            self.screen.get_width() - self.width,
-            self.top_margin,
-            self.width,
-            self.height,
-        )
-
         # --- Size Bars ---
-        self.size_rectangle = SideSize("rectangle", self.rect)
-        self.size_triangle = SideSize("triangle", self.rect)
-        self.size_circle = SideSize("circle", self.rect)
-
+        self.size_rectangle = SideSize("rectangle")
+        self.size_triangle = SideSize("triangle")
+        self.size_circle = SideSize("circle")
         # --- SelectorType ---
-        self.selectortype = SelectorType(self.rect)
+        self.featurespanel = FeaturesPanel()
 
+        def val_show_features():
+            con = self.selectortype.checkboxpool.get_value()
+            self.featurespanel.show(con)
+            self.reset_width()
+            self.update()
+
+        self.selectortype = SelectorType(val_show_features)
         # --- Thorpy Elements ---
         ico_path = "app/assets/icons/x-square.svg"
         img = pygame.image.load(ico_path)
@@ -90,15 +90,16 @@ class SideBar:
         )
 
         self.box = tp.Box([self.main_group])
-        self.box.set_topleft(self.rect.left, self.rect.top)
-        self.box.set_size((self.rect.width, self.rect.height))
+        self.box.set_topleft(self.screen.get_width() - self.width, self.top_margin)
+        self.box.set_size((self.width, self.height))
         self.launcher = self.box.get_updater()
 
-        self.rect = self.box.rect
-        self.size_rectangle.on__init(self.rect)
-        self.size_triangle.on__init(self.rect)
-        self.size_circle.on__init(self.rect)
-        self.selectortype.on__init(self.size_circle.box.rect)
+        self.rect: pygame.Rect = self.box.rect
+        self.size_rectangle.rebuild(self.rect)
+        self.size_triangle.rebuild(self.rect)
+        self.size_circle.rebuild(self.rect)
+        self.selectortype.rebuild(self.size_circle.box.rect)
+        self.featurespanel.rebuild(self.selectortype.box.rect)
 
     def show(self) -> None:
         if self.visible:
@@ -113,6 +114,7 @@ class SideBar:
         self.size_triangle.show(shape_type)
         self.size_circle.show(shape_type)
         self.selectortype.show()
+        self.featurespanel.show(self.selectortype.checkboxpool.get_value())
 
     def hide(self) -> None:
         self.visible = False
@@ -120,6 +122,7 @@ class SideBar:
         self.size_triangle.hide()
         self.size_circle.hide()
         self.selectortype.hide()
+        self.featurespanel.hide()
 
     def update(self) -> None:
         target_offset = 0 if self.visible else self.screen.get_width()
@@ -139,6 +142,7 @@ class SideBar:
                 self.size_triangle,
                 self.size_circle,
                 self.selectortype,
+                self.featurespanel,
             )
             if p.visible
         ]
@@ -147,6 +151,10 @@ class SideBar:
         for panel in visible_panels:
             panel.offset = self.offset
             panel.update(x)
+
+        # if not self.featurespanel.visible:
+        #     x = self.screen.get_width()
+        #     self.featurespanel.update(x)
 
         self.launcher.reaction(pygame.event.get())
         self.launcher.update()
@@ -167,17 +175,24 @@ class SideBar:
             self.size_triangle,
             self.size_circle,
             self.selectortype,
+            self.featurespanel,
         ]
 
         boxes = [p.box for p in panels]
         max_width = max(box.rect.width for box in boxes)
-        visible_offsets = [panel.offset for panel in panels if panel.visible]
-        min_offset = min(visible_offsets) if visible_offsets else self.offset
+        visible_offsets = [
+            int(panel.offset)
+            for panel in panels
+            if panel.visible and panel.offset is not None
+        ]
+        min_offset = min(visible_offsets) if visible_offsets else int(self.offset or 0)
         for box in boxes:
             box.set_size((max_width, box.rect.height))
 
         for panel in panels:
             panel.width = max_width
-            panel.rect.width = max_width
+            if panel.rect is not None:
+                panel.rect.width = max_width
+
             if panel.visible:
                 panel.offset = min_offset
