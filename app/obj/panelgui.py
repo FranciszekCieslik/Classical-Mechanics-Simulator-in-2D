@@ -18,7 +18,6 @@ class Panel_GUI:
         self.screen: pygame.Surface = pygame.display.get_surface()
 
         self.metagroup: Optional[tp.Group] = None
-        self.launcher: Optional[tp.Loop] = None
 
         self.group_draw: Optional[tp.Group] = None
         self.group_simulation: Optional[tp.Group] = None
@@ -39,13 +38,19 @@ class Panel_GUI:
     def on_init(self):
 
         ico_paths = [
-            "app/assets/icons/line.svg",
+            # "app/assets/icons/line.svg",
             "app/assets/icons/rectangle.svg",
             "app/assets/icons/circle.svg",
             "app/assets/icons/triangle.svg",
             "app/assets/icons/rubber.svg",
         ]
-        draw_labels = ["Line", "Rectangle", "Circle", "Triangle", "Rubber"]
+        draw_labels = [
+            # "Line",
+            "Rectangle",
+            "Circle",
+            "Triangle",
+            "Rubber",
+        ]
 
         draw_buttons = []
         for icon_path, label in zip(ico_paths, draw_labels):
@@ -167,10 +172,6 @@ class Panel_GUI:
         self.draw_assistance.set_color(self.color_palette.selected_color)
         self.color_palette.update_color_preview()
 
-    def render(self):
-        if self.launcher:
-            self.launcher.update(func_after=self.after_update)
-
     def resize_panel(self, panel_surface: pygame.Surface):
         self.screen = panel_surface
         tp.set_screen(self.screen)
@@ -178,8 +179,6 @@ class Panel_GUI:
             self.set_screen_recursive(self.metagroup, self.screen)
             self.metagroup.set_size(self.screen.get_size())
             self.metagroup.set_topleft(0, 10)
-            self.launcher = self.metagroup.get_updater()
-            self.launcher.update()
 
     def set_screen_recursive(self, element, new_surface):
         if element is None:

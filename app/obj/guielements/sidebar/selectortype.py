@@ -30,12 +30,6 @@ class SelectorType:
         self.box.set_size((self.width, self.box.rect.height))
         self.box.set_topleft(self.rect.left, self.top_margin)
 
-    def update(self, x: int):
-        self.box.set_topleft(x, self.top_margin)
-        self.launcher.reaction(pygame.event.get())
-        self.checkboxpool.toggle()
-        self.launcher.update()
-
     def show(self) -> None:
         self.visible = True
 

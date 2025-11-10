@@ -51,3 +51,13 @@ class CheckboxPool:
         self.selected = self.choices[clicked_idx]
         self.prev_state = [cb.value for cb in self.checkboxes]
         self._callback()
+
+    def set_value(self, val: str):
+        if val not in self.choices:
+            return
+        for i, (choice, checkbox) in enumerate(zip(self.choices, self.checkboxes)):
+            checkbox.set_value(choice == val)
+            if choice == val:
+                self.selected = self.choices[i]
+        self.prev_state = [cb.value for cb in self.checkboxes]
+        self._callback()

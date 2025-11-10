@@ -2,12 +2,13 @@ from typing import Optional, Union
 
 import pygame
 import thorpy as tp
-from obj.guielements.featurespanel import FeaturesPanel
-from obj.guielements.selectortype import SelectorType
-from obj.guielements.sidesize import SideSize
+from obj.guielements.sidebar.featurespanel import FeaturesPanel
+from obj.guielements.sidebar.selectortype import SelectorType
+from obj.guielements.sidebar.sidesize import SideSize
 from obj.realobject import RealObject
+from thorpy import loops
 
-PanelType = Union["SideBar", "SideSize", "SelectorType", "FeaturesPanel"]
+PanelType = Union["SideBar", SideSize, SelectorType, FeaturesPanel]
 
 
 class SideBar:
@@ -46,7 +47,7 @@ class SideBar:
 
         # --- Title ---
         self.title = tp.Text("Object Controls", font_size=18)
-        self.title_line = tp.Line('h', self.title.get_current_width())
+        self.title_line = tp.Line('h', 360)
         titlegroup = tp.Group(
             elements=[xbtn, self.title], mode="h", margins=(0, 0), gap=15
         )
@@ -90,16 +91,27 @@ class SideBar:
         )
 
         self.box = tp.Box([self.main_group])
-        self.box.set_topleft(self.screen.get_width() - self.width, self.top_margin)
+        self.box.set_topleft(self.screen.get_width() + self.width, self.top_margin)
         self.box.set_size((self.width, self.height))
-        self.launcher = self.box.get_updater()
-
         self.rect: pygame.Rect = self.box.rect
+
         self.size_rectangle.rebuild(self.rect)
         self.size_triangle.rebuild(self.rect)
         self.size_circle.rebuild(self.rect)
         self.selectortype.rebuild(self.size_circle.box.rect)
         self.featurespanel.rebuild(self.selectortype.box.rect)
+
+        self.container = tp.Group(
+            [
+                self.box,
+                self.size_rectangle.box,
+                self.size_triangle.box,
+                self.size_circle.box,
+                self.selectortype.box,
+                self.featurespanel.box,
+            ],
+            mode=None,
+        )
 
     def show(self) -> None:
         if self.visible:
@@ -135,29 +147,28 @@ class SideBar:
 
         self.reset_width()
 
-        visible_panels = [
-            p
-            for p in (
-                self.size_rectangle,
-                self.size_triangle,
-                self.size_circle,
-                self.selectortype,
-                self.featurespanel,
-            )
-            if p.visible
+        panels: list[PanelType] = [
+            self.size_rectangle,
+            self.size_triangle,
+            self.size_circle,
+            self.selectortype,
+            self.featurespanel,
         ]
 
+        visible_panels = [p for p in panels if p.visible]
+
         x = self.box.rect.left
-        for panel in visible_panels:
-            panel.offset = self.offset
-            panel.update(x)
-
-        # if not self.featurespanel.visible:
-        #     x = self.screen.get_width()
-        #     self.featurespanel.update(x)
-
-        self.launcher.reaction(pygame.event.get())
-        self.launcher.update()
+        events = pygame.event.get()
+        for panel in panels:
+            if panel in visible_panels:
+                panel.offset = self.offset
+                panel.box.set_topleft(x, panel.top_margin)
+            else:
+                panel.offset = self.screen.get_width()
+                panel.box.set_topleft(
+                    self.screen.get_width() + self.width, panel.top_margin
+                )
+        self.selectortype.checkboxpool.toggle()
 
     def get_data_from_real_obj(self, rlobjct: RealObject) -> None:
         self.obj = rlobjct
@@ -167,6 +178,9 @@ class SideBar:
         self.x_pos.value = str(round(pos.x, 3))
         self.y_pos.value = str(-round(pos.y, 3))
         self.rotation.value = str(round(body.angle, 3))
+        self.selectortype.checkboxpool.set_value(
+            'static' if self.obj.physics.is_static else 'dynamic'
+        )
 
     def reset_width(self) -> None:
         panels: list[PanelType] = [

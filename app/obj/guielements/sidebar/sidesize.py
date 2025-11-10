@@ -20,34 +20,41 @@ class SideSize:
             self.edge = tp.TextInput("", placeholder="0.00")
             self.angle2 = tp.TextInput("", placeholder="0.00")
             self.group1 = tp.Group(
-                [tp.Text("Angle 1:"), self.angle1, tp.Text("Edge:"), self.edge],
+                [
+                    tp.Text("Angle 1:", font_size=14),
+                    self.angle1,
+                    tp.Text("Edge:", font_size=14),
+                    self.edge,
+                ],
                 mode="h",
             )
-            self.group2 = tp.Group([tp.Text("Angle 2:"), self.angle2], mode="h")
+            self.group2 = tp.Group(
+                [tp.Text("Angle 2:", font_size=14), self.angle2], mode="h"
+            )
             self.group = tp.Group([self.group1, self.group2])
         else:
             if shape_type == "circle":
                 self.radius = tp.TextInput("", placeholder="0.00")
                 self.group1 = tp.Group(
                     [
-                        tp.Text("Radius:"),
+                        tp.Text("Radius:", font_size=14),
                         self.radius,
                     ],
                     mode="h",
                 )
-                self.group2 = tp.Group([tp.Text("")])
+                self.group2 = tp.Group([tp.Text("", font_size=14)])
                 self.group = tp.Group([self.group1, self.group2])
             elif shape_type == "rectangle":
                 self.w = tp.TextInput("", placeholder="0.00")
                 self.h = tp.TextInput("", placeholder="0.00")
                 elements = [
-                    tp.Text("Width:"),
+                    tp.Text("Width:", font_size=14),
                     self.w,
-                    tp.Text("Height:"),
+                    tp.Text("Height:", font_size=14),
                     self.h,
                 ]
                 self.group1 = tp.Group(elements, mode="h")
-                self.group2 = tp.Group([tp.Text("")])
+                self.group2 = tp.Group([tp.Text("", font_size=14)])
                 self.group = tp.Group([self.group1, self.group2])
             else:
                 elements = [tp.Text("Unsupported shape type")]
@@ -62,11 +69,6 @@ class SideSize:
         self.top_margin = rect.bottom
         self.box.set_topleft(self.rect.left, self.top_margin)
         self.box.set_size((self.width, self.box.rect.height))
-
-    def update(self, x: int):
-        self.box.set_topleft(x, self.top_margin)
-        self.launcher.reaction(pygame.event.get())
-        self.launcher.update()
 
     def show(self, shape_type: str) -> None:
         self.visible = self.shape_type == shape_type

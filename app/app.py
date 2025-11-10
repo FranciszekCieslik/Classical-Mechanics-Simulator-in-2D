@@ -8,7 +8,7 @@ from obj.axes import Axes
 from obj.camera import Camera
 from obj.drawassistance import DrawAssistance
 from obj.grid import Grid
-from obj.guielements.sidebar import SideBar
+from obj.guielements.sidebar.sidebar import SideBar
 from obj.objectsmanager import ObjectsManager
 from obj.panelgui import Panel_GUI
 from obj.physicobject import Features
@@ -63,6 +63,11 @@ class App:
         )
         # --- Side Bar ---
         self.objsidebar: SideBar = SideBar()
+        # --- Thorpy Launcher ---
+        self.panels = tp.Group(
+            [self.panelgui.mainbox, self.objsidebar.container], mode=None
+        )
+        self.panels_launcher = self.panels.get_updater()
         # --- TIMING ---
         self.clock: Clock = Clock()
         self._resize_lock: threading.Lock = threading.Lock()
@@ -201,9 +206,9 @@ class App:
     def on_update(self) -> None:
         self.objmanager.step_simulation()
 
-    def draw_panel(self):
-        self.panelgui.render()
-        # self.screen.blit(self.panel_surface, self.panel_rect)
+    def draw_panels(self):
+        self.objsidebar.update()
+        self.panels_launcher.update(func_after=self.panelgui.after_update)
 
     def on_render(self) -> None:
         if getattr(self, "minimized", False):
@@ -214,8 +219,7 @@ class App:
         self.axes.draw()
         self.objmanager.draw_objects()
         self.draw_assistance.draw()
-        self.draw_panel()
-        self.objsidebar.update()
+        self.draw_panels()
 
     def on_cleanup(self) -> None:
         pygame.quit()
