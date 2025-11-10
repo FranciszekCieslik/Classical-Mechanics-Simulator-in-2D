@@ -217,7 +217,9 @@ class App:
             color=pygame.Vector3(150, 150, 255),
         )
 
-        dyn_features = Features(density=1.0, friction=0.4, restitution=0.3)
+        dyn_features = Features(
+            density=1.0, friction=0.4, restitution=0.3, linearVelocity=(1, 3)
+        )
         self.objmanager.add_object(
             obj_type="dynamic",
             shape_type="rectangle",

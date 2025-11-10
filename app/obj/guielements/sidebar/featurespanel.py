@@ -120,6 +120,7 @@ class FeaturesPanel:
 
     def hide(self) -> None:
         self.visible = False
+        self.reset_inputs()
 
     def set_data_from_obj(
         self, body: Any, linearVelocity: Tuple[float, float], angularVelocity: float
@@ -136,3 +137,17 @@ class FeaturesPanel:
 
         self.start_angular_velocity.value = str(round(angularVelocity, 3))
         self.curr_angular_velocity.value = str(round(body.angularVelocity, 3))
+
+    def reset_inputs(self) -> None:
+        self.mass.value = ""
+        self.density.value = ""
+        self.friction.value = ""
+        self.restitution.value = ""
+
+        self.start_velocity_x.value = ""
+        self.start_velocity_y.value = ""
+        self.curr_velocity_x.value = ""
+        self.curr_velocity_y.value = ""
+
+        self.start_angular_velocity.value = ""
+        self.curr_angular_velocity.value = ""

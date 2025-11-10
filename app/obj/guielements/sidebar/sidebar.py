@@ -6,7 +6,6 @@ from obj.guielements.sidebar.featurespanel import FeaturesPanel
 from obj.guielements.sidebar.selectortype import SelectorType
 from obj.guielements.sidebar.sidesize import SideSize
 from obj.realobject import RealObject
-from thorpy import loops
 
 PanelType = Union["SideBar", SideSize, SelectorType, FeaturesPanel]
 
@@ -44,12 +43,22 @@ class SideBar:
         )
         xbtn = tp.ImageButton("", img.copy(), img_hover=variant)
         xbtn.at_unclick = self.hide
-
+        # --- Build Btn ---
+        ico_path = "app/assets/icons/build.svg"
+        img = pygame.image.load(ico_path)
+        img = pygame.transform.smoothscale(img, (30, 30))
+        variant = tp.graphics.change_color_on_img(
+            img, img.get_at((0, 0)), (100, 100, 100)
+        )
+        build_btn = tp.ImageButton("", img.copy(), img_hover=variant)
+        build_btn.at_unclick = self.apply
+        helper = tp.Helper("Apply\nchanges", build_btn, countdown=30, offset=(80, 0))
+        helper.set_font_size(12)
         # --- Title ---
         self.title = tp.Text("Object Controls", font_size=18)
         self.title_line = tp.Line('h', 360)
         titlegroup = tp.Group(
-            elements=[xbtn, self.title], mode="h", margins=(0, 0), gap=15
+            elements=[xbtn, self.title, build_btn], mode="h", margins=(0, 0), gap=15
         )
 
         # --- Position ---
@@ -131,6 +140,7 @@ class SideBar:
         self.featurespanel.show(self.selectortype.checkboxpool.get_value())
 
     def hide(self) -> None:
+        self.obj = None
         self.visible = False
         self.size_rectangle.hide()
         self.size_triangle.hide()
@@ -180,6 +190,14 @@ class SideBar:
         self.x_pos.value = str(round(pos.x, 3))
         self.y_pos.value = str(-round(pos.y, 3))
         self.rotation.value = str(round(body.angle, 3))
+
+        if self.obj.shape_type == "circle":
+            self.size_circle.set_size_from_obj(body)
+        elif self.obj.shape_type == "triangle":
+            self.size_triangle.set_size_from_obj(body)
+        elif self.obj.shape_type == "rectangle":
+            self.size_rectangle.set_size_from_obj(body)
+
         self.selectortype.checkboxpool.set_value(
             'static' if self.obj.physics.is_static else 'dynamic'
         )
@@ -216,3 +234,11 @@ class SideBar:
 
             if panel.visible:
                 panel.offset = min_offset
+
+    def apply_to_real_obj(self, rlobjct: RealObject) -> None:
+        pass
+
+    def apply(self):
+        if self.obj:
+            self.apply_to_real_obj(self.obj)
+            self.hide()
