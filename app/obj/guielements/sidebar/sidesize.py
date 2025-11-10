@@ -60,7 +60,7 @@ class SideSize:
                 elements = [tp.Text("Unsupported shape type")]
                 self.group = tp.Group(elements, mode="h")
         self.box = tp.Box([self.group])
-        self.launcher = self.box.get_updater()
+        self.box.set_bck_color((0, 0, 0))
 
     def rebuild(self, rect: pygame.Rect):
         self.rect = pygame.Rect(rect.left, rect.bottom, rect.width, rect.height)

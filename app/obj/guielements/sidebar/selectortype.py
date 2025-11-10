@@ -19,8 +19,8 @@ class SelectorType:
         elements = [self.checkboxpool.get()]
 
         self.group = tp.Group(elements, mode="h")
-        self.box = tp.Box([self.group])
-        self.launcher = self.box.get_updater()
+        self.box = tp.Box([tp.Line("h", 360), self.group])
+        self.box.set_bck_color((0, 0, 0))
 
     def rebuild(self, rect: pygame.Rect):
         self.rect = rect

@@ -155,10 +155,8 @@ class Panel_GUI:
 
         self.group_ext = tp.Group([text_group1, text_group2], "v", gap=5, align="right")
 
-        # === Color Picker (wbudowany w panel, nie popup) ===
         self.color_palette = ColorPalette()
         self.group_color = self.color_palette.get()
-        # === Łączenie wszystkich grup ===
         self.metagroup = tp.Group(
             [self.group_draw, self.group_simulation, self.group_ext, self.group_color]
         )
@@ -166,19 +164,11 @@ class Panel_GUI:
         self.metagroup.set_size(self.screen.get_size())
         self.mainbox = tp.Box([self.metagroup])
         self.mainbox.set_topleft(0, 0)
-        self.launcher = self.mainbox.get_updater()
+        self.mainbox.set_bck_color((0, 0, 0))
 
     def after_update(self):
         self.draw_assistance.set_color(self.color_palette.selected_color)
         self.color_palette.update_color_preview()
-
-    def resize_panel(self, panel_surface: pygame.Surface):
-        self.screen = panel_surface
-        tp.set_screen(self.screen)
-        if self.metagroup is not None:
-            self.set_screen_recursive(self.metagroup, self.screen)
-            self.metagroup.set_size(self.screen.get_size())
-            self.metagroup.set_topleft(0, 10)
 
     def set_screen_recursive(self, element, new_surface):
         if element is None:

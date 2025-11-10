@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional, Tuple
 
 import pygame
 import thorpy as tp
@@ -22,10 +22,8 @@ class FeaturesPanel:
         self.start_velocity_y: tp.TextInput
         self.curr_velocity_x: tp.TextInput
         self.curr_velocity_y: tp.TextInput
-        self.start_angular_velocity_x: tp.TextInput
-        self.start_angular_velocity_y: tp.TextInput
-        self.curr_angular_velocity_x: tp.TextInput
-        self.curr_angular_velocity_y: tp.TextInput
+        self.start_angular_velocity: tp.TextInput
+        self.curr_angular_velocity: tp.TextInput
 
         # lista nazw wszystkich pól tekstowych
         fields = [
@@ -37,10 +35,8 @@ class FeaturesPanel:
             "start_velocity_y",
             "curr_velocity_x",
             "curr_velocity_y",
-            "start_angular_velocity_x",
-            "start_angular_velocity_y",
-            "curr_angular_velocity_x",
-            "curr_angular_velocity_y",
+            "start_angular_velocity",
+            "curr_angular_velocity",
         ]
 
         # automatyczna inicjalizacja
@@ -96,30 +92,18 @@ class FeaturesPanel:
             tp.Text("Angular Velocity", font_size=16),
             tp.Line("h", 360),
             tp.Group(
-                [
-                    tp.Text("Start:", font_size=14),
-                    tp.Text("x:", font_size=14),
-                    self.start_angular_velocity_x,
-                    tp.Text("y:", font_size=14),
-                    self.start_angular_velocity_y,
-                ],
+                [tp.Text("Start:", font_size=14), self.start_angular_velocity],
                 "h",
             ),
             tp.Group(
-                [
-                    tp.Text("Current", font_size=14),
-                    tp.Text("x:", font_size=14),
-                    self.curr_angular_velocity_x,
-                    tp.Text("y:", font_size=14),
-                    self.curr_angular_velocity_y,
-                ],
+                [tp.Text("Current", font_size=14), self.curr_angular_velocity],
                 "h",
             ),
         ]
         # ---
         self.group = tp.Group(elements, mode="v")
         self.box = tp.Box([self.group])
-        self.launcher = self.box.get_updater()
+        self.box.set_bck_color((0, 0, 0))
 
     def rebuild(self, rect: pygame.Rect) -> None:
         self.rect = rect
@@ -136,3 +120,19 @@ class FeaturesPanel:
 
     def hide(self) -> None:
         self.visible = False
+
+    def set_data_from_obj(
+        self, body: Any, linearVelocity: Tuple[float, float], angularVelocity: float
+    ) -> None:
+        self.mass.value = str(round(body.mass, 3))
+        self.density.value = str(round(body.fixtures[0].density, 3))
+        self.friction.value = str(round(body.fixtures[0].friction, 3))
+        self.restitution.value = str(round(body.fixtures[0].restitution, 3))
+
+        self.start_velocity_x.value = str(round(linearVelocity[0], 3))
+        self.start_velocity_y.value = str(round(linearVelocity[1], 3))
+        self.curr_velocity_x.value = str(round(body.linearVelocity.x, 3))
+        self.curr_velocity_y.value = str(round(body.linearVelocity.y, 3))
+
+        self.start_angular_velocity.value = str(round(angularVelocity, 3))
+        self.curr_angular_velocity.value = str(round(body.angularVelocity, 3))

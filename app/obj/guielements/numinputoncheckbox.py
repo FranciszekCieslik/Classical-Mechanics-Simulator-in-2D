@@ -43,6 +43,10 @@ class NumberInputOnCheckbox:
         active = not self.checkbox.get_value()
         self._set_input_visual(active=active)
         self.input.set_locked(not active)
+        if not active:
+            self.fun(0.0)
+        else:
+            self.on_input_entered()
 
     def on_input_entered(self):
         text = self.input.get_value().strip()

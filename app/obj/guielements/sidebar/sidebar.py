@@ -93,6 +93,8 @@ class SideBar:
         self.box = tp.Box([self.main_group])
         self.box.set_topleft(self.screen.get_width() + self.width, self.top_margin)
         self.box.set_size((self.width, self.height))
+        self.box.set_bck_color((0, 0, 0))
+
         self.rect: pygame.Rect = self.box.rect
 
         self.size_rectangle.rebuild(self.rect)
@@ -181,6 +183,10 @@ class SideBar:
         self.selectortype.checkboxpool.set_value(
             'static' if self.obj.physics.is_static else 'dynamic'
         )
+        if not self.obj.physics.is_static:
+            self.featurespanel.set_data_from_obj(
+                body, self.obj.start_linearVelocity, self.obj.start_angularVelocity
+            )
 
     def reset_width(self) -> None:
         panels: list[PanelType] = [

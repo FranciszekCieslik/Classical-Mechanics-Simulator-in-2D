@@ -33,6 +33,9 @@ class RealObject:
         self.cell_size = cell_size
         self.start_angle = angle
 
+        self.start_linearVelocity = features.linearVelocity if features else (0.0, 0.0)
+        self.start_angularVelocity = features.angularVelocity if features else 0.0
+
         self.physics = PhysicObject(
             obj_type=obj_type,
             shape_type=shape_type,
@@ -91,8 +94,8 @@ class RealObject:
         body = self.physics.body
         body.position = self.start_position
         body.angle = self.start_angle
-        body.linearVelocity = (0, 0)
-        body.angularVelocity = 0
+        body.linearVelocity = self.start_linearVelocity
+        body.angularVelocity = self.start_angularVelocity
         body.awake = True  # <- bez tego ciało pozostaje „uśpione”
 
         self.sync()

@@ -103,29 +103,11 @@ class App:
             self.size = (width, height)
             self.screen = pygame.display.set_mode(self.size, flags)
 
-            # --- aktualizacja panelu ---
-            self.panelgui.resize_panel(self.screen)
-
     def on_event(self, event) -> None:
         # --- WINDOW EVENTS ---
         if event.type == pygame.QUIT:
             self._running = False
             return
-
-        # if window is resaizeable
-        # if event.type in (pygame.VIDEORESIZE, pygame.WINDOWRESIZED):
-        #     self.resize(event)
-        #     return
-
-        # if event.type in (pygame.WINDOWRESTORED, pygame.WINDOWMAXIMIZED):
-        #     if self.panelgui:
-        #         self.panelgui.render()
-        #     self.minimized = False
-        #     return
-
-        # if event.type == pygame.WINDOWMINIMIZED:
-        #     self.minimized = True
-        #     return
 
         # --- KEY EVENTS ---
         if event.type == pygame.KEYDOWN:
