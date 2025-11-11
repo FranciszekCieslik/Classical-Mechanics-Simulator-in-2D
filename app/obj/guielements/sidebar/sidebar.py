@@ -163,6 +163,7 @@ class SideBar:
 
         # --- rotation ---
         self.rotation = tp.TextInput("", placeholder="00.000")
+        allow_negative_input(self.rotation)
         self.rot_group = tp.Group(
             [
                 tp.Text("Rotation", font_size=14),
@@ -274,7 +275,7 @@ class SideBar:
         correct_y = -round(pos.y, 3) if pos.y != 0 else 0.00
         self.x_pos.value = str(round(pos.x, 3))
         self.y_pos.value = str(correct_y)
-        self.rotation.value = str(round(body.angle, 3))
+        self.rotation.value = str(round(math.degrees(body.angle) % 360, 3))
 
         if self.obj.shape_type == "circle":
             self.size_circle.set_size_from_obj(body)
@@ -368,7 +369,7 @@ class SideBar:
         if size is None:
             return None
 
-        angle = safe_float(self.rotation.value)
+        angle = math.radians(safe_float(self.rotation.value))
         color = rlobjct.visual.color
         cell_size = rlobjct.cell_size
 

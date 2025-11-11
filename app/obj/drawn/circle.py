@@ -51,15 +51,13 @@ class Circle:
         self._draw_radius_line()
 
     def _draw_radius_line(self) -> None:
-        """Draws a line representing the radius direction."""
         radius_px = self.radius * self.base_cell_size_world * self.cam.zoom
-        angle_rad = -1 * math.radians(self.angle)
 
         start = pygame.Vector2(self.screen_center)
-        end = pygame.Vector2(
-            start.x + math.cos(angle_rad) * radius_px,
-            start.y - math.sin(angle_rad) * radius_px,  # - bo pygame ma oś Y w dół
-        )
+        end = pygame.Vector2(start.x + radius_px, start.y)
+
+        # Obrót względem środka (zgodnie z konwencją Pygame)
+        end = self.rotate_point(end, start, self.angle)
 
         pygame.gfxdraw.line(
             self.surface,
@@ -69,6 +67,16 @@ class Circle:
             int(end.y),
             self.border_color,
         )
+
+    def rotate_point(
+        self, point: pygame.Vector2, center: pygame.Vector2, angle_deg: float
+    ) -> pygame.Vector2:
+        angle_rad = math.radians(angle_deg)
+
+        dx, dy = point.x - center.x, point.y - center.y
+        qx = center.x + dx * math.cos(angle_rad) - dy * math.sin(angle_rad)
+        qy = center.y + dx * math.sin(angle_rad) + dy * math.cos(angle_rad)
+        return pygame.Vector2(qx, qy)
 
     def move(self, vec: pygame.Vector2) -> None:
         """Move the rectangle by dx, dy in world coordinates."""
