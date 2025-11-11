@@ -62,7 +62,7 @@ class App:
             objmanager=self.objmanager, draw_assistance=self.draw_assistance
         )
         # --- Side Bar ---
-        self.objsidebar: SideBar = SideBar()
+        self.objsidebar: SideBar = SideBar(self.objmanager)
         # --- Thorpy Launcher ---
         self.panels = tp.Group(
             [self.panelgui.mainbox, self.objsidebar.container], mode=None

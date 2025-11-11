@@ -1,3 +1,4 @@
+import math
 from typing import Any, Literal, Optional, cast
 
 import pygame
@@ -92,20 +93,11 @@ class SideSize:
         self.visible = False
 
     def set_size_from_obj(self, body: Any) -> None:
-        """
-        Pobiera rozmiary kształtu z obiektu pybox2d (staticbody/dynamicbody)
-        i przystosowuje je do TextInput, uwzględniając:
-        - angles w zakresie 0–90
-        - wartości dodatnie z min. 0.01
-        """
         if body is None or not hasattr(body, "fixtures") or not body.fixtures:
             return
 
         shape = body.fixtures[0].shape
 
-        # -----------------------------------------
-        # ✅ CIRCLE (b2CircleShape)
-        # -----------------------------------------
         if self.shape_type == "circle" and isinstance(shape, b2CircleShape):
             radius: float = float(shape.radius)
             radius = positive_min(radius)
@@ -113,9 +105,6 @@ class SideSize:
             if hasattr(self, "radius"):
                 self.radius.value = f"{radius:.2f}"
 
-        # -----------------------------------------
-        # ✅ RECTANGLE (b2PolygonShape → 4 vertices)
-        # -----------------------------------------
         elif self.shape_type == "rectangle" and isinstance(shape, b2PolygonShape):
             poly = cast(b2PolygonShape, shape)
 
@@ -131,45 +120,43 @@ class SideSize:
             if hasattr(self, "h"):
                 self.h.value = f"{height:.2f}"
 
-        # -----------------------------------------
-        # ✅ TRIANGLE (b2PolygonShape → 3 vertexy)
-        # -----------------------------------------
         elif self.shape_type == "triangle" and isinstance(shape, b2PolygonShape):
-            poly = cast(b2PolygonShape, shape)
-            verts = poly.vertices
+            verts = list(shape.vertices)
+            if len(verts) != 3:
+                return
 
-            if len(verts) == 3:
-                # Długości krawędzi trójkąta
-                import math
+            def dist(a, b):
+                return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
 
-                def dist(a: Any, b: Any) -> float:
-                    return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+            edges = [(verts[0], verts[1]), (verts[1], verts[2]), (verts[2], verts[0])]
+            base_edge = min(
+                edges, key=lambda e: abs(e[0][1] - e[1][1])
+            )  # najmniejsze Δy
 
-                a = dist(verts[0], verts[1])
-                b = dist(verts[1], verts[2])
-                c = dist(verts[2], verts[0])
+            A, B = base_edge
+            C = [v for v in verts if v not in base_edge][0]
 
-                # Zakładając edge = jedna z krawędzi → weźmy największą
-                edge_val = positive_min(max(a, b, c))
+            edge_val = dist(A, B)
 
-                # Oblicz kąty wewnętrzne trójkąta
-                def angle(opposite: float, s1: float, s2: float) -> float:
-                    # prawo cosinusów
-                    import math
+            direction = 1.0 if B[0] > A[0] else -1.0
 
-                    num = s1**2 + s2**2 - opposite**2
-                    den = 2 * s1 * s2
-                    if den == 0:
-                        return 0.0
-                    ang = math.degrees(math.acos(max(-1.0, min(1.0, num / den))))
-                    return clamp_angle(ang)
+            a_len = dist(B, C)
+            b_len = dist(A, C)
+            c_len = edge_val
 
-                angle1_val = angle(a, b, c)
-                angle2_val = angle(b, a, c)
+            def angle(opposite, s1, s2):
+                num = s1**2 + s2**2 - opposite**2
+                den = 2 * s1 * s2
+                if den == 0:
+                    return 0.0
+                return math.degrees(math.acos(max(-1.0, min(1.0, num / den))))
 
-                if hasattr(self, "edge"):
-                    self.edge.value = f"{edge_val:.2f}"
-                if hasattr(self, "angle1"):
-                    self.angle1.value = f"{angle1_val:.2f}"
-                if hasattr(self, "angle2"):
-                    self.angle2.value = f"{angle2_val:.2f}"
+            angle1_val = angle(a_len, b_len, c_len)  # przy A
+            angle2_val = angle(b_len, a_len, c_len)  # przy B
+
+            if hasattr(self, "edge"):
+                self.edge.value = f"{edge_val:.2f}"
+            if hasattr(self, "angle1"):
+                self.angle1.value = f"{angle1_val:.2f}"
+            if hasattr(self, "angle2"):
+                self.angle2.value = f"{angle2_val:.2f}"

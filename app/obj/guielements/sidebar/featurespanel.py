@@ -4,6 +4,19 @@ import pygame
 import thorpy as tp
 
 
+def allow_negative_input(textinput):
+    val = textinput.get_value()
+    if val == "":
+        return True  # puste pole dopuszczalne
+    try:
+        float(val)  # próbujemy konwersji do liczby
+        return True
+    except ValueError:
+        # jeśli nie da się skonwertować, cofamy wpis
+        textinput.set_text(val[:-1])
+        return False
+
+
 class FeaturesPanel:
     def __init__(self) -> None:
         self.screen: pygame.Surface = pygame.display.get_surface()
@@ -42,7 +55,10 @@ class FeaturesPanel:
         # automatyczna inicjalizacja
         for name in fields:
             text_input = tp.TextInput("", placeholder="00.00")
-            text_input.set_only_numbers()
+            if "velocity" in name:
+                allow_negative_input(text_input)
+            else:
+                text_input.set_only_numbers()
             setattr(self, name, text_input)
 
         elements = [
@@ -131,9 +147,19 @@ class FeaturesPanel:
         self.restitution.value = str(round(body.fixtures[0].restitution, 3))
 
         self.start_velocity_x.value = str(round(linearVelocity[0], 3))
-        self.start_velocity_y.value = str(round(linearVelocity[1], 3))
+        vy = (
+            -1 * round(linearVelocity[1], 3)
+            if round(linearVelocity[1], 3) != 0
+            else 0.00
+        )
+        self.start_velocity_y.value = str(vy)
         self.curr_velocity_x.value = str(round(body.linearVelocity.x, 3))
-        self.curr_velocity_y.value = str(round(body.linearVelocity.y, 3))
+        vy = (
+            -1 * round(body.linearVelocity.y, 3)
+            if round(body.linearVelocity.y, 3) != 0
+            else 0.00
+        )
+        self.curr_velocity_y.value = str(vy)
 
         self.start_angular_velocity.value = str(round(angularVelocity, 3))
         self.curr_angular_velocity.value = str(round(body.angularVelocity, 3))

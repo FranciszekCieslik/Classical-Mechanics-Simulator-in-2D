@@ -1,8 +1,9 @@
+import math
 from concurrent.futures import ThreadPoolExecutor
 from typing import List, Optional, Tuple, Union
 
 import pygame  # type: ignore
-from Box2D import b2Vec2, b2World
+from Box2D import b2CircleShape, b2PolygonShape, b2Vec2, b2World
 from obj.camera import Camera
 from obj.physicobject import Features
 
@@ -78,6 +79,7 @@ class ObjectsManager:
         self.time = 0.0
 
     def run_simulation(self, run: bool) -> None:
+        self.remove_dust()
         if run:
             for obj in self.objects:
                 obj.physics.body.awake = True
@@ -108,3 +110,24 @@ class ObjectsManager:
 
     def set_gravity_force(self, val: float = 0.0):
         self.world.gravity = b2Vec2(0.0, val)
+
+    def remove_dust(self):
+        def body_area(body):
+            total_area = 0.0
+            for fixture in body.fixtures:
+                shape = fixture.shape
+                if isinstance(shape, b2CircleShape):
+                    total_area += math.pi * shape.radius**2
+                elif isinstance(shape, b2PolygonShape):
+                    verts = shape.vertices
+                    total_area += 0.5 * abs(
+                        sum(
+                            x0 * y1 - x1 * y0
+                            for (x0, y0), (x1, y1) in zip(verts, verts[1:] + verts[:1])
+                        )
+                    )
+            return total_area
+
+        for i, obj in enumerate(self.objects):
+            if body_area(obj.physics.body) < 0.000004:
+                self.objects.pop(i)
