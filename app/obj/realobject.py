@@ -6,6 +6,7 @@ from Box2D import b2Vec2, b2World
 from obj.camera import Camera
 from obj.drawn.drawnobject import DrawnObject
 from obj.physicobject import Features, PhysicObject
+from obj.trajectory import Trajectory
 
 
 class RealObject:
@@ -67,7 +68,12 @@ class RealObject:
             camera=camera,
             cell_size=cell_size,
         )
-
+        self.trayectory: Optional[Trajectory] = None
+        if obj_type != 'static':
+            self.trayectory = Trajectory(
+                camera, color, self.cell_size, self.physics.body
+            )
+            self.trayectory.visible = True
         self.sync()
 
     # -------------------------------------------------------
@@ -87,6 +93,8 @@ class RealObject:
     def draw(self) -> None:
         self.sync()
         self.visual.draw()
+        if self.trayectory:
+            self.trayectory.draw_trajectory()
 
     # -------------------------------------------------------
     def reset(self) -> None:
