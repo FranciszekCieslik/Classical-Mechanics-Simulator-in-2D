@@ -60,8 +60,16 @@ class FeaturesPanel:
             else:
                 text_input.set_only_numbers()
             setattr(self, name, text_input)
-
+        self.show_trajectory = tp.Checkbox()
         elements = [
+            tp.Line("h", 360),
+            tp.Group(
+                [
+                    tp.Text("Show trajectory", font_size=14),
+                    self.show_trajectory,
+                ],
+                "h",
+            ),
             tp.Line("h", 360),
             tp.Group(
                 [
@@ -177,3 +185,4 @@ class FeaturesPanel:
 
         self.start_angular_velocity.value = ""
         self.curr_angular_velocity.value = ""
+        self.show_trajectory.value = False

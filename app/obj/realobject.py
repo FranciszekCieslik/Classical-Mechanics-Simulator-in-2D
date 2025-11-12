@@ -73,7 +73,6 @@ class RealObject:
             self.trayectory = Trajectory(
                 camera, color, self.cell_size, self.physics.body
             )
-            self.trayectory.visible = True
         self.sync()
 
     # -------------------------------------------------------

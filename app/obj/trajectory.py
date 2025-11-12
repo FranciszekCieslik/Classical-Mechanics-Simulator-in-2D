@@ -104,8 +104,6 @@ class Trajectory:
         Rysuje przewidywaną trajektorię obiektu.
         :param skip: liczba punktów do pominięcia (np. 2 = rysuj co 2 punkt)
         """
-        if not self.visible:
-            return
 
         # Przewiduj nową trajektorię
         predict_tra = self._predict_trajectory(self.body)
@@ -171,6 +169,8 @@ class Trajectory:
             pygame.gfxdraw.line(self.surface, x1, y1, x2, y2, self.dark_color)
 
     def draw_trajectory(self, start_point: pygame.Vector2, skip: int = 2):
+        if not self.visible:
+            return
         self.draw_track(start_point, skip)
         self.draw_predict_trajectory(skip)
 

@@ -427,6 +427,9 @@ class SideBar:
             new_obj.start_angle = rlobjct.start_angle
             new_obj.start_linearVelocity = start_linearVelocity
             new_obj.start_angularVelocity = start_angularVelocity
+            if self.featurespanel.show_trajectory.value:
+                if new_obj.trayectory:
+                    new_obj.trayectory.visible = True
 
         return new_obj
 
