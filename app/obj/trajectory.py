@@ -1,9 +1,15 @@
-from typing import Any
+from typing import Any, Optional
 
 import pygame
 import pygame.gfxdraw
 from Box2D import b2Vec2
 from obj.camera import Camera
+
+
+def _vectors_are_close(
+    p1: pygame.Vector2, p2: pygame.Vector2, eps: float = 1e-2
+) -> bool:
+    return p1.distance_to(p2) < eps
 
 
 class Trajectory:
@@ -12,7 +18,8 @@ class Trajectory:
     ):
         self.camera = camera
         # Rozjaśnij kolor bez przekroczenia 255
-        self.color = tuple(min(c + 100, 255) for c in color[:3])
+        self.light_color = tuple(min(c + 100, 255) for c in color[:3])
+        self.dark_color = tuple(max(c - 50, 0) for c in color[:3])
         self.line_thickness: int = 2
         self.base_cell_size = base_cell_size
         self.surface: pygame.Surface = pygame.display.get_surface()
@@ -33,13 +40,19 @@ class Trajectory:
         """Return True if trajectory has changed."""
         if not self.trajectory_points:
             return True
-        if self.trajectory_points[0] != start_point:
+        if not _vectors_are_close(self.trajectory_points[0], start_point):
             return True
 
         predict_tra = self._predict_trajectory(self.body)
-        predict_tra = [self._create_trajectory_point(p) for p in predict_tra]
-        common = set(predict_tra) & set(self.trajectory_points)
-        return not bool(common)
+        if not predict_tra:
+            return False
+
+        N = min(len(predict_tra), len(self.trajectory_points), 20)
+        for i in range(0, N):
+            if not _vectors_are_close(predict_tra[i], self.trajectory_points[i]):
+                return True
+
+        return False
 
     # COORDINATE CONVERSIONS
     def _point_to_screen(self, point: pygame.Vector2) -> pygame.Vector2:
@@ -58,13 +71,17 @@ class Trajectory:
         return 0 <= screen_pos.x <= w and 0 <= screen_pos.y <= h
 
     # PHYSICS PREDICTION
-    def _predict_trajectory(self, body: Any, dt: float = 1 / 60, steps: int = 120):
-        # Pobierz wektor grawitacji jako pygame.Vector2
+    def _predict_trajectory(
+        self, body: Any, dt: float = 1 / 60, steps: int = 60
+    ) -> Optional[list[pygame.Vector2]]:
+        if not body.awake:
+            return None
+
         g = body.world.gravity
         if hasattr(g, "x") and hasattr(g, "y"):
             gravity = pygame.Vector2(g.x, g.y)
         else:
-            gravity = pygame.Vector2(0, -9.81)  # fallback
+            gravity = pygame.Vector2(0, -9.81)
 
         pos = pygame.Vector2(body.position.x, body.position.y)
         vel = pygame.Vector2(body.linearVelocity.x, body.linearVelocity.y)
@@ -72,9 +89,8 @@ class Trajectory:
 
         trajectory = [pos.copy()]
         for _ in range(steps):
-            # Siła netto (tylko grawitacja)
             force = mass * gravity
-            acc = force / mass  # = gravity
+            acc = force / mass
 
             vel += acc * dt
             pos += vel * dt
@@ -83,7 +99,7 @@ class Trajectory:
         return trajectory
 
     # RENDERING
-    def draw_trajectory(self, skip: int = 2):
+    def draw_predict_trajectory(self, skip: int = 2):
         """
         Rysuje przewidywaną trajektorię obiektu.
         :param skip: liczba punktów do pominięcia (np. 2 = rysuj co 2 punkt)
@@ -93,33 +109,70 @@ class Trajectory:
 
         # Przewiduj nową trajektorię
         predict_tra = self._predict_trajectory(self.body)
+        if predict_tra is None:
+            return
+
         predict_tra = [self._create_trajectory_point(p) for p in predict_tra]
 
-        # Wybierz tylko punkty widoczne
         points = [
             self._point_to_screen(p) for p in predict_tra if self._if_point_on_screen(p)
         ]
 
-        # Pomijaj co n-ty punkt (dla wydajności i płynności)
         if skip > 1:
             points = points[::skip]
 
         if len(points) < 2:
             return
 
-        # Zamień Vector2 → tuplę intów
         int_points = [(int(p.x), int(p.y)) for p in points]
 
-        # Rysuj linię przerywaną — pojedyncze segmenty gfxdraw.line
         for i in range(len(int_points) - 1):
             x1, y1 = int_points[i]
             x2, y2 = int_points[i + 1]
 
-            # narysuj grubą linię jako prostokąt (dla width > 1)
             if self.line_thickness > 1:
                 pygame.draw.line(
-                    self.surface, self.color, (x1, y1), (x2, y2), self.line_thickness
+                    self.surface,
+                    self.light_color,
+                    (x1, y1),
+                    (x2, y2),
+                    self.line_thickness,
                 )
 
-            # wygładzenie krawędzi cienką linią
-            pygame.gfxdraw.line(self.surface, x1, y1, x2, y2, self.color)
+            pygame.gfxdraw.line(self.surface, x1, y1, x2, y2, self.light_color)
+
+    def draw_track(self, start_point: pygame.Vector2, skip: int = 2):
+        pos = pygame.Vector2(self.body.position.x, self.body.position.y)
+        self.add_trajectory_point(pos)
+        points = [
+            self._point_to_screen(p)
+            for p in self.trajectory_points
+            if self._if_point_on_screen(p)
+        ]
+        if skip > 1:
+            points = points[::skip]
+        if len(points) < 2:
+            return
+
+        int_points = [(int(p.x), int(p.y)) for p in points]
+
+        for i in range(len(int_points) - 1):
+            x1, y1 = int_points[i]
+            x2, y2 = int_points[i + 1]
+
+            if self.line_thickness > 1:
+                pygame.draw.line(
+                    self.surface,
+                    self.dark_color,
+                    (x1, y1),
+                    (x2, y2),
+                    self.line_thickness,
+                )
+            pygame.gfxdraw.line(self.surface, x1, y1, x2, y2, self.dark_color)
+
+    def draw_trajectory(self, start_point: pygame.Vector2, skip: int = 2):
+        self.draw_track(start_point, skip)
+        self.draw_predict_trajectory(skip)
+
+    def clear_track(self):
+        self.trajectory_points = []

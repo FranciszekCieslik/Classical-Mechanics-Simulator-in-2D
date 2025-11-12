@@ -94,7 +94,8 @@ class RealObject:
         self.sync()
         self.visual.draw()
         if self.trayectory:
-            self.trayectory.draw_trajectory()
+            pos = pygame.Vector2(self.start_position.x, self.start_position.y)
+            self.trayectory.draw_trajectory(pos)
 
     # -------------------------------------------------------
     def reset(self) -> None:
@@ -105,7 +106,8 @@ class RealObject:
         body.linearVelocity = self.start_linearVelocity
         body.angularVelocity = self.start_angularVelocity
         body.awake = True  # <- bez tego ciało pozostaje „uśpione”
-
+        if self.trayectory:
+            self.trayectory.clear_track()
         self.sync()
 
     def is_point_inside(self, position) -> bool:
@@ -141,5 +143,6 @@ class RealObject:
 
         if not self.physics.is_static:
             body.awake = True
-
+        if self.trayectory:
+            self.trayectory.clear_track()
         self.visual.object.move(vec)
