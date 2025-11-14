@@ -61,67 +61,109 @@ class FeaturesPanel:
                 text_input.set_only_numbers()
             setattr(self, name, text_input)
         self.show_trajectory = tp.Checkbox()
+        self.show_lineral_velocity = tp.Checkbox()
+        self.show_lineral_v_comp = tp.Checkbox()
         elements = [
             tp.Line("h", 360),
             tp.Group(
                 [
                     tp.Text("Show trajectory", font_size=14),
                     self.show_trajectory,
+                    tp.Group(
+                        [
+                            tp.Group(
+                                [
+                                    tp.Text(
+                                        'Show lineral velocity vector', font_size=14
+                                    ),
+                                    self.show_lineral_velocity,
+                                ],
+                                'h',
+                            ),
+                            tp.Group(
+                                [
+                                    tp.Text('Show components', font_size=14),
+                                    self.show_lineral_v_comp,
+                                ],
+                                'h',
+                            ),
+                        ],
+                        'v',
+                        align='right',
+                    ),
                 ],
                 "h",
             ),
             tp.Line("h", 360),
             tp.Group(
                 [
-                    tp.Text("Mass:", font_size=14),
-                    self.mass,
-                    tp.Text("Density:", font_size=14),
-                    self.density,
+                    tp.Group(
+                        [
+                            tp.Text("Mass:", font_size=14),
+                            self.mass,
+                            tp.Text("Density:", font_size=14),
+                            self.density,
+                        ],
+                        "h",
+                    ),
+                    tp.Group(
+                        [
+                            tp.Text("Friction:", font_size=14),
+                            self.friction,
+                            tp.Text("Restitution:", font_size=14),
+                            self.restitution,
+                        ],
+                        "h",
+                    ),
                 ],
-                "h",
-            ),
-            tp.Group(
-                [
-                    tp.Text("Friction:", font_size=14),
-                    self.friction,
-                    tp.Text("Restitution:", font_size=14),
-                    self.restitution,
-                ],
-                "h",
+                "v",
+                align='right',
             ),
             tp.Line("h", 360),
             tp.Text("Lineral Velocity", font_size=16),
             tp.Line("h", 360),
             tp.Group(
                 [
-                    tp.Text("Start:", font_size=14),
-                    tp.Text("x:", font_size=14),
-                    self.start_velocity_x,
-                    tp.Text("y:", font_size=14),
-                    self.start_velocity_y,
+                    tp.Group(
+                        [
+                            tp.Text("Start:", font_size=14),
+                            tp.Text("x:", font_size=14),
+                            self.start_velocity_x,
+                            tp.Text("y:", font_size=14),
+                            self.start_velocity_y,
+                        ],
+                        "h",
+                    ),
+                    tp.Group(
+                        [
+                            tp.Text("Current", font_size=14),
+                            tp.Text("x:", font_size=14),
+                            self.curr_velocity_x,
+                            tp.Text("y:", font_size=14),
+                            self.curr_velocity_y,
+                        ],
+                        "h",
+                    ),
                 ],
-                "h",
-            ),
-            tp.Group(
-                [
-                    tp.Text("Current", font_size=14),
-                    tp.Text("x:", font_size=14),
-                    self.curr_velocity_x,
-                    tp.Text("y:", font_size=14),
-                    self.curr_velocity_y,
-                ],
-                "h",
+                'v',
+                align='right',
             ),
             tp.Line("h", 360),
             tp.Text("Angular Velocity", font_size=16),
             tp.Line("h", 360),
             tp.Group(
-                [tp.Text("Start:", font_size=14), self.start_angular_velocity],
-                "h",
-            ),
-            tp.Group(
-                [tp.Text("Current", font_size=14), self.curr_angular_velocity],
-                "h",
+                [
+                    tp.Group(
+                        [tp.Text("Start:", font_size=14), self.start_angular_velocity],
+                        "h",
+                    ),
+                    tp.Group(
+                        [tp.Text("Current", font_size=14), self.curr_angular_velocity],
+                        "h",
+                    ),
+                ],
+                'v',
+                align='right',
             ),
         ]
         # ---
@@ -186,3 +228,5 @@ class FeaturesPanel:
         self.start_angular_velocity.value = ""
         self.curr_angular_velocity.value = ""
         self.show_trajectory.value = False
+        self.show_lineral_velocity.value = False
+        self.show_lineral_v_comp.value = False

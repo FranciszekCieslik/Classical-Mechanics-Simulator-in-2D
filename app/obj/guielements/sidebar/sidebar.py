@@ -291,6 +291,11 @@ class SideBar:
             self.featurespanel.set_data_from_obj(
                 body, self.obj.start_linearVelocity, self.obj.start_angularVelocity
             )
+            if rlobjct.trayectory and rlobjct.vector_manager:
+                self.featurespanel.show_trajectory.value = rlobjct.trayectory.visible
+                lv = rlobjct.vector_manager.lineral_velocity
+                self.featurespanel.show_lineral_velocity.value = lv.vector.visible
+                self.featurespanel.show_lineral_v_comp.value = lv.vec_x.visible
 
     def reset_width(self) -> None:
         panels: list[PanelType] = [
@@ -373,7 +378,6 @@ class SideBar:
         color = rlobjct.visual.color
         cell_size = rlobjct.cell_size
 
-        # --- cechy fizyczne ---
         features = None
         if obj_type == 'dynamic':
             start_linearVelocity = (
@@ -430,7 +434,11 @@ class SideBar:
             if self.featurespanel.show_trajectory.value:
                 if new_obj.trayectory:
                     new_obj.trayectory.visible = True
-
+            if new_obj.vector_manager:
+                if self.featurespanel.show_lineral_velocity.value:
+                    new_obj.vector_manager.lineral_velocity.show_vector()
+                if self.featurespanel.show_lineral_v_comp.value:
+                    new_obj.vector_manager.lineral_velocity.show_components()
         return new_obj
 
     def apply(self):

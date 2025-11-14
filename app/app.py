@@ -264,6 +264,7 @@ class App:
                 self.on_event(event)
             self.on_update()
             self.on_render()
+
             pygame.display.flip()
             self.clock.tick(60)
 

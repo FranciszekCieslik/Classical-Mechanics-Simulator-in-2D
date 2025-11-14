@@ -83,7 +83,7 @@ class Trajectory:
         else:
             gravity = pygame.Vector2(0, -9.81)
 
-        pos = pygame.Vector2(body.position.x, body.position.y)
+        pos = pygame.Vector2(body.worldCenter.x, body.worldCenter.y)
         vel = pygame.Vector2(body.linearVelocity.x, body.linearVelocity.y)
         mass = body.mass
 
@@ -140,7 +140,7 @@ class Trajectory:
             pygame.gfxdraw.line(self.surface, x1, y1, x2, y2, self.light_color)
 
     def draw_track(self, start_point: pygame.Vector2, skip: int = 2):
-        pos = pygame.Vector2(self.body.position.x, self.body.position.y)
+        pos = pygame.Vector2(self.body.worldCenter.x, self.body.worldCenter.y)
         self.add_trajectory_point(pos)
         points = [
             self._point_to_screen(p)

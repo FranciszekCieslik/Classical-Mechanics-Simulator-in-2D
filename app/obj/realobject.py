@@ -7,6 +7,7 @@ from obj.camera import Camera
 from obj.drawn.drawnobject import DrawnObject
 from obj.physicobject import Features, PhysicObject
 from obj.trajectory import Trajectory
+from obj.vectormanager import VectorManager
 
 
 class RealObject:
@@ -69,10 +70,12 @@ class RealObject:
             cell_size=cell_size,
         )
         self.trayectory: Optional[Trajectory] = None
+        self.vector_manager: Optional[VectorManager] = None
         if obj_type != 'static':
             self.trayectory = Trajectory(
                 camera, color, self.cell_size, self.physics.body
             )
+            self.vector_manager = VectorManager(self)
         self.sync()
 
     # -------------------------------------------------------
@@ -87,6 +90,8 @@ class RealObject:
 
         self.visual.object.set_position(pos)
         self.visual.object.set_angle(angle)
+        if self.vector_manager:
+            self.vector_manager.update()
 
     # -------------------------------------------------------
     def draw(self) -> None:
@@ -95,6 +100,8 @@ class RealObject:
         if self.trayectory:
             pos = pygame.Vector2(self.start_position.x, self.start_position.y)
             self.trayectory.draw_trajectory(pos)
+        if self.vector_manager:
+            self.vector_manager.draw()
 
     # -------------------------------------------------------
     def reset(self) -> None:

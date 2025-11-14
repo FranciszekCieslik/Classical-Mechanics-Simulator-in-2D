@@ -118,6 +118,9 @@ class PhysicObject:
             restitution=features.restitution,
         )
 
+    def __del__(self):
+        self.world.DestroyBody(self.body)
+
     def _create_shape(self, shape_type, size, local_vertices):
         if shape_type == "triangle":
             return b2PolygonShape(vertices=local_vertices)
