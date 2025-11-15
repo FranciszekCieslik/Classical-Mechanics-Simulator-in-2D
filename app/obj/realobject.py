@@ -1,10 +1,11 @@
 import math
-from typing import List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 import pygame  # type: ignore
 from Box2D import b2Vec2, b2World
 from obj.camera import Camera
 from obj.drawn.drawnobject import DrawnObject
+from obj.impulsecollector import ImpulseCollector
 from obj.physicobject import Features, PhysicObject
 from obj.trajectory import Trajectory
 from obj.vectormanager import VectorManager
@@ -28,8 +29,10 @@ class RealObject:
         angle: float,
         color: pygame.Vector3,
         cell_size: int,
+        impulse_collector: ImpulseCollector,
         features: Optional[Features] = None,
     ) -> None:
+        self.my_manager: Optional[Any] = None
 
         self.shape_type = shape_type
         self.cell_size = cell_size
@@ -75,7 +78,7 @@ class RealObject:
             self.trayectory = Trajectory(
                 camera, color, self.cell_size, self.physics.body
             )
-            self.vector_manager = VectorManager(self)
+            self.vector_manager = VectorManager(self, impulse_collector)
         self.sync()
 
     # -------------------------------------------------------
@@ -111,7 +114,7 @@ class RealObject:
         body.angle = self.start_angle
         body.linearVelocity = self.start_linearVelocity
         body.angularVelocity = self.start_angularVelocity
-        body.awake = True  # <- bez tego ciało pozostaje „uśpione”
+        body.awake = True
         if self.trayectory:
             self.trayectory.clear_track()
         self.sync()

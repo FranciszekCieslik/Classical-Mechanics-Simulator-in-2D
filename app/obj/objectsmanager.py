@@ -5,6 +5,7 @@ from typing import List, Optional, Tuple, Union
 import pygame  # type: ignore
 from Box2D import b2CircleShape, b2PolygonShape, b2Vec2, b2World
 from obj.camera import Camera
+from obj.impulsecollector import ImpulseCollector
 from obj.physicobject import Features
 
 from .realobject import RealObject
@@ -31,6 +32,9 @@ class ObjectsManager:
         self.selected_obj: Optional[RealObject] = None
         self.selected_obj_is_being_dragged: bool = False
 
+        self.collector = ImpulseCollector()
+        self.world.contactListener = self.collector
+
     def add_object(
         self,
         obj_type: str,
@@ -52,12 +56,14 @@ class ObjectsManager:
             angle=angle,
             color=color,
             cell_size=self.cell_size,
+            impulse_collector=self.collector,
             features=features,
         )
         self.objects.append(new_object)
 
     def step_simulation(self) -> None:
         if self.is_simulation_running:
+            self._apply_forces()
             self.world.Step(
                 self.time_step,
                 self.velocity_iterations,
@@ -131,3 +137,8 @@ class ObjectsManager:
         for i, obj in enumerate(self.objects):
             if body_area(obj.physics.body) < 0.000004:
                 self.objects.pop(i)
+
+    def _apply_forces(self):
+        for obj in self.objects:
+            if obj.vector_manager:
+                obj.vector_manager.forcemanager.apply_force()

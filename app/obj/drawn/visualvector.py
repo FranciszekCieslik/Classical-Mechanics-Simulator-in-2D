@@ -28,25 +28,19 @@ class VisualVector:
         if not self.visible:
             return
 
-        # --- 1. Współrzędne świata na ekran ---
-        # Punkt przyłożenia (początek strzałki)
         start_world = pygame.Vector2(self.attachment_point.x, self.attachment_point.y)
         start_screen = (
             start_world * self.base_cell_size * self.camera.zoom + self.camera.offset
         )
 
-        # --- 2. Przeskalowany wektor wartości ---
-        # Wektor w metrach → w piksele
         scaled_value = (
             pygame.Vector2(self.value.x, self.value.y)
             * self.base_cell_size
             * self.camera.zoom
         )
 
-        # --- 3. Koniec wektora na ekranie ---
         end_screen = start_screen + scaled_value
 
-        # --- 4. Narysuj linię (trzon strzałki) ---
         pygame.draw.line(
             self.screen,
             self.color,
@@ -55,15 +49,13 @@ class VisualVector:
             self.line_thikness,
         )
 
-        # --- 5. Narysuj grot strzałki ---
-        # Określ kąt i długość grotu
         arrow_vec = scaled_value
         if arrow_vec.length() > 0.0001:
             direction = arrow_vec.normalize()
             perp = pygame.Vector2(-direction.y, direction.x)
 
-            head_length = 12 * self.camera.zoom  # długość grotu
-            head_width = 7 * self.camera.zoom  # szerokość grotu
+            head_length = 12 * self.camera.zoom
+            head_width = 7 * self.camera.zoom
 
             left_head = end_screen - direction * head_length + perp * head_width
             right_head = end_screen - direction * head_length - perp * head_width

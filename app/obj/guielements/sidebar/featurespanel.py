@@ -7,12 +7,11 @@ import thorpy as tp
 def allow_negative_input(textinput):
     val = textinput.get_value()
     if val == "":
-        return True  # puste pole dopuszczalne
+        return True
     try:
-        float(val)  # próbujemy konwersji do liczby
+        float(val)
         return True
     except ValueError:
-        # jeśli nie da się skonwertować, cofamy wpis
         textinput.set_text(val[:-1])
         return False
 
@@ -37,6 +36,8 @@ class FeaturesPanel:
         self.curr_velocity_y: tp.TextInput
         self.start_angular_velocity: tp.TextInput
         self.curr_angular_velocity: tp.TextInput
+        self.applied_force_x: tp.TextInput
+        self.applied_force_y: tp.TextInput
 
         # lista nazw wszystkich pól tekstowych
         fields = [
@@ -50,19 +51,26 @@ class FeaturesPanel:
             "curr_velocity_y",
             "start_angular_velocity",
             "curr_angular_velocity",
+            "applied_force_x",
+            "applied_force_y",
         ]
 
         # automatyczna inicjalizacja
         for name in fields:
             text_input = tp.TextInput("", placeholder="00.00")
-            if "velocity" in name:
+            if "velocity" in name or "force" in name:
                 allow_negative_input(text_input)
             else:
                 text_input.set_only_numbers()
             setattr(self, name, text_input)
+
         self.show_trajectory = tp.Checkbox()
         self.show_lineral_velocity = tp.Checkbox()
         self.show_lineral_v_comp = tp.Checkbox()
+        self.show_applied_force = tp.Checkbox()
+        self.show_gravity_force = tp.Checkbox()
+        self.show_resultant_force = tp.Checkbox()
+
         elements = [
             tp.Line("h", 360),
             tp.Group(
@@ -162,6 +170,50 @@ class FeaturesPanel:
                         "h",
                     ),
                 ],
+                'h',
+            ),
+            tp.Line("h", 360),
+            tp.Text("Additional Force", font_size=16),
+            tp.Line("h", 360),
+            tp.Group(
+                [
+                    tp.Text('x:', font_size=14),
+                    self.applied_force_x,
+                    tp.Text('y:', font_size=14),
+                    self.applied_force_y,
+                ],
+                'h',
+            ),
+            tp.Line("h", 360),
+            tp.Group(
+                [
+                    tp.Group(
+                        [
+                            tp.Group(
+                                [
+                                    tp.Text("Show applied force", font_size=14),
+                                    self.show_applied_force,
+                                ],
+                                "h",
+                            ),
+                            tp.Group(
+                                [
+                                    tp.Text("Show gravity force", font_size=14),
+                                    self.show_gravity_force,
+                                ],
+                                "h",
+                            ),
+                        ],
+                        'h',
+                    ),
+                    tp.Group(
+                        [
+                            tp.Text("Show resutant force", font_size=14),
+                            self.show_resultant_force,
+                        ],
+                        "h",
+                    ),
+                ],
                 'v',
                 align='right',
             ),
@@ -227,6 +279,12 @@ class FeaturesPanel:
 
         self.start_angular_velocity.value = ""
         self.curr_angular_velocity.value = ""
+        self.applied_force_x.value = ""
+        self.applied_force_y.value = ""
+
         self.show_trajectory.value = False
         self.show_lineral_velocity.value = False
         self.show_lineral_v_comp.value = False
+        self.show_applied_force.value = False
+        self.show_gravity_force.value = False
+        self.show_resultant_force.value = False

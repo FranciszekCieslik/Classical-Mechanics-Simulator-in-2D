@@ -14,7 +14,7 @@ PanelType = Union["SideBar", SideSize, SelectorType, FeaturesPanel]
 import math
 from typing import Any, List, Tuple
 
-from Box2D import b2PolygonShape
+from Box2D import b2PolygonShape, b2Vec2
 
 
 def triangle_from_angles(
@@ -100,7 +100,7 @@ class SideBar:
         self.visible: bool = False
         self.speed: int = 12
         self.obj: Optional[RealObject] = None
-        self.top_margin: int = 60
+        self.top_margin: int = 15
         self.width: int = 300
         self.height: int = 165
         self.offset: int = self.width
@@ -296,6 +296,18 @@ class SideBar:
                 lv = rlobjct.vector_manager.lineral_velocity
                 self.featurespanel.show_lineral_velocity.value = lv.vector.visible
                 self.featurespanel.show_lineral_v_comp.value = lv.vec_x.visible
+                self.featurespanel.show_gravity_force.value = (
+                    rlobjct.vector_manager.gravity_force.vector.visible
+                )
+                self.featurespanel.show_applied_force.value = (
+                    rlobjct.vector_manager.applied_force.vector.visible
+                )
+                self.featurespanel.show_resultant_force.value = (
+                    rlobjct.vector_manager.total_force.vector.visible
+                )
+                af = rlobjct.vector_manager.forcemanager.applied_force
+                self.featurespanel.applied_force_x.value = str(round(af.x, 3))
+                self.featurespanel.applied_force_y.value = str(round(-1 * af.y, 3))
 
     def reset_width(self) -> None:
         panels: list[PanelType] = [
@@ -417,8 +429,14 @@ class SideBar:
             angle,
             color,
             cell_size,
+            self.objectmanager.collector,
             features,
         )
+
+        if self.objectmanager.time <= 0:
+            new_obj.start_angle = angle
+        else:
+            new_obj.start_angle = rlobjct.start_angle
 
         if obj_type == 'dynamic':
             if mass != 0:
@@ -428,7 +446,6 @@ class SideBar:
                 )
                 new_obj.physics.body.mass = mass
                 new_obj.physics.body.ResetMassData()
-            new_obj.start_angle = rlobjct.start_angle
             new_obj.start_linearVelocity = start_linearVelocity
             new_obj.start_angularVelocity = start_angularVelocity
             if self.featurespanel.show_trajectory.value:
@@ -439,6 +456,16 @@ class SideBar:
                     new_obj.vector_manager.lineral_velocity.show_vector()
                 if self.featurespanel.show_lineral_v_comp.value:
                     new_obj.vector_manager.lineral_velocity.show_components()
+                if self.featurespanel.show_applied_force.value:
+                    new_obj.vector_manager.applied_force.show_vector()
+                if self.featurespanel.show_gravity_force.value:
+                    new_obj.vector_manager.gravity_force.show_vector()
+                if self.featurespanel.show_resultant_force.value:
+                    new_obj.vector_manager.total_force.show_vector()
+                x = safe_float(self.featurespanel.applied_force_x.value)
+                y = -1 * safe_float(self.featurespanel.applied_force_y.value)
+                new_obj.vector_manager.forcemanager.applied_force = b2Vec2(x, y)
+
         return new_obj
 
     def apply(self):
