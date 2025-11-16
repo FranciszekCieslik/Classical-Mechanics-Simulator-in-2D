@@ -26,8 +26,8 @@ class DrawAssistance:
             self.draw_circle()
         elif self.state == 'triangle':
             self.draw_triangle()
-        elif self.state == 'line':
-            self.draw_line()
+        elif self.state == 'point_particle':
+            self.draw_point_particle()
 
     def active_drawing(self, state: str):
         '''Activate drawing mode with the given state by GUI button.'''
@@ -152,6 +152,12 @@ class DrawAssistance:
             radius = world_radius_px / cell_size
             return position, radius
 
+        elif self.state == "point_particle":
+            world_pos_px = (pygame.Vector2(x2, y2) - cam.offset) / cam.zoom
+            position = world_pos_px / cell_size
+            radius = 10
+            return position, radius
+
         elif self.state == "line":
             world_p1_px = (pygame.Vector2(self.start_pos) - cam.offset) / cam.zoom
             world_p2_px = (pygame.Vector2(self.current_pos) - cam.offset) / cam.zoom
@@ -194,3 +200,15 @@ class DrawAssistance:
             return position, vertices
 
         return None
+
+    def draw_point_particle(self):
+        if self.start_pos is None or self.current_pos is None:
+            return
+
+        x1, y1 = self.current_pos
+
+        radius = 10
+
+        pygame.gfxdraw.filled_circle(self.surface, x1, y1, radius, self.color)
+        pygame.gfxdraw.aacircle(self.surface, x1, y1, radius, self.color)
+        pygame.gfxdraw.aacircle(self.surface, x1, y1, radius, self.border_color)

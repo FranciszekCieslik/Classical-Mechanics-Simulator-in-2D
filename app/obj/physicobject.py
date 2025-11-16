@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 from Box2D import b2CircleShape, b2PolygonShape, b2Shape, b2Vec2, b2World
 
@@ -92,34 +92,55 @@ class PhysicObject:
                     f"Expected float for circle radius, got {type(size).__name__}"
                 )
             radius = size
+        elif self.shape_type == "point_particle":
+            radius = 1e-4
+            self.is_static = False
 
-        if self.is_static:
-            self.body = world.CreateStaticBody(position=body_pos, angle=angle)
-        else:
+        if self.shape_type == "point_particle":
+            self.is_static = False
             self.body = world.CreateDynamicBody(
                 position=body_pos,
-                angle=angle,
-                linearVelocity=b2Vec2(*features.linearVelocity),
-                angularVelocity=features.angularVelocity,
-                linearDamping=features.linearDamping,
-                angularDamping=features.angularDamping,
-                fixedRotation=features.fixedRotation,
-                active=features.active,
+                fixedRotation=True,
             )
+        else:
+            if self.is_static:
+                self.body = world.CreateStaticBody(position=body_pos, angle=angle)
+            else:
+                self.body = world.CreateDynamicBody(
+                    position=body_pos,
+                    angle=angle,
+                    linearVelocity=b2Vec2(*features.linearVelocity),
+                    angularVelocity=features.angularVelocity,
+                    linearDamping=features.linearDamping,
+                    angularDamping=features.angularDamping,
+                    fixedRotation=features.fixedRotation,
+                    active=features.active,
+                )
 
         shape_obj = self._create_shape(self.shape_type, size, local_vertices)
+
         if self.shape_type != "circle":
             shape_obj.radius = 0.0022
 
-        self.fixture = self.body.CreateFixture(
-            shape=shape_obj,
-            density=features.density if not self.is_static else 0.0,
-            friction=features.friction,
-            restitution=features.restitution,
-        )
+        if self.shape_type == 'point_particle':
+            self.fixture = self.body.CreateFixture(
+                shape=shape_obj,
+                density=1.0,
+                friction=0.0,
+                restitution=0.0,
+            )
+            self.set_body_mass(1.0)
+        else:
+            self.fixture = self.body.CreateFixture(
+                shape=shape_obj,
+                density=features.density if not self.is_static else 0.0,
+                friction=features.friction,
+                restitution=features.restitution,
+            )
 
     def __del__(self):
-        self.world.DestroyBody(self.body)
+        if self.body:
+            self.world.DestroyBody(self.body)
 
     def _create_shape(self, shape_type, size, local_vertices):
         if shape_type == "triangle":
@@ -129,6 +150,8 @@ class PhysicObject:
             return b2PolygonShape(box=(width / 2, height / 2))
         elif shape_type == "circle":
             return b2CircleShape(radius=size)
+        elif shape_type == "point_particle":
+            return b2CircleShape(radius=1e-4)
         else:
             raise ValueError(f"Unknown shape type: {shape_type}")
 
@@ -155,11 +178,15 @@ class PhysicObject:
 
     # -------------------------------------------
     def apply_force(
-        self, force: Tuple[float, float], point: Optional[Tuple[float, float]] = None
+        self,
+        force: Tuple[float, float],
+        point_particle: Optional[Tuple[float, float]] = None,
     ) -> None:
-        """Applies a force to the body at the given world point."""
+        """Applies a force to the body at the given world point_particle."""
         if self.is_static:
             raise ValueError("Cannot apply force to a static body.")
-        if point is None:
-            point = self.body.worldCenter
-        self.body.ApplyForce(force=b2Vec2(*force), point=b2Vec2(*point), wake=True)
+        if point_particle is None:
+            point_particle = self.body.worldCenter
+        self.body.ApplyForce(
+            force=b2Vec2(*force), point_particle=b2Vec2(*point_particle), wake=True
+        )

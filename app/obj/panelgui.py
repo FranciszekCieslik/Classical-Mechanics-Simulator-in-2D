@@ -127,6 +127,10 @@ class Panel_GUI:
                 btn = tp.ImageButton("", img.copy(), img_hover=variant)
             if label == "Reset":
                 btn._at_click = self.objects_manager.reset_simulation
+            elif "point" in icon_path:
+                btn._at_click = lambda: self.draw_assistance.active_drawing(
+                    "point_particle"
+                )
             helper = tp.Helper(label, btn, countdown=30, offset=(0, 40))
             helper.set_font_size(12)
             self.helpers.append(helper)

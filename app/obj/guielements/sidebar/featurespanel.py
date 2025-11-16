@@ -47,7 +47,7 @@ class FeaturesPanel:
         # automatyczna inicjalizacja
         for name in fields:
             text_input = NumberInput("", placeholder="00.00")
-            if not "velocity" in name or not "force" in name:
+            if not "velocity" in name and not "force" in name:
                 text_input.set_only_non_negative()
             text_input.max_length = 5
             setattr(self, name, text_input)
@@ -85,7 +85,7 @@ class FeaturesPanel:
                             ),
                         ],
                         'v',
-                        align='right',
+                        align='left',
                     ),
                 ],
                 "h",
@@ -203,7 +203,7 @@ class FeaturesPanel:
                     ),
                 ],
                 'v',
-                align='right',
+                align='left',
             ),
         ]
         # ---

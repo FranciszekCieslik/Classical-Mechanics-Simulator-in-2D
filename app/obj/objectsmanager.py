@@ -88,6 +88,8 @@ class ObjectsManager:
         self.remove_dust()
         if run:
             for obj in self.objects:
+                if obj.physics.body is None:
+                    return
                 obj.physics.body.awake = True
             self.is_simulation_running = True
         else:

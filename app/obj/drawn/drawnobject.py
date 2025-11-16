@@ -5,10 +5,11 @@ import pygame  # type: ignore
 from obj.camera import Camera
 from obj.drawn.circle import Circle
 from obj.drawn.empty import Empty
+from obj.drawn.pointparticle import PointParticle
 from obj.drawn.rectangle import Rectangle
 from obj.drawn.triangle import Triangle
 
-DrawnShape = Union[Circle, Triangle, Rectangle]
+DrawnShape = Union[Circle, Triangle, Rectangle, PointParticle]
 
 
 class DrawnObject:
@@ -31,7 +32,7 @@ class DrawnObject:
         Initializes a drawable object based on its shape type.
 
         Args:
-            shape: Shape type ('rectangle', 'circle', 'triangle')
+            shape: Shape type ('rectangle', 'circle', 'triangle', 'point_particle')
             size: Shape size — depends on type:
                 rectangle -> pygame.Vector2(width, height)
                 circle -> float (radius)
@@ -58,6 +59,8 @@ class DrawnObject:
             self.object = Circle(surface, camera, position, color, size, cell_size)
         elif self.shape == "triangle":
             self.object = Triangle(surface, camera, position, color, size, cell_size)
+        elif self.shape == "point_particle":
+            self.object = PointParticle(surface, camera, position, color, cell_size)
         else:
             raise ValueError(f"Unsupported shape type: {shape}")
 

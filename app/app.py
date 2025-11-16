@@ -8,6 +8,7 @@ from obj.axes import Axes
 from obj.camera import Camera
 from obj.drawassistance import DrawAssistance
 from obj.grid import Grid
+from obj.guielements.sidebar.particle_sidebar import PointParticleSideBar
 from obj.guielements.sidebar.sidebar import SideBar
 from obj.objectsmanager import ObjectsManager
 from obj.panelgui import Panel_GUI
@@ -63,9 +64,17 @@ class App:
         )
         # --- Side Bar ---
         self.objsidebar: SideBar = SideBar(self.objmanager)
+        self.point_particle_sidebar: PointParticleSideBar = PointParticleSideBar(
+            self.objmanager
+        )
         # --- Thorpy Launcher ---
         self.panels = tp.Group(
-            [self.panelgui.mainbox, self.objsidebar.container], mode=None
+            [
+                self.panelgui.mainbox,
+                self.objsidebar.container,
+                self.point_particle_sidebar.container,
+            ],
+            mode=None,
         )
         self.panels_launcher = self.panels.get_updater()
         # --- TIMING ---
@@ -119,8 +128,20 @@ class App:
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
             obj = self.objmanager.select_object_at_position(event.pos)
             if obj:
-                self.objsidebar.get_data_from_real_obj(obj)
-                self.objsidebar.show()
+                if obj.shape_type != "point_particle":
+                    self.objsidebar.get_data_from_real_obj(obj)
+                    if (
+                        not self.objsidebar.visible
+                        and not self.point_particle_sidebar.visible
+                    ):
+                        self.objsidebar.show()
+                elif obj.shape_type == "point_particle":
+                    self.point_particle_sidebar.get_data_from_real_obj(obj)
+                    if (
+                        not self.objsidebar.visible
+                        and not self.point_particle_sidebar.visible
+                    ):
+                        self.point_particle_sidebar.show()
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.panelgui.is_rubber_on:
@@ -194,6 +215,8 @@ class App:
 
     def draw_panels(self):
         self.objsidebar.update()
+        if not self.objsidebar.visible:
+            self.point_particle_sidebar.update()
         self.panels_launcher.update(func_after=self.panelgui.after_update)
 
     def on_render(self) -> None:

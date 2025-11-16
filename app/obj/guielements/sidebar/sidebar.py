@@ -434,6 +434,9 @@ class SideBar:
             features,
         )
 
+        if new_obj.physics.body is None:
+            return None
+
         if self.objectmanager.time <= 0:
             new_obj.start_angle = angle
         else:
