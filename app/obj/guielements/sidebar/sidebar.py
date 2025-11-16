@@ -2,7 +2,8 @@ from typing import Optional, Union
 
 import pygame
 import thorpy as tp
-from obj.guielements.sidebar.featurespanel import FeaturesPanel, allow_negative_input
+from obj.guielements.numberinput import NumberInput
+from obj.guielements.sidebar.featurespanel import FeaturesPanel
 from obj.guielements.sidebar.selectortype import SelectorType
 from obj.guielements.sidebar.sidesize import SideSize
 from obj.objectsmanager import ObjectsManager
@@ -12,7 +13,7 @@ from obj.realobject import RealObject
 PanelType = Union["SideBar", SideSize, SelectorType, FeaturesPanel]
 
 import math
-from typing import Any, List, Tuple
+from typing import Any
 
 from Box2D import b2PolygonShape, b2Vec2
 
@@ -147,10 +148,10 @@ class SideBar:
 
         # --- Position ---
         self.text = tp.Text("", font_size=14)
-        self.x_pos = tp.TextInput("", placeholder="00.000")
-        allow_negative_input(self.x_pos)
-        self.y_pos = tp.TextInput("", placeholder="00.000")
-        allow_negative_input(self.y_pos)
+        self.x_pos = NumberInput("", placeholder="00.000")
+        self.y_pos = NumberInput("", placeholder="00.000")
+        self.y_pos.max_length = 5
+        self.x_pos.max_length = 5
         self.pos_group = tp.Group(
             [
                 tp.Text("X:", font_size=14),
@@ -162,8 +163,8 @@ class SideBar:
         )
 
         # --- rotation ---
-        self.rotation = tp.TextInput("", placeholder="00.000")
-        allow_negative_input(self.rotation)
+        self.rotation = NumberInput("", placeholder="00.000")
+        self.rotation.max_length = 5
         self.rot_group = tp.Group(
             [
                 tp.Text("Rotation", font_size=14),

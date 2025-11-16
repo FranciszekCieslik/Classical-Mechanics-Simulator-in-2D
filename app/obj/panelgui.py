@@ -25,7 +25,6 @@ class Panel_GUI:
         self.group_color: Optional[tp.Group] = None
 
         self.gravity_input: Optional[NumberInputOnCheckbox] = None
-        self.checkbox_obj_as_points: Optional[tp.Checkbox] = None
 
         self.helpers: list[tp.Helper] = []
 
@@ -85,9 +84,9 @@ class Panel_GUI:
         sim_icons = [
             "app/assets/icons/play.svg",
             "app/assets/icons/reset.svg",
-            "app/assets/icons/vector-two-fill.svg",
+            "app/assets/icons/check_point.svg",
         ]
-        sim_labels = ["Start/Pause", "Reset", "Simulation Space"]
+        sim_labels = ["Start/Pause", "Reset", "Point particle"]
 
         sim_buttons = []
 
@@ -143,17 +142,7 @@ class Panel_GUI:
         )
         text_group1 = self.gravity_input.get()
 
-        self.checkbox_obj_as_points = tp.Checkbox()
-        text_group2 = tp.Group(
-            [
-                self.checkbox_obj_as_points,
-                tp.Text("TREAT OBJECTS AS POINTS", font_size=12),
-            ],
-            "h",
-            gap=10,
-        )
-
-        self.group_ext = tp.Group([text_group1, text_group2], "v", gap=5, align="right")
+        self.group_ext = tp.Group([text_group1], "v", gap=5, align="right")
 
         self.color_palette = ColorPalette()
         self.group_color = self.color_palette.get()

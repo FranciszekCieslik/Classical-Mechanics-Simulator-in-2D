@@ -2,18 +2,7 @@ from typing import Any, Optional, Tuple
 
 import pygame
 import thorpy as tp
-
-
-def allow_negative_input(textinput):
-    val = textinput.get_value()
-    if val == "":
-        return True
-    try:
-        float(val)
-        return True
-    except ValueError:
-        textinput.set_text(val[:-1])
-        return False
+from obj.guielements.numberinput import NumberInput
 
 
 class FeaturesPanel:
@@ -26,18 +15,18 @@ class FeaturesPanel:
         self.offset: Optional[int] = None
         self.top_margin: Optional[int] = None
         # ---
-        self.mass: tp.TextInput
-        self.density: tp.TextInput
-        self.friction: tp.TextInput
-        self.restitution: tp.TextInput
-        self.start_velocity_x: tp.TextInput
-        self.start_velocity_y: tp.TextInput
-        self.curr_velocity_x: tp.TextInput
-        self.curr_velocity_y: tp.TextInput
-        self.start_angular_velocity: tp.TextInput
-        self.curr_angular_velocity: tp.TextInput
-        self.applied_force_x: tp.TextInput
-        self.applied_force_y: tp.TextInput
+        self.mass: NumberInput
+        self.density: NumberInput
+        self.friction: NumberInput
+        self.restitution: NumberInput
+        self.start_velocity_x: NumberInput
+        self.start_velocity_y: NumberInput
+        self.curr_velocity_x: NumberInput
+        self.curr_velocity_y: NumberInput
+        self.start_angular_velocity: NumberInput
+        self.curr_angular_velocity: NumberInput
+        self.applied_force_x: NumberInput
+        self.applied_force_y: NumberInput
 
         # lista nazw wszystkich pól tekstowych
         fields = [
@@ -57,11 +46,10 @@ class FeaturesPanel:
 
         # automatyczna inicjalizacja
         for name in fields:
-            text_input = tp.TextInput("", placeholder="00.00")
-            if "velocity" in name or "force" in name:
-                allow_negative_input(text_input)
-            else:
-                text_input.set_only_numbers()
+            text_input = NumberInput("", placeholder="00.00")
+            if not "velocity" in name or not "force" in name:
+                text_input.set_only_non_negative()
+            text_input.max_length = 5
             setattr(self, name, text_input)
 
         self.show_trajectory = tp.Checkbox()
@@ -252,14 +240,14 @@ class FeaturesPanel:
         vy = (
             -1 * round(linearVelocity[1], 3)
             if round(linearVelocity[1], 3) != 0
-            else 0.00
+            else 00.00
         )
         self.start_velocity_y.value = str(vy)
         self.curr_velocity_x.value = str(round(body.linearVelocity.x, 3))
         vy = (
             -1 * round(body.linearVelocity.y, 3)
             if round(body.linearVelocity.y, 3) != 0
-            else 0.00
+            else 00.00
         )
         self.curr_velocity_y.value = str(vy)
 

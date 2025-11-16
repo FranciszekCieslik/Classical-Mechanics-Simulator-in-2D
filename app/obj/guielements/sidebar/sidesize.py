@@ -4,6 +4,7 @@ from typing import Any, Literal, Optional, cast
 import pygame
 import thorpy as tp
 from Box2D import b2CircleShape, b2PolygonShape
+from obj.guielements.numberinput import NumberInput
 
 
 def clamp_angle(value: float) -> float:
@@ -26,12 +27,15 @@ class SideSize:
         self.top_margin: Optional[int] = None
 
         if shape_type == "triangle":
-            self.angle1 = tp.TextInput("", placeholder="0.00")
-            self.edge = tp.TextInput("", placeholder="0.00")
-            self.angle2 = tp.TextInput("", placeholder="0.00")
-            self.angle1.set_only_numbers()
-            self.edge.set_only_numbers()
-            self.angle2.set_only_numbers()
+            self.angle1 = NumberInput("", placeholder="00.00")
+            self.edge = NumberInput("", placeholder="00.00")
+            self.angle2 = NumberInput("", placeholder="00.00")
+            self.angle1.set_only_non_negative()
+            self.edge.set_only_non_negative()
+            self.angle2.set_only_non_negative()
+            self.angle1.max_length = 5
+            self.edge.max_length = 5
+            self.angle2.max_length = 5
             self.group1 = tp.Group(
                 [
                     tp.Text("Angle 1:", font_size=14),
@@ -47,8 +51,9 @@ class SideSize:
             self.group = tp.Group([self.group1, self.group2])
         else:
             if shape_type == "circle":
-                self.radius = tp.TextInput("", placeholder="0.00")
-                self.radius.set_only_numbers()
+                self.radius = NumberInput("", placeholder="00.00")
+                self.radius.set_only_non_negative()
+                self.radius.max_length = 5
                 self.group1 = tp.Group(
                     [
                         tp.Text("Radius:", font_size=14),
@@ -59,10 +64,12 @@ class SideSize:
                 self.group2 = tp.Group([tp.Text("", font_size=14)])
                 self.group = tp.Group([self.group1, self.group2])
             elif shape_type == "rectangle":
-                self.w = tp.TextInput("", placeholder="0.00")
-                self.h = tp.TextInput("", placeholder="0.00")
-                self.w.set_only_numbers()
-                self.h.set_only_numbers()
+                self.w = NumberInput("", placeholder="00.00")
+                self.h = NumberInput("", placeholder="00.00")
+                self.w.set_only_non_negative()
+                self.h.set_only_non_negative()
+                self.w.max_length = 5
+                self.h.max_length = 5
                 elements = [
                     tp.Text("Width:", font_size=14),
                     self.w,
