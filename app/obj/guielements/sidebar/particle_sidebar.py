@@ -285,13 +285,19 @@ class PointParticleSideBar:
             else 00.00
         )
         self.start_velocity_y.value = str(vy)
-        self.curr_velocity_x.value = str(round(body.linearVelocity.x, 3))
+        self.curr_velocity_x.value = (
+            str(round(body.linearVelocity.x, 3))
+            if self.objectmanager.time > 0.0
+            else self.start_velocity_x.value
+        )
         vy = (
             -1 * round(body.linearVelocity.y, 3)
             if round(body.linearVelocity.y, 3) != 0
             else 00.00
         )
-        self.curr_velocity_y.value = str(vy)
+        self.curr_velocity_y.value = (
+            str(vy) if self.objectmanager.time > 0.0 else self.start_velocity_y.value
+        )
 
         if rlobjct.trajectory and rlobjct.vector_manager:
             self.show_trajectory.value = rlobjct.trajectory.visible
@@ -324,7 +330,6 @@ class PointParticleSideBar:
         color = rlobjct.visual.color
         cell_size = rlobjct.cell_size
         obj_type = 'dynamic'
-        features = None
 
         start_linearVelocity = (
             safe_float(self.start_velocity_x.value),
@@ -337,7 +342,9 @@ class PointParticleSideBar:
         )
         mass = safe_float(self.mass.value, 1.0)
 
-        features = Features(linearVelocity=lv)
+        features = Features(
+            linearVelocity=lv if self.objectmanager.time > 0.0 else start_linearVelocity
+        )
 
         angle = 0.0
         size = 10.0
@@ -355,6 +362,7 @@ class PointParticleSideBar:
             self.objectmanager.collector,
             features,
         )
+        new_obj.start_position = rlobjct.start_position
 
         if mass != 0:
             new_obj.physics.body.fixtures[0].density = new_obj.physics.body.fixtures[
@@ -389,7 +397,9 @@ class PointParticleSideBar:
             if new_obj:
                 for i, old_obj in enumerate(self.objectmanager.objects):
                     if old_obj == self.obj:
-                        self.objectmanager.objects[i] = new_obj
+                        self.objectmanager.objects[i].destroy()
+                        self.objectmanager.objects.pop(i)
+                        self.objectmanager.objects.append(new_obj)
                         break
         self.hide()
 

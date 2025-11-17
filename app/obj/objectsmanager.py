@@ -2,7 +2,7 @@ import math
 from concurrent.futures import ThreadPoolExecutor
 from typing import List, Optional, Tuple, Union
 
-import pygame  # type: ignore
+import pygame
 from Box2D import b2CircleShape, b2PolygonShape, b2Vec2, b2World
 from obj.camera import Camera
 from obj.impulsecollector import ImpulseCollector
@@ -89,7 +89,7 @@ class ObjectsManager:
         if run:
             for obj in self.objects:
                 if obj.physics.body is None:
-                    return
+                    continue
                 obj.physics.body.awake = True
             self.is_simulation_running = True
         else:
@@ -122,6 +122,8 @@ class ObjectsManager:
     def remove_dust(self):
         def body_area(body):
             total_area = 0.0
+            if body is None:
+                return 0.0
             for fixture in body.fixtures:
                 shape = fixture.shape
                 if isinstance(shape, b2CircleShape):

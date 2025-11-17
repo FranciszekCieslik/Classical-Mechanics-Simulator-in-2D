@@ -143,6 +143,7 @@ class PhysicObject:
                 restitution=0.0,
             )
             self.set_body_mass(1.0)
+            self.fixture.sensor = True
         else:
             self.fixture = self.body.CreateFixture(
                 shape=shape_obj,
@@ -150,10 +151,6 @@ class PhysicObject:
                 friction=features.friction,
                 restitution=features.restitution,
             )
-
-    def __del__(self):
-        if self.body:
-            self.world.DestroyBody(self.body)
 
     def _create_shape(self, shape_type, size, local_vertices):
         if shape_type == "triangle":

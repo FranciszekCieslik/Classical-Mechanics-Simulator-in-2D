@@ -86,6 +86,11 @@ class RealObject:
         )
         self.sync()
 
+    def destroy(self):
+        if self.physics and self.physics.body and self.physics.world:
+            self.physics.world.DestroyBody(self.physics.body)
+            self.physics.body = None
+
     # -------------------------------------------------------
     def sync(self) -> None:
         """
@@ -93,6 +98,9 @@ class RealObject:
         Converts Box2D world coordinates to visual world coordinates.
         """
         body = self.physics.body
+        if body is None:
+            return
+
         pos = pygame.Vector2(body.position.x, body.position.y)
         angle = math.degrees(body.angle)
 

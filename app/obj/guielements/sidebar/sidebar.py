@@ -110,7 +110,7 @@ class SideBar:
         self.size_triangle = SideSize("triangle")
         self.size_circle = SideSize("circle")
         # --- SelectorType ---
-        self.featurespanel = FeaturesPanel()
+        self.featurespanel = FeaturesPanel(self.objectmanager)
 
         def val_show_features():
             con = self.selectortype.checkboxpool.get_value()
@@ -272,6 +272,8 @@ class SideBar:
         self.obj = rlobjct
         self.text.set_value(self.obj.shape_type)
         body = self.obj.physics.body
+        if body is None:
+            return
         pos = body.position
         correct_y = -round(pos.y, 3) if pos.y != 0 else 0.00
         self.x_pos.value = str(round(pos.x, 3))
@@ -412,8 +414,12 @@ class SideBar:
             r = safe_float(self.featurespanel.restitution.value, 0.0)
 
             features = Features(
-                linearVelocity=lv,
-                angularVelocity=av,
+                linearVelocity=(
+                    lv if self.objectmanager.time != 0.0 else start_linearVelocity
+                ),
+                angularVelocity=(
+                    av if self.objectmanager.time != 0.0 else start_angularVelocity
+                ),
                 density=d,
                 friction=f,
                 restitution=r,
@@ -433,7 +439,7 @@ class SideBar:
             self.objectmanager.collector,
             features,
         )
-
+        new_obj.start_position = rlobjct.start_position
         if new_obj.physics.body is None:
             return None
 
@@ -478,6 +484,8 @@ class SideBar:
             if new_obj:
                 for i, old_obj in enumerate(self.objectmanager.objects):
                     if old_obj == self.obj:
-                        self.objectmanager.objects[i] = new_obj
+                        self.objectmanager.objects[i].destroy()
+                        self.objectmanager.objects.pop(i)
+                        self.objectmanager.objects.append(new_obj)
                         break
         self.hide()

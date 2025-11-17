@@ -116,7 +116,9 @@ class SaveManager:
         data = to_json_safe(data)  # <-- DODAJ TO
 
         self.save_at_unclick()
-        file_name = self.get_value()
+        file_name = str(self.get_value()).strip()
+        if not file_name.endswith(".json"):
+            file_name += ".json"
         if file_name:
             file_path = os.path.join(save_dir, file_name)
             with open(file_path, "w") as f:

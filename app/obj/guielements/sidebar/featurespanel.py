@@ -3,10 +3,11 @@ from typing import Any, Optional, Tuple
 import pygame
 import thorpy as tp
 from obj.guielements.numberinput import NumberInput
+from obj.objectsmanager import ObjectsManager
 
 
 class FeaturesPanel:
-    def __init__(self) -> None:
+    def __init__(self, objectmanager: ObjectsManager) -> None:
         self.screen: pygame.Surface = pygame.display.get_surface()
         self.visible: bool = False
         self.speed: int = 12
@@ -14,6 +15,7 @@ class FeaturesPanel:
         self.width: Optional[int] = None
         self.offset: Optional[int] = None
         self.top_margin: Optional[int] = None
+        self.objectmanager = objectmanager
         # ---
         self.mass: NumberInput
         self.density: NumberInput
@@ -243,13 +245,19 @@ class FeaturesPanel:
             else 00.00
         )
         self.start_velocity_y.value = str(vy)
-        self.curr_velocity_x.value = str(round(body.linearVelocity.x, 3))
+        self.curr_velocity_x.value = (
+            str(round(body.linearVelocity.x, 3))
+            if self.objectmanager.time != 0
+            else self.start_velocity_x.value
+        )
         vy = (
             -1 * round(body.linearVelocity.y, 3)
             if round(body.linearVelocity.y, 3) != 0
             else 00.00
         )
-        self.curr_velocity_y.value = str(vy)
+        self.curr_velocity_y.value = (
+            str(vy) if self.objectmanager.time != 0 else self.start_velocity_y.value
+        )
 
         self.start_angular_velocity.value = str(round(angularVelocity, 3))
         self.curr_angular_velocity.value = str(round(body.angularVelocity, 3))
