@@ -1,6 +1,7 @@
 from typing import Callable
 
 import thorpy as tp
+from obj.guielements.numberinput import NumberInput
 
 
 class NumberInputOnCheckbox:
@@ -24,9 +25,10 @@ class NumberInputOnCheckbox:
 
         self.label_checkbox = tp.Text(checkbox_text, font_size=12)
 
-        self.input = tp.TextInput(input_text, input_placeholder)
+        self.input = NumberInput(input_text, input_placeholder)
         self.input.set_size((120, 28))
-        self.input.set_only_numbers()
+        self.input.set_only_non_negative()
+        self.input.max_length = 5
         self._set_input_visual(active=True)
 
         self.group = tp.Group([self.checkbox, self.label_checkbox, self.input], "h")

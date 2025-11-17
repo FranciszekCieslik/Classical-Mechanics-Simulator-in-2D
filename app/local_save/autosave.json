@@ -13,8 +13,8 @@
                 1
             ],
             "position": [
-                0,
-                0
+                0.0,
+                0.0
             ],
             "angle": 0.0,
             "color": [
@@ -32,8 +32,8 @@
                 1
             ],
             "position": [
-                -5,
-                3
+                -5.0,
+                3.0
             ],
             "angle": 45.0,
             "color": [
@@ -54,7 +54,24 @@
                 "restitution": 0.3,
                 "fixedRotation": false,
                 "active": true
-            }
+            },
+            "mass": 1.0,
+            "linear_velocity": [
+                1.0,
+                3.0
+            ],
+            "angular_velocity": 0.0,
+            "applied_force": [
+                0.0,
+                0.0
+            ],
+            "show_trajectory": false,
+            "show_gravity_force": false,
+            "show_applied_force": false,
+            "show_total_force": false,
+            "show_velocity": false,
+            "show_velocity_x": false,
+            "show_velocity_y": false
         },
         {
             "obj_type": "dynamic",
@@ -64,8 +81,8 @@
                 1
             ],
             "position": [
-                0,
-                3
+                0.0,
+                3.0
             ],
             "angle": 45.0,
             "color": [
@@ -86,15 +103,32 @@
                 "restitution": 0.3,
                 "fixedRotation": false,
                 "active": true
-            }
+            },
+            "mass": 1.0,
+            "linear_velocity": [
+                1.0,
+                3.0
+            ],
+            "angular_velocity": 0.0,
+            "applied_force": [
+                0.0,
+                0.0
+            ],
+            "show_trajectory": false,
+            "show_gravity_force": false,
+            "show_applied_force": false,
+            "show_total_force": false,
+            "show_velocity": false,
+            "show_velocity_x": false,
+            "show_velocity_y": false
         },
         {
             "obj_type": "dynamic",
             "shape_type": "circle",
             "size": 0.8,
             "position": [
-                0,
-                20
+                0.0,
+                20.0
             ],
             "angle": 45.0,
             "color": [
@@ -115,7 +149,24 @@
                 "restitution": 0.3,
                 "fixedRotation": false,
                 "active": true
-            }
+            },
+            "mass": 2.0106194019317627,
+            "linear_velocity": [
+                1.0,
+                3.0
+            ],
+            "angular_velocity": 0.0,
+            "applied_force": [
+                0.0,
+                0.0
+            ],
+            "show_trajectory": false,
+            "show_gravity_force": false,
+            "show_applied_force": false,
+            "show_total_force": false,
+            "show_velocity": false,
+            "show_velocity_x": false,
+            "show_velocity_y": false
         },
         {
             "obj_type": "dynamic",
@@ -135,8 +186,8 @@
                 ]
             ],
             "position": [
-                0,
-                14
+                0.0,
+                14.0
             ],
             "angle": 0.0,
             "color": [
@@ -157,7 +208,24 @@
                 "restitution": 0.3,
                 "fixedRotation": false,
                 "active": true
-            }
+            },
+            "mass": 6.0,
+            "linear_velocity": [
+                1.0,
+                3.0
+            ],
+            "angular_velocity": 0.0,
+            "applied_force": [
+                0.0,
+                0.0
+            ],
+            "show_trajectory": false,
+            "show_gravity_force": false,
+            "show_applied_force": false,
+            "show_total_force": false,
+            "show_velocity": false,
+            "show_velocity_x": false,
+            "show_velocity_y": false
         }
     ]
 }

@@ -293,8 +293,8 @@ class PointParticleSideBar:
         )
         self.curr_velocity_y.value = str(vy)
 
-        if rlobjct.trayectory and rlobjct.vector_manager:
-            self.show_trajectory.value = rlobjct.trayectory.visible
+        if rlobjct.trajectory and rlobjct.vector_manager:
+            self.show_trajectory.value = rlobjct.trajectory.visible
             lv = rlobjct.vector_manager.lineral_velocity
             self.show_lineral_velocity.value = lv.vector.visible
             self.show_lineral_v_comp.value = lv.vec_x.visible
@@ -364,8 +364,8 @@ class PointParticleSideBar:
             new_obj.physics.body.ResetMassData()
         new_obj.start_linearVelocity = start_linearVelocity
         if self.show_trajectory.value:
-            if new_obj.trayectory:
-                new_obj.trayectory.visible = True
+            if new_obj.trajectory:
+                new_obj.trajectory.visible = True
         if new_obj.vector_manager:
             if self.show_lineral_velocity.value:
                 new_obj.vector_manager.lineral_velocity.show_vector()

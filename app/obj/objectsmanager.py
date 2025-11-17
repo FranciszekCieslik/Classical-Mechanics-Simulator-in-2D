@@ -154,9 +154,25 @@ class ObjectsManager:
 
     def load_from_json(self, data: dict) -> None:
         self.objects.clear()
+        if data is None:
+            return
 
+        # -----------------------------
+        # Wczytaj parametry managera
+        # -----------------------------
+        gravity = data.get("gravity")
+        if isinstance(gravity, (list, tuple)) and len(gravity) > 1:
+            g = gravity[1]
+            self.set_gravity_force(round(g, 4))
+
+        cell_size = data.get("cell_size")
+        self.cell_size = int(cell_size) if isinstance(cell_size, (int, float)) else 100
+
+        # -----------------------------
+        # Wczytaj każdy obiekt
+        # -----------------------------
         for obj_data in data.get("objects", []):
-            # Reconstruct Features
+            # ---------- FEATURES ----------
             features_data = obj_data.get("features")
             if features_data is not None:
                 features = Features(
@@ -173,28 +189,23 @@ class ObjectsManager:
             else:
                 features = None
 
-            # Convert color
+            # ---------- COLOR ----------
             c = obj_data["color"]
             color_vec = pygame.Vector3(c[0], c[1], c[2])
 
-            # ----------- FIX HERE -----------
+            # ---------- SIZE ----------
             size = obj_data["size"]
-
-            # size is polygon: list[list[float]]
             if isinstance(size, list):
                 if (
                     len(size) == 2
                     and isinstance(size[0], (float, int))
                     and isinstance(size[1], (float, int))
                 ):
-                    # rectangle/list from JSON -> convert to tuple
                     size = tuple(size)
                 else:
-                    # polygon: list of points -> convert each point to tuple
                     size = [tuple(pt) for pt in size]
-            # ---------------------------------
 
-            # Add the reconstructed object
+            # ---------- TWORZENIE OBIEKTU ----------
             self.add_object(
                 obj_type=obj_data["obj_type"],
                 shape_type=obj_data["shape_type"],
@@ -204,3 +215,60 @@ class ObjectsManager:
                 color=color_vec,
                 features=features,
             )
+
+            # ============================================================
+            #  ODTWARZANIE DANYCH FIZYCZNYCH DLA OBIEKTÓW DYNAMICZNYCH
+            # ============================================================
+            if obj_data["obj_type"] != "static":
+                body = self.objects[-1].physics.body
+
+                # prędkości startowe
+                lin_vel = obj_data.get("linear_velocity")
+                if lin_vel:
+                    body.linearVelocity = tuple(lin_vel)
+
+                ang_vel = obj_data.get("angular_velocity")
+                if ang_vel is not None:
+                    body.angularVelocity = ang_vel
+
+                # nadpisanie masy (jeśli ma sens — Box2D pozwala)
+                try:
+                    body.mass = obj_data["mass"]
+                except AttributeError:
+                    # masa jest readonly w Box2D – ignorujemy zmianę
+                    pass
+
+                # siła przyłożona
+                if "applied_force" in obj_data:
+                    fx, fy = obj_data["applied_force"]
+                    self.objects[-1].vector_manager.forcemanager.applied_force = b2Vec2(
+                        fx, fy
+                    )
+
+                # ============================================================
+                #  ODTWARZANIE WIDOCZNOŚCI WEKTORÓW I TRAJEKTORII
+                # ============================================================
+                vis = obj_data
+
+                obj = self.objects[-1]
+
+                obj.trajectory.visible = vis.get("show_trajectory", False)
+                obj.vector_manager.gravity_force.vector.visible = vis.get(
+                    "show_gravity_force", False
+                )
+                obj.vector_manager.applied_force.vector.visible = vis.get(
+                    "show_applied_force", False
+                )
+                obj.vector_manager.total_force.vector.visible = vis.get(
+                    "show_total_force", False
+                )
+
+                obj.vector_manager.lineral_velocity.vector.visible = vis.get(
+                    "show_velocity", False
+                )
+                obj.vector_manager.lineral_velocity.vec_x.visible = vis.get(
+                    "show_velocity_x", False
+                )
+                obj.vector_manager.lineral_velocity.vec_y.visible = vis.get(
+                    "show_velocity_y", False
+                )

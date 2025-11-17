@@ -178,11 +178,26 @@ class Panel_GUI:
         def on_load():
             save_dir = "./app/local_save"
             data = self.save_manager.load_from_json(save_dir)
+            self.gravity_input.input.value = str(round(data.get("gravity")[1], 4))
             self.objects_manager.load_from_json(data)
             self.objects_manager.reset_simulation()
 
         btn_load.default_at_unclick = on_load
-        save_group = tp.Group([btn_save, btn_load], 'h')
+        save_group = tp.Group([btn_save, btn_load], 'h', gap=10)
+        # --- Clear Btn ---
+        img = pygame.image.load("app/assets/icons/clear.svg")
+        img = pygame.transform.smoothscale(img, (30, 30))
+        variant = tp.graphics.change_color_on_img(
+            img, img.get_at((0, 0)), (100, 100, 100)
+        )
+        btn_clr = tp.ImageButton("", img.copy(), img_hover=variant)
+        helper = tp.Helper('Load file', btn_clr, countdown=30, offset=(0, 40))
+        helper.set_font_size(12)
+
+        def clear_all():
+            self.objects_manager.objects.clear()
+
+        btn_clr.default_at_unclick = clear_all
 
         self.metagroup = tp.Group(
             [
@@ -191,6 +206,7 @@ class Panel_GUI:
                 self.group_ext,
                 self.group_color,
                 save_group,
+                btn_clr,
             ]
         )
         self.metagroup.sort_children("h", gap=30)

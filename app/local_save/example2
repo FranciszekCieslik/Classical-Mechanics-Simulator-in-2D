@@ -1,0 +1,101 @@
+{
+    "cell_size": 100,
+    "gravity": [
+        0.0,
+        0.0
+    ],
+    "objects": [
+        {
+            "obj_type": "dynamic",
+            "shape_type": "point_particle",
+            "size": 10.0,
+            "position": [
+                -1.0,
+                -0.0
+            ],
+            "angle": 0.0,
+            "color": [
+                255.0,
+                80.0,
+                80.0
+            ],
+            "features": {
+                "linearVelocity": [
+                    0.0,
+                    -0.0
+                ],
+                "angularVelocity": 0.0,
+                "linearDamping": 0.0,
+                "angularDamping": 0.0,
+                "density": 1.0,
+                "friction": 0.3,
+                "restitution": 0.0,
+                "fixedRotation": false,
+                "active": true
+            },
+            "mass": 1.0,
+            "linear_velocity": [
+                0.2,
+                -0.0
+            ],
+            "angular_velocity": 0.0,
+            "applied_force": [
+                0.0,
+                -0.0
+            ],
+            "show_trajectory": false,
+            "show_gravity_force": false,
+            "show_applied_force": false,
+            "show_total_force": false,
+            "show_velocity": false,
+            "show_velocity_x": false,
+            "show_velocity_y": false
+        },
+        {
+            "obj_type": "dynamic",
+            "shape_type": "point_particle",
+            "size": 10.0,
+            "position": [
+                4.0,
+                -0.0
+            ],
+            "angle": 0.0,
+            "color": [
+                150.0,
+                150.0,
+                255.0
+            ],
+            "features": {
+                "linearVelocity": [
+                    0.0,
+                    -0.0
+                ],
+                "angularVelocity": 0.0,
+                "linearDamping": 0.0,
+                "angularDamping": 0.0,
+                "density": 1.0,
+                "friction": 0.3,
+                "restitution": 0.0,
+                "fixedRotation": false,
+                "active": true
+            },
+            "mass": 1.0,
+            "linear_velocity": [
+                -0.8,
+                -0.0
+            ],
+            "angular_velocity": 0.0,
+            "applied_force": [
+                0.0,
+                -0.0
+            ],
+            "show_trajectory": false,
+            "show_gravity_force": false,
+            "show_applied_force": false,
+            "show_total_force": false,
+            "show_velocity": false,
+            "show_velocity_x": false,
+            "show_velocity_y": false
+        }
+    ]
+}

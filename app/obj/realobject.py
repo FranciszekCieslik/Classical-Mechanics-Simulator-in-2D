@@ -37,7 +37,6 @@ class RealObject:
         self.obj_type = obj_type
         self.shape_type = shape_type
         self.size = size
-        self.position = position
         self.start_angle = angle
         self.color = color
         self.cell_size = cell_size
@@ -77,13 +76,10 @@ class RealObject:
             camera=camera,
             cell_size=cell_size,
         )
-        self.trayectory: Optional[Trajectory] = None
-        self.vector_manager: Optional[VectorManager] = None
-        if obj_type != 'static':
-            self.trayectory = Trajectory(
-                camera, color, self.cell_size, self.physics.body
-            )
-            self.vector_manager = VectorManager(self, impulse_collector)
+        self.trajectory: Trajectory = Trajectory(
+            camera, color, self.cell_size, self.physics.body
+        )
+        self.vector_manager: VectorManager = VectorManager(self, impulse_collector)
         self.sync()
 
     # -------------------------------------------------------
@@ -105,9 +101,9 @@ class RealObject:
     def draw(self) -> None:
         self.sync()
         self.visual.draw()
-        if self.trayectory:
+        if self.trajectory:
             pos = pygame.Vector2(self.start_position.x, self.start_position.y)
-            self.trayectory.draw_trajectory(pos)
+            self.trajectory.draw_trajectory(pos)
         if self.vector_manager:
             self.vector_manager.draw()
 
@@ -120,8 +116,8 @@ class RealObject:
         body.linearVelocity = self.start_linearVelocity
         body.angularVelocity = self.start_angularVelocity
         body.awake = True
-        if self.trayectory:
-            self.trayectory.clear_track()
+        if self.trajectory:
+            self.trajectory.clear_track()
         self.sync()
 
     def is_point_inside(self, position) -> bool:
@@ -157,17 +153,53 @@ class RealObject:
 
         if not self.physics.is_static:
             body.awake = True
-        if self.trayectory:
-            self.trayectory.clear_track()
+        if self.trajectory:
+            self.trajectory.clear_track()
         self.visual.object.move(vec)
 
-    def transfer_to_json(self) -> dict:
-        return {
-            "obj_type": self.obj_type,
-            "shape_type": self.shape_type,
-            "size": self.size,
-            "position": self.position,
-            "angle": self.start_angle,
-            "color": [self.color.x, self.color.y, self.color.z],
-            "features": self.features.transfer_to_json() if self.features else None,
-        }
+    def transfer_to_json(self) -> Optional[dict]:
+        if self.obj_type == 'static':
+            return {
+                "obj_type": self.obj_type,
+                "shape_type": self.shape_type,
+                "size": self.size,
+                "position": [
+                    float(self.start_position.x),
+                    float(self.start_position.y),
+                ],
+                "angle": self.start_angle,
+                "color": [self.color.x, self.color.y, self.color.z],
+                "features": self.features.transfer_to_json() if self.features else None,
+            }
+        else:
+            if self.vector_manager is None or self.trajectory is None:
+                return None
+            return {
+                "obj_type": self.obj_type,
+                "shape_type": self.shape_type,
+                "size": self.size,
+                "position": [
+                    float(self.start_position.x),
+                    float(self.start_position.y),
+                ],
+                "angle": self.start_angle,
+                "color": [self.color.x, self.color.y, self.color.z],
+                "features": self.features.transfer_to_json() if self.features else None,
+                "mass": self.physics.body.mass,
+                "linear_velocity": [
+                    float(self.start_linearVelocity[0]),
+                    float(self.start_linearVelocity[1]),
+                ],
+                "angular_velocity": self.start_angularVelocity,
+                "applied_force": [
+                    float(self.vector_manager.forcemanager.applied_force.x),
+                    float(self.vector_manager.forcemanager.applied_force.y),
+                ],
+                "show_trajectory": self.trajectory.visible,
+                "show_gravity_force": self.vector_manager.gravity_force.vector.visible,
+                "show_applied_force": self.vector_manager.applied_force.vector.visible,
+                "show_total_force": self.vector_manager.total_force.vector.visible,
+                "show_velocity": self.vector_manager.lineral_velocity.vector.visible,
+                "show_velocity_x": self.vector_manager.lineral_velocity.vec_x.visible,
+                "show_velocity_y": self.vector_manager.lineral_velocity.vec_y.visible,
+            }
