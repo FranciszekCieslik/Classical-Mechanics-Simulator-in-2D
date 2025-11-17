@@ -14,10 +14,14 @@ def _vectors_are_close(
 
 class Trajectory:
     def __init__(
-        self, camera: Camera, color: pygame.Color, base_cell_size: int, body: Any
+        self,
+        camera: Camera,
+        color: pygame.Color,
+        base_cell_size: int,
+        body: Any,
+        total_force: b2Vec2,
     ):
         self.camera = camera
-        # Rozjaśnij kolor bez przekroczenia 255
         self.light_color = tuple(min(c + 100, 255) for c in color[:3])
         self.dark_color = tuple(max(c - 50, 0) for c in color[:3])
         self.line_thickness: int = 2
@@ -26,8 +30,8 @@ class Trajectory:
         self.visible: bool = False
         self.trajectory_points: list[pygame.Vector2] = []
         self.body = body
+        self.total_force = total_force
 
-    # TRAJECTORY MANAGEMENT
     def add_trajectory_point(self, point: pygame.Vector2) -> None:
         n_point = self._create_trajectory_point(point)
         if n_point not in self.trajectory_points:
@@ -54,7 +58,6 @@ class Trajectory:
 
         return False
 
-    # COORDINATE CONVERSIONS
     def _point_to_screen(self, point: pygame.Vector2) -> pygame.Vector2:
         screen_x = (
             point.x * self.base_cell_size * self.camera.zoom + self.camera.offset.x
@@ -83,13 +86,15 @@ class Trajectory:
         else:
             gravity = pygame.Vector2(0, -9.81)
 
+        total_force = pygame.Vector2(self.total_force.x, self.total_force.y)
+
         pos = pygame.Vector2(body.worldCenter.x, body.worldCenter.y)
         vel = pygame.Vector2(body.linearVelocity.x, body.linearVelocity.y)
         mass = body.mass
 
         trajectory = [pos.copy()]
         for _ in range(steps):
-            force = mass * gravity
+            force = total_force
             acc = force / mass
 
             vel += acc * dt
@@ -98,14 +103,12 @@ class Trajectory:
 
         return trajectory
 
-    # RENDERING
     def draw_predict_trajectory(self, skip: int = 2):
         """
         Rysuje przewidywaną trajektorię obiektu.
         :param skip: liczba punktów do pominięcia (np. 2 = rysuj co 2 punkt)
         """
 
-        # Przewiduj nową trajektorię
         predict_tra = self._predict_trajectory(self.body)
         if predict_tra is None:
             return

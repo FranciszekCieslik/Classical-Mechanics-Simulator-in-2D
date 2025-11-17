@@ -76,10 +76,14 @@ class RealObject:
             camera=camera,
             cell_size=cell_size,
         )
-        self.trajectory: Trajectory = Trajectory(
-            camera, color, self.cell_size, self.physics.body
-        )
         self.vector_manager: VectorManager = VectorManager(self, impulse_collector)
+        self.trajectory: Trajectory = Trajectory(
+            camera,
+            color,
+            self.cell_size,
+            self.physics.body,
+            self.vector_manager.forcemanager.total_force,
+        )
         self.sync()
 
     # -------------------------------------------------------
