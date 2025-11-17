@@ -234,58 +234,6 @@ class App:
         pygame.quit()
 
     def on_execute(self) -> None:
-
-        self.objmanager.add_object(
-            obj_type="static",
-            shape_type="rectangle",
-            size=(8, 1),
-            position=(0, 0),
-            angle=00.0,
-            color=pygame.Vector3(150, 150, 255),
-        )
-
-        dyn_features = Features(
-            density=1.0, friction=0.4, restitution=0.3, linearVelocity=(1, 3)
-        )
-        self.objmanager.add_object(
-            obj_type="dynamic",
-            shape_type="rectangle",
-            size=(1, 1),
-            position=(-5, 3),
-            angle=45.0,
-            color=pygame.Vector3(255, 80, 80),
-            features=dyn_features,
-        )
-        self.objmanager.add_object(
-            obj_type="dynamic",
-            shape_type="rectangle",
-            size=(1, 1),
-            position=(0, 3),
-            angle=45.0,
-            color=pygame.Vector3(255, 80, 80),
-            features=dyn_features,
-        )
-
-        self.objmanager.add_object(
-            obj_type="dynamic",
-            shape_type="circle",
-            size=0.8,
-            position=(0, 20),
-            angle=45.0,
-            color=pygame.Vector3(255, 200, 0),
-            features=dyn_features,
-        )
-
-        self.objmanager.add_object(
-            obj_type="dynamic",
-            shape_type="triangle",
-            size=[(-2, 0), (2, 0), (0, 3)],
-            position=(0, 14),
-            angle=00.0,
-            color=pygame.Vector3(80, 255, 80),
-            features=dyn_features,
-        )
-
         while self._running:
             for event in pygame.event.get():
                 self.on_event(event)

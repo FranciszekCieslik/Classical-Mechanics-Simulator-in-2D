@@ -34,9 +34,14 @@ class RealObject:
     ) -> None:
         self.my_manager: Optional[Any] = None
 
+        self.obj_type = obj_type
         self.shape_type = shape_type
-        self.cell_size = cell_size
+        self.size = size
+        self.position = position
         self.start_angle = angle
+        self.color = color
+        self.cell_size = cell_size
+        self.features = features
 
         self.start_linearVelocity = features.linearVelocity if features else (0.0, 0.0)
         self.start_angularVelocity = features.angularVelocity if features else 0.0
@@ -155,3 +160,14 @@ class RealObject:
         if self.trayectory:
             self.trayectory.clear_track()
         self.visual.object.move(vec)
+
+    def transfer_to_json(self) -> dict:
+        return {
+            "obj_type": self.obj_type,
+            "shape_type": self.shape_type,
+            "size": self.size,
+            "position": self.position,
+            "angle": self.start_angle,
+            "color": [self.color.x, self.color.y, self.color.z],
+            "features": self.features.transfer_to_json() if self.features else None,
+        }

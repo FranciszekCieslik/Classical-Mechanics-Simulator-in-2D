@@ -7,6 +7,7 @@ from obj.guielements.colorpalette import ColorPalette
 from obj.guielements.numinputoncheckbox import NumberInputOnCheckbox
 from obj.guielements.toggleimagebutton import ToggleImageButton
 from obj.objectsmanager import ObjectsManager
+from obj.savemanager import SaveManager
 
 
 class Panel_GUI:
@@ -32,6 +33,7 @@ class Panel_GUI:
         self.draw_assistance = draw_assistance
         self.button_play: Optional[tp.ImageButton] = None
         self.is_rubber_on: bool = False
+        self.save_manager = SaveManager()
         self.on_init()
 
     def on_init(self):
@@ -144,14 +146,52 @@ class Panel_GUI:
             fun=self.objects_manager.set_gravity_force,
             input_placeholder="9.8",
         )
-        text_group1 = self.gravity_input.get()
-
-        self.group_ext = tp.Group([text_group1], "v", gap=5, align="right")
-
+        self.group_ext = tp.Group([self.gravity_input.get()], "v", gap=5, align="right")
         self.color_palette = ColorPalette()
         self.group_color = self.color_palette.get()
+        # --- Save ---
+        img = pygame.image.load("app/assets/icons/save.svg")
+        img = pygame.transform.smoothscale(img, (30, 30))
+        variant = tp.graphics.change_color_on_img(
+            img, img.get_at((0, 0)), (100, 100, 100)
+        )
+        btn_save = tp.ImageButton("", img.copy(), img_hover=variant)
+        helper = tp.Helper('Save', btn_save, countdown=30, offset=(0, 40))
+        helper.set_font_size(12)
+
+        def on_save():
+            data = self.objects_manager.transfer_to_json()
+            save_dir = "./app/local_save"
+            self.save_manager.save_to_json(data, save_dir)
+
+        btn_save.default_at_unclick = on_save
+        # -- Load ---
+        img = pygame.image.load("app/assets/icons/load.svg")
+        img = pygame.transform.smoothscale(img, (30, 30))
+        variant = tp.graphics.change_color_on_img(
+            img, img.get_at((0, 0)), (100, 100, 100)
+        )
+        btn_load = tp.ImageButton("", img.copy(), img_hover=variant)
+        helper = tp.Helper('Load file', btn_load, countdown=30, offset=(0, 40))
+        helper.set_font_size(12)
+
+        def on_load():
+            save_dir = "./app/local_save"
+            data = self.save_manager.load_from_json(save_dir)
+            self.objects_manager.load_from_json(data)
+            self.objects_manager.reset_simulation()
+
+        btn_load.default_at_unclick = on_load
+        save_group = tp.Group([btn_save, btn_load], 'h')
+
         self.metagroup = tp.Group(
-            [self.group_draw, self.group_simulation, self.group_ext, self.group_color]
+            [
+                self.group_draw,
+                self.group_simulation,
+                self.group_ext,
+                self.group_color,
+                save_group,
+            ]
         )
         self.metagroup.sort_children("h", gap=30)
         self.metagroup.set_size(self.screen.get_size())

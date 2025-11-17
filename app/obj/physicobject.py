@@ -34,6 +34,19 @@ class Features:
         self.fixedRotation = fixedRotation
         self.active = active
 
+    def transfer_to_json(self) -> dict:
+        return {
+            "linearVelocity": self.linearVelocity,
+            "angularVelocity": self.angularVelocity,
+            "linearDamping": self.linearDamping,
+            "angularDamping": self.angularDamping,
+            "density": self.density,
+            "friction": self.friction,
+            "restitution": self.restitution,
+            "fixedRotation": self.fixedRotation,
+            "active": self.active,
+        }
+
 
 class PhysicObject:
     """Creates a static or dynamic physical object in a Box2D world."""

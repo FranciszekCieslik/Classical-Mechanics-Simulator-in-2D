@@ -144,3 +144,63 @@ class ObjectsManager:
         for obj in self.objects:
             if obj.vector_manager:
                 obj.vector_manager.forcemanager.apply_force()
+
+    def transfer_to_json(self) -> dict:
+        return {
+            "cell_size": self.cell_size,
+            "gravity": tuple(self.world.gravity),
+            "objects": [obj.transfer_to_json() for obj in self.objects],
+        }
+
+    def load_from_json(self, data: dict) -> None:
+        self.objects.clear()
+
+        for obj_data in data.get("objects", []):
+            # Reconstruct Features
+            features_data = obj_data.get("features")
+            if features_data is not None:
+                features = Features(
+                    linearVelocity=tuple(features_data["linearVelocity"]),
+                    angularVelocity=features_data["angularVelocity"],
+                    linearDamping=features_data["linearDamping"],
+                    angularDamping=features_data["angularDamping"],
+                    density=features_data["density"],
+                    friction=features_data["friction"],
+                    restitution=features_data["restitution"],
+                    fixedRotation=features_data["fixedRotation"],
+                    active=features_data["active"],
+                )
+            else:
+                features = None
+
+            # Convert color
+            c = obj_data["color"]
+            color_vec = pygame.Vector3(c[0], c[1], c[2])
+
+            # ----------- FIX HERE -----------
+            size = obj_data["size"]
+
+            # size is polygon: list[list[float]]
+            if isinstance(size, list):
+                if (
+                    len(size) == 2
+                    and isinstance(size[0], (float, int))
+                    and isinstance(size[1], (float, int))
+                ):
+                    # rectangle/list from JSON -> convert to tuple
+                    size = tuple(size)
+                else:
+                    # polygon: list of points -> convert each point to tuple
+                    size = [tuple(pt) for pt in size]
+            # ---------------------------------
+
+            # Add the reconstructed object
+            self.add_object(
+                obj_type=obj_data["obj_type"],
+                shape_type=obj_data["shape_type"],
+                size=size,
+                position=tuple(obj_data["position"]),
+                angle=obj_data["angle"],
+                color=color_vec,
+                features=features,
+            )
