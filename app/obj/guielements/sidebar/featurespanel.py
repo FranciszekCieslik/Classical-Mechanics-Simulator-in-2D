@@ -23,10 +23,10 @@ class FeaturesPanel:
         self.restitution: NumberInput
         self.start_velocity_x: NumberInput
         self.start_velocity_y: NumberInput
-        self.curr_velocity_x: NumberInput
-        self.curr_velocity_y: NumberInput
+        # self.curr_velocity_x: NumberInput
+        # self.curr_velocity_y: NumberInput
         self.start_angular_velocity: NumberInput
-        self.curr_angular_velocity: NumberInput
+        # self.curr_angular_velocity: NumberInput
         self.applied_force_x: NumberInput
         self.applied_force_y: NumberInput
 
@@ -38,10 +38,10 @@ class FeaturesPanel:
             "restitution",
             "start_velocity_x",
             "start_velocity_y",
-            "curr_velocity_x",
-            "curr_velocity_y",
+            # "curr_velocity_x",
+            # "curr_velocity_y",
             "start_angular_velocity",
-            "curr_angular_velocity",
+            # "curr_angular_velocity",
             "applied_force_x",
             "applied_force_y",
         ]
@@ -132,16 +132,16 @@ class FeaturesPanel:
                         ],
                         "h",
                     ),
-                    tp.Group(
-                        [
-                            tp.Text("Current", font_size=14),
-                            tp.Text("x:", font_size=14),
-                            self.curr_velocity_x,
-                            tp.Text("y:", font_size=14),
-                            self.curr_velocity_y,
-                        ],
-                        "h",
-                    ),
+                    # tp.Group(
+                    #     [
+                    #         tp.Text("Current", font_size=14),
+                    #         tp.Text("x:", font_size=14),
+                    #         self.curr_velocity_x,
+                    #         tp.Text("y:", font_size=14),
+                    #         self.curr_velocity_y,
+                    #     ],
+                    #     "h",
+                    # ),
                 ],
                 'v',
                 align='right',
@@ -155,10 +155,10 @@ class FeaturesPanel:
                         [tp.Text("Start:", font_size=14), self.start_angular_velocity],
                         "h",
                     ),
-                    tp.Group(
-                        [tp.Text("Current", font_size=14), self.curr_angular_velocity],
-                        "h",
-                    ),
+                    # tp.Group(
+                    #     [tp.Text("Current", font_size=14), self.curr_angular_velocity],
+                    #     "h",
+                    # ),
                 ],
                 'h',
             ),
@@ -245,22 +245,22 @@ class FeaturesPanel:
             else 00.00
         )
         self.start_velocity_y.value = str(vy)
-        self.curr_velocity_x.value = (
-            str(round(body.linearVelocity.x, 3))
-            if self.objectmanager.time != 0
-            else self.start_velocity_x.value
-        )
+        # self.curr_velocity_x.value = (
+        #     str(round(body.linearVelocity.x, 3))
+        #     if self.objectmanager.time != 0
+        #     else self.start_velocity_x.value
+        # )
         vy = (
             -1 * round(body.linearVelocity.y, 3)
             if round(body.linearVelocity.y, 3) != 0
             else 00.00
         )
-        self.curr_velocity_y.value = (
-            str(vy) if self.objectmanager.time != 0 else self.start_velocity_y.value
-        )
+        # self.curr_velocity_y.value = (
+        #     str(vy) if self.objectmanager.time != 0 else self.start_velocity_y.value
+        # )
 
         self.start_angular_velocity.value = str(round(angularVelocity, 3))
-        self.curr_angular_velocity.value = str(round(body.angularVelocity, 3))
+        # self.curr_angular_velocity.value = str(round(body.angularVelocity, 3))
 
     def reset_inputs(self) -> None:
         self.mass.value = ""
@@ -270,11 +270,11 @@ class FeaturesPanel:
 
         self.start_velocity_x.value = ""
         self.start_velocity_y.value = ""
-        self.curr_velocity_x.value = ""
-        self.curr_velocity_y.value = ""
+        # self.curr_velocity_x.value = ""
+        # self.curr_velocity_y.value = ""
 
         self.start_angular_velocity.value = ""
-        self.curr_angular_velocity.value = ""
+        # self.curr_angular_velocity.value = ""
         self.applied_force_x.value = ""
         self.applied_force_y.value = ""
 

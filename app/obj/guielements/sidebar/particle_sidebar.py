@@ -82,8 +82,8 @@ class PointParticleSideBar:
         self.mass: NumberInput
         self.start_velocity_x: NumberInput
         self.start_velocity_y: NumberInput
-        self.curr_velocity_x: NumberInput
-        self.curr_velocity_y: NumberInput
+        # self.curr_velocity_x: NumberInput
+        # self.curr_velocity_y: NumberInput
         self.applied_force_x: NumberInput
         self.applied_force_y: NumberInput
 
@@ -92,8 +92,8 @@ class PointParticleSideBar:
             "mass",
             "start_velocity_x",
             "start_velocity_y",
-            "curr_velocity_x",
-            "curr_velocity_y",
+            # "curr_velocity_x",
+            # "curr_velocity_y",
             "applied_force_x",
             "applied_force_y",
         ]
@@ -175,16 +175,16 @@ class PointParticleSideBar:
                             ],
                             "h",
                         ),
-                        tp.Group(
-                            [
-                                tp.Text("Current", font_size=14),
-                                tp.Text("x:", font_size=14),
-                                self.curr_velocity_x,
-                                tp.Text("y:", font_size=14),
-                                self.curr_velocity_y,
-                            ],
-                            "h",
-                        ),
+                        # tp.Group(
+                        #     [
+                        #         tp.Text("Current", font_size=14),
+                        #         tp.Text("x:", font_size=14),
+                        #         self.curr_velocity_x,
+                        #         tp.Text("y:", font_size=14),
+                        #         self.curr_velocity_y,
+                        #     ],
+                        #     "h",
+                        # ),
                     ],
                     'v',
                     align='right',
@@ -278,26 +278,28 @@ class PointParticleSideBar:
         self.y_pos.value = str(correct_y)
 
         self.mass.value = str(round(body.mass, 3))
-        self.start_velocity_x.value = str(round(self.obj.start_linearVelocity[0], 3))
+
+        linearVelocity = self.obj.start_linearVelocity
+        self.start_velocity_x.value = str(round(linearVelocity[0], 3))
         vy = (
-            -1 * round(self.obj.start_linearVelocity[1], 3)
-            if round(self.obj.start_linearVelocity[1], 3) != 0
+            -1 * round(linearVelocity[1], 3)
+            if round(linearVelocity[1], 3) != 0
             else 00.00
         )
         self.start_velocity_y.value = str(vy)
-        self.curr_velocity_x.value = (
-            str(round(body.linearVelocity.x, 3))
-            if self.objectmanager.time > 0.0
-            else self.start_velocity_x.value
-        )
-        vy = (
-            -1 * round(body.linearVelocity.y, 3)
-            if round(body.linearVelocity.y, 3) != 0
-            else 00.00
-        )
-        self.curr_velocity_y.value = (
-            str(vy) if self.objectmanager.time > 0.0 else self.start_velocity_y.value
-        )
+        # self.curr_velocity_x.value = (
+        #     str(round(body.linearVelocity.x, 3))
+        #     if self.objectmanager.time != 0
+        #     else self.start_velocity_x.value
+        # )
+        # vy = (
+        #     -1 * round(body.linearVelocity.y, 3)
+        #     if round(body.linearVelocity.y, 3) != 0
+        #     else 00.00
+        # )
+        # self.curr_velocity_y.value = (
+        #     str(vy) if self.objectmanager.time != 0 else self.start_velocity_y.value
+        # )
 
         if rlobjct.trajectory and rlobjct.vector_manager:
             self.show_trajectory.value = rlobjct.trajectory.visible
@@ -315,7 +317,8 @@ class PointParticleSideBar:
             )
             af = rlobjct.vector_manager.forcemanager.applied_force
             self.applied_force_x.value = str(round(af.x, 3))
-            self.applied_force_y.value = str(round(-1 * af.y, 3))
+            afy = -1 * round(af.y, 3) if round(af.y, 3) != 0 else 00.00
+            self.applied_force_y.value = str(afy)
 
     def apply_to_real_obj(self, rlobjct: RealObject) -> Optional[RealObject]:
 
@@ -330,24 +333,25 @@ class PointParticleSideBar:
         color = rlobjct.visual.color
         cell_size = rlobjct.cell_size
         obj_type = 'dynamic'
+        mass = safe_float(self.mass.value, 1.0)
+        size = 10.0
+        angle = 0.0
 
         start_linearVelocity = (
             safe_float(self.start_velocity_x.value),
             -1 * safe_float(self.start_velocity_y.value),
         )
 
-        lv = (
-            safe_float(self.curr_velocity_x.value),
-            -1 * safe_float(self.curr_velocity_y.value),
-        )
-        mass = safe_float(self.mass.value, 1.0)
+        # lv = (
+        #     safe_float(self.curr_velocity_x.value),
+        #     -1 * safe_float(self.curr_velocity_y.value),
+        # )
 
         features = Features(
-            linearVelocity=lv if self.objectmanager.time > 0.0 else start_linearVelocity
+            # linearVelocity=(lv if self.objectmanager.time != 0.0 else start_linearVelocity)
+            linearVelocity=(start_linearVelocity)
         )
 
-        angle = 0.0
-        size = 10.0
         new_obj = RealObject(
             world,
             surface,
@@ -401,6 +405,7 @@ class PointParticleSideBar:
                         self.objectmanager.objects.pop(i)
                         self.objectmanager.objects.append(new_obj)
                         break
+        self.objectmanager.reset_simulation()
         self.hide()
 
     def reset_inputs(self) -> None:
@@ -408,8 +413,8 @@ class PointParticleSideBar:
 
         self.start_velocity_x.value = ""
         self.start_velocity_y.value = ""
-        self.curr_velocity_x.value = ""
-        self.curr_velocity_y.value = ""
+        # self.curr_velocity_x.value = ""
+        # self.curr_velocity_y.value = ""
 
         self.applied_force_x.value = ""
         self.applied_force_y.value = ""

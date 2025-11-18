@@ -403,23 +403,25 @@ class SideBar:
                 self.featurespanel.start_angular_velocity.value
             )
 
-            lv = (
-                safe_float(self.featurespanel.curr_velocity_x.value),
-                -1 * safe_float(self.featurespanel.curr_velocity_y.value),
-            )
-            av = safe_float(self.featurespanel.curr_angular_velocity.value)
+            # lv = (
+            #     safe_float(self.featurespanel.curr_velocity_x.value),
+            #     -1 * safe_float(self.featurespanel.curr_velocity_y.value),
+            # )
+            # av = safe_float(self.featurespanel.curr_angular_velocity.value)
             mass = safe_float(self.featurespanel.mass.value, 0.0)
             d = safe_float(self.featurespanel.density.value, 1.0)
             f = safe_float(self.featurespanel.friction.value, 0.5)
             r = safe_float(self.featurespanel.restitution.value, 0.0)
 
             features = Features(
-                linearVelocity=(
-                    lv if self.objectmanager.time != 0.0 else start_linearVelocity
-                ),
-                angularVelocity=(
-                    av if self.objectmanager.time != 0.0 else start_angularVelocity
-                ),
+                # linearVelocity=(
+                #     lv if self.objectmanager.time != 0.0 else start_linearVelocity
+                # ),
+                # angularVelocity=(
+                #     av if self.objectmanager.time != 0.0 else start_angularVelocity
+                # ),
+                linearVelocity=(start_linearVelocity),
+                angularVelocity=(start_angularVelocity),
                 density=d,
                 friction=f,
                 restitution=r,
@@ -488,4 +490,5 @@ class SideBar:
                         self.objectmanager.objects.pop(i)
                         self.objectmanager.objects.append(new_obj)
                         break
+        self.objectmanager.reset_simulation()
         self.hide()

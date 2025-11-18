@@ -198,7 +198,35 @@ class Panel_GUI:
             self.objects_manager.objects.clear()
 
         btn_clr.default_at_unclick = clear_all
+        # --- Info ---
+        img = pygame.image.load("app/assets/icons/info.svg")
+        img = pygame.transform.smoothscale(img, (30, 30))
+        variant = tp.graphics.change_color_on_img(
+            img, img.get_at((0, 0)), (100, 100, 100)
+        )
+        btn_info = tp.ImageButton("", img.copy(), img_hover=variant)
+        helper = tp.Helper('Load file', btn_info, countdown=30, offset=(0, 40))
+        helper.set_font_size(12)
 
+        text = """
+        position - meters (m)
+        velocity - meters per second (m/s)
+        force - newtons (N)
+        mass - kilograms (kg)
+        density - kilograms per square meter (kg/m²) - in 2D
+        gravity - meters per second squared (m/s²)
+        angular velocity - radians per second (rad/s)
+        friction - unitless coefficient
+        restitution - unitless coefficient
+        """
+
+        info_view = tp.Alert("Quantities and measurement units", text, ok_text="Close")
+
+        def show_info():
+            info_view.launch_alone(click_outside_cancel=True)
+
+        btn_info.default_at_unclick = show_info
+        # ------
         self.metagroup = tp.Group(
             [
                 self.group_draw,
@@ -206,7 +234,7 @@ class Panel_GUI:
                 self.group_ext,
                 self.group_color,
                 save_group,
-                btn_clr,
+                tp.Group([btn_clr, btn_info], "h"),
             ]
         )
         self.metagroup.sort_children("h", gap=30)
