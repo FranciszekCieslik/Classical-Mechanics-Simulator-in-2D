@@ -351,7 +351,7 @@ class SideBar:
         camera = rlobjct.visual.camera
         obj_type = self.selectortype.checkboxpool.get_value()
         shape_type = self.obj.shape_type
-        position = (safe_float(self.x_pos.value), -1 * safe_float(self.y_pos.value))
+        position = b2Vec2(safe_float(self.x_pos.value), -1 * safe_float(self.y_pos.value))
 
         # --- rozmiar obiektu ---
         size: Optional[Union[float, tuple[float, float], list[tuple[float, float]]]] = (
@@ -441,7 +441,7 @@ class SideBar:
             self.objectmanager.collector,
             features,
         )
-        new_obj.start_position = rlobjct.start_position
+        new_obj.start_position = position if self.objectmanager.time == 0.0 else rlobjct.start_position
         if new_obj.physics.body is None:
             return None
 
@@ -490,5 +490,5 @@ class SideBar:
                         self.objectmanager.objects.pop(i)
                         self.objectmanager.objects.append(new_obj)
                         break
-        self.objectmanager.reset_simulation()
+        # self.objectmanager.reset_simulation()
         self.hide()

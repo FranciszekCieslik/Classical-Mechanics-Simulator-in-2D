@@ -329,7 +329,7 @@ class PointParticleSideBar:
         surface = rlobjct.visual.surface
         camera = rlobjct.visual.camera
         shape_type = self.obj.shape_type
-        position = (safe_float(self.x_pos.value), -1 * safe_float(self.y_pos.value))
+        position = b2Vec2(safe_float(self.x_pos.value), -1 * safe_float(self.y_pos.value))
         color = rlobjct.visual.color
         cell_size = rlobjct.cell_size
         obj_type = 'dynamic'
@@ -366,7 +366,7 @@ class PointParticleSideBar:
             self.objectmanager.collector,
             features,
         )
-        new_obj.start_position = rlobjct.start_position
+        new_obj.start_position = position if self.objectmanager.time == 0.0 else rlobjct.start_position
 
         if mass != 0:
             new_obj.physics.body.fixtures[0].density = new_obj.physics.body.fixtures[
@@ -405,7 +405,7 @@ class PointParticleSideBar:
                         self.objectmanager.objects.pop(i)
                         self.objectmanager.objects.append(new_obj)
                         break
-        self.objectmanager.reset_simulation()
+        # self.objectmanager.reset_simulation()
         self.hide()
 
     def reset_inputs(self) -> None:
