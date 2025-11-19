@@ -2,6 +2,7 @@ from typing import Optional
 
 import pygame
 import thorpy as tp
+from obj.guielements.timer import Timer
 from obj.drawassistance import DrawAssistance
 from obj.guielements.colorpalette import ColorPalette
 from obj.guielements.numinputoncheckbox import NumberInputOnCheckbox
@@ -227,6 +228,8 @@ class Panel_GUI:
 
         btn_info.default_at_unclick = show_info
         # ------
+        self.simulation_timer = Timer(self.objects_manager)
+        # ------
         self.metagroup = tp.Group(
             [
                 self.group_draw,
@@ -235,6 +238,7 @@ class Panel_GUI:
                 self.group_color,
                 save_group,
                 tp.Group([btn_clr, btn_info], "h"),
+                self.simulation_timer.get()
             ]
         )
         self.metagroup.sort_children("h", gap=30)
@@ -246,6 +250,7 @@ class Panel_GUI:
     def after_update(self):
         self.draw_assistance.set_color(self.color_palette.selected_color)
         self.color_palette.update_color_preview()
+        self.simulation_timer.update()
 
     def set_screen_recursive(self, element, new_surface):
         if element is None:
