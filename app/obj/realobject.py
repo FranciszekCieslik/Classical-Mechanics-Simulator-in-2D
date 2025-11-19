@@ -82,7 +82,7 @@ class RealObject:
             color,
             self.cell_size,
             self.physics.body,
-            self.vector_manager.forcemanager.total_force,
+            self.vector_manager.forcemanager,
         )
         self.sync()
 

@@ -3,6 +3,7 @@ from typing import Any, Optional
 import pygame
 import pygame.gfxdraw
 from Box2D import b2Vec2
+from obj.forcemanager import ForceManager
 from obj.camera import Camera
 
 
@@ -19,7 +20,7 @@ class Trajectory:
         color: pygame.Color,
         base_cell_size: int,
         body: Any,
-        total_force: b2Vec2,
+        forcemanager: ForceManager,
     ):
         self.camera = camera
         self.light_color = tuple(min(c + 100, 255) for c in color[:3])
@@ -30,7 +31,7 @@ class Trajectory:
         self.visible: bool = False
         self.trajectory_points: list[pygame.Vector2] = []
         self.body = body
-        self.total_force = total_force
+        self.forcemanager = forcemanager
 
     def add_trajectory_point(self, point: pygame.Vector2) -> None:
         n_point = self._create_trajectory_point(point)
@@ -68,40 +69,32 @@ class Trajectory:
         return pygame.Vector2(screen_x, screen_y)
 
     def _if_point_on_screen(self, point: pygame.Vector2) -> bool:
-        """Zwraca True, jeśli punkt (w świecie) jest widoczny na ekranie."""
         screen_pos = self._point_to_screen(point)
         w, h = self.surface.get_size()
         return 0 <= screen_pos.x <= w and 0 <= screen_pos.y <= h
 
-    # PHYSICS PREDICTION
-    def _predict_trajectory(
-        self, body: Any, dt: float = 1 / 60, steps: int = 60
-    ) -> Optional[list[pygame.Vector2]]:
+    def _predict_trajectory(self, body: Any, dt: float = 1 / 60, steps: int = 60):
         if not body.awake:
             return None
 
-        g = body.world.gravity
-        if hasattr(g, "x") and hasattr(g, "y"):
-            gravity = pygame.Vector2(g.x, g.y)
-        else:
-            gravity = pygame.Vector2(0, -9.81)
-
-        total_force = pygame.Vector2(self.total_force.x, self.total_force.y)
-
-        pos = pygame.Vector2(body.worldCenter.x, body.worldCenter.y)
-        vel = pygame.Vector2(body.linearVelocity.x, body.linearVelocity.y)
         mass = body.mass
 
+        # Initial state
+        pos = pygame.Vector2(body.worldCenter.x, body.worldCenter.y)
+        vel = pygame.Vector2(body.linearVelocity.x, body.linearVelocity.y)
+
         trajectory = [pos.copy()]
+
         for _ in range(steps):
-            force = total_force
-            acc = force / mass
+            acc = self.forcemanager.total_force / mass
 
             vel += acc * dt
             pos += vel * dt
+
             trajectory.append(pos.copy())
 
         return trajectory
+
 
     def draw_predict_trajectory(self, skip: int = 2):
         """
