@@ -52,13 +52,13 @@ class PopInfo:
         I = body.inertia
         er = 0.5 * I * av * av
         return (
-            f"Object at position: {round(pos.x,3)}, {round(-pos.y,3)}\n"
-            f"Linear velocity: {round(lv,3)} m/s\n"
-            f"Acceleration: {round(acc,3)} m/s²\n"
-            f"Angular velocity: {round(av,3)} rad/s\n"
-            f"Kinetic energy: {round(ek,3)} J\n"
-            f"Rotational energy: {round(er,3)} J\n"
-            f"Potential energy: {round(dep,3)} J\n"
+            f"Object at position: ({pos.x:.2f}, {-pos.y:.2f}) m\n"
+            f"Linear velocity: {lv:.3f} m/s\n"
+            f"Acceleration: {acc:.3f} m/s²\n"
+            f"Angular velocity: {av:.3f} rad/s\n"
+            f"Kinetic energy: {ek:.3f} J\n"
+            f"Rotational energy: {er:.3f} J\n"
+            f"Potential energy: {dep:.3f} J\n"
         )
 
     def _position(self):
