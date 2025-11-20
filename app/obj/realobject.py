@@ -34,8 +34,8 @@ class RealObject:
     ) -> None:
         self.my_manager: Optional[Any] = None
 
-        self.obj_type = obj_type
         self.shape_type = shape_type
+        self.obj_type = obj_type if shape_type != "point_particle" else 'dynamic'
         self.size = size
         self.start_angle = angle
         self.color = color

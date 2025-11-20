@@ -8,6 +8,7 @@ from obj.axes import Axes
 from obj.camera import Camera
 from obj.drawassistance import DrawAssistance
 from obj.grid import Grid
+from obj.guielements.popinfo import PopInfo
 from obj.guielements.sidebar.particle_sidebar import PointParticleSideBar
 from obj.guielements.sidebar.sidebar import SideBar
 from obj.objectsmanager import ObjectsManager
@@ -67,12 +68,16 @@ class App:
         self.point_particle_sidebar: PointParticleSideBar = PointParticleSideBar(
             self.objmanager
         )
+        # --- Pop Inf ---
+        self.pop_info = PopInfo(self.camera, self.objmanager)
+
         # --- Thorpy Launcher ---
         self.panels = tp.Group(
             [
                 self.panelgui.mainbox,
                 self.objsidebar.container,
                 self.point_particle_sidebar.container,
+                self.pop_info.get(),
             ],
             mode=None,
         )
@@ -161,11 +166,13 @@ class App:
                     self.draw_assistance.set_third_triangle_point(event.pos)
             else:
                 now = pygame.time.get_ticks()
+                obj = self.objmanager.select_object_at_position(pygame.mouse.get_pos())
                 if now - self.last_click_time <= self.DOUBLE_CLICK_TIME:
-                    obj = self.objmanager.select_object_at_position(event.pos)
                     if obj:
                         self.objmanager.selected_obj_is_being_dragged = True
                         self.prev_mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
+                else:
+                    self.pop_info.update(obj)
                 self.last_click_time = now
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             result = self.draw_assistance.deactivate_drawing(
@@ -238,8 +245,8 @@ class App:
             for event in pygame.event.get():
                 self.on_event(event)
             self.on_update()
+            self.pop_info.tick()
             self.on_render()
-
             pygame.display.flip()
             self.clock.tick(60)
 
