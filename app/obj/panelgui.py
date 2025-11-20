@@ -2,10 +2,11 @@ from typing import Optional
 
 import pygame
 import thorpy as tp
-from obj.guielements.timer import Timer
 from obj.drawassistance import DrawAssistance
 from obj.guielements.colorpalette import ColorPalette
 from obj.guielements.numinputoncheckbox import NumberInputOnCheckbox
+from obj.guielements.stoper import Stoper
+from obj.guielements.timer import Timer
 from obj.guielements.toggleimagebutton import ToggleImageButton
 from obj.objectsmanager import ObjectsManager
 from obj.savemanager import SaveManager
@@ -32,7 +33,7 @@ class Panel_GUI:
 
         self.objects_manager = objmanager
         self.draw_assistance = draw_assistance
-        self.button_play: Optional[tp.ImageButton] = None
+        self.button_play: ToggleImageButton
         self.is_rubber_on: bool = False
         self.save_manager = SaveManager()
         self.on_init()
@@ -46,6 +47,7 @@ class Panel_GUI:
             "app/assets/icons/triangle.svg",
             "app/assets/icons/rubber.svg",
         ]
+
         draw_labels = [
             # "Line",
             "Rectangle",
@@ -57,7 +59,7 @@ class Panel_GUI:
         draw_buttons = []
         for icon_path, label in zip(ico_paths, draw_labels):
             img = pygame.image.load(icon_path)
-            img = pygame.transform.smoothscale(img, (30, 30))
+            img = pygame.transform.smoothscale(img, (25, 25))
             variant = tp.graphics.change_color_on_img(
                 img, img.get_at((0, 0)), (100, 100, 100)
             )
@@ -95,7 +97,7 @@ class Panel_GUI:
 
         for icon_path, label in zip(sim_icons, sim_labels):
             img = pygame.image.load(icon_path)
-            img = pygame.transform.smoothscale(img, (30, 30))
+            img = pygame.transform.smoothscale(img, (25, 25))
             variant = tp.graphics.change_color_on_img(
                 img, img.get_at((0, 0)), (100, 100, 100)
             )
@@ -104,13 +106,13 @@ class Panel_GUI:
             if "play.svg" in icon_path:
                 # --- Wczytanie ikon ---
                 img_play = pygame.image.load("app/assets/icons/play.svg")
-                img_play = pygame.transform.smoothscale(img_play, (30, 30))
+                img_play = pygame.transform.smoothscale(img_play, (25, 25))
                 img_play_hover = tp.graphics.change_color_on_img(
                     img_play, img_play.get_at((0, 0)), (100, 100, 100)
                 )
 
                 img_stop = pygame.image.load("app/assets/icons/stop.svg")
-                img_stop = pygame.transform.smoothscale(img_stop, (30, 30))
+                img_stop = pygame.transform.smoothscale(img_stop, (25, 25))
                 img_stop_hover = tp.graphics.change_color_on_img(
                     img_stop, img_stop.get_at((0, 0)), (100, 100, 100)
                 )
@@ -143,16 +145,16 @@ class Panel_GUI:
 
         self.gravity_input = NumberInputOnCheckbox(
             checkbox_text="GRAVITY",
-            input_text="9.8",
+            input_text="9.81 ",
             fun=self.objects_manager.set_gravity_force,
-            input_placeholder="9.8",
+            input_placeholder="9.81 ",
         )
         self.group_ext = tp.Group([self.gravity_input.get()], "v", gap=5, align="right")
         self.color_palette = ColorPalette()
         self.group_color = self.color_palette.get()
         # --- Save ---
         img = pygame.image.load("app/assets/icons/save.svg")
-        img = pygame.transform.smoothscale(img, (30, 30))
+        img = pygame.transform.smoothscale(img, (25, 25))
         variant = tp.graphics.change_color_on_img(
             img, img.get_at((0, 0)), (100, 100, 100)
         )
@@ -168,7 +170,7 @@ class Panel_GUI:
         btn_save.default_at_unclick = on_save
         # -- Load ---
         img = pygame.image.load("app/assets/icons/load.svg")
-        img = pygame.transform.smoothscale(img, (30, 30))
+        img = pygame.transform.smoothscale(img, (25, 25))
         variant = tp.graphics.change_color_on_img(
             img, img.get_at((0, 0)), (100, 100, 100)
         )
@@ -187,7 +189,7 @@ class Panel_GUI:
         save_group = tp.Group([btn_save, btn_load], 'h', gap=10)
         # --- Clear Btn ---
         img = pygame.image.load("app/assets/icons/clear.svg")
-        img = pygame.transform.smoothscale(img, (30, 30))
+        img = pygame.transform.smoothscale(img, (25, 25))
         variant = tp.graphics.change_color_on_img(
             img, img.get_at((0, 0)), (100, 100, 100)
         )
@@ -201,7 +203,7 @@ class Panel_GUI:
         btn_clr.default_at_unclick = clear_all
         # --- Info ---
         img = pygame.image.load("app/assets/icons/info.svg")
-        img = pygame.transform.smoothscale(img, (30, 30))
+        img = pygame.transform.smoothscale(img, (25, 25))
         variant = tp.graphics.change_color_on_img(
             img, img.get_at((0, 0)), (100, 100, 100)
         )
@@ -229,6 +231,7 @@ class Panel_GUI:
         btn_info.default_at_unclick = show_info
         # ------
         self.simulation_timer = Timer(self.objects_manager)
+        self.stoper = Stoper()
         # ------
         self.metagroup = tp.Group(
             [
@@ -238,10 +241,11 @@ class Panel_GUI:
                 self.group_color,
                 save_group,
                 tp.Group([btn_clr, btn_info], "h"),
-                self.simulation_timer.get()
+                self.simulation_timer.get(),
+                self.stoper.get(),
             ]
         )
-        self.metagroup.sort_children("h", gap=30)
+        self.metagroup.sort_children("h", gap=6)
         self.metagroup.set_size(self.screen.get_size())
         self.mainbox = tp.Box([self.metagroup])
         self.mainbox.set_topleft(0, 0)

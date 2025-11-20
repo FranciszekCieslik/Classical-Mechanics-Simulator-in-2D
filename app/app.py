@@ -63,6 +63,8 @@ class App:
         self.panelgui: Panel_GUI = Panel_GUI(
             objmanager=self.objmanager, draw_assistance=self.draw_assistance
         )
+        self.objmanager.stoper = self.panelgui.stoper
+        self.objmanager.un_play = lambda: self.panelgui.button_play.set_value(False)
         # --- Side Bar ---
         self.objsidebar: SideBar = SideBar(self.objmanager)
         self.point_particle_sidebar: PointParticleSideBar = PointParticleSideBar(

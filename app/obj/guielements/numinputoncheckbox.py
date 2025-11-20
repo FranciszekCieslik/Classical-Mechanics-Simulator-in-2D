@@ -10,7 +10,7 @@ class NumberInputOnCheckbox:
         checkbox_text: str,
         input_text: str,
         fun: Callable[[float], None],
-        input_placeholder: str = "",
+        input_placeholder: str = "09.81",
         max_value: float = 83.85,
     ):
         if not callable(fun):
@@ -25,9 +25,9 @@ class NumberInputOnCheckbox:
 
         self.label_checkbox = tp.Text(checkbox_text, font_size=12)
 
-        self.input = NumberInput(input_text, input_placeholder)
-        self.input.set_size((120, 28))
+        self.input = NumberInput(text=input_text, placeholder=input_placeholder)
         self.input.set_only_non_negative()
+        self.input.set_font_size(14)
         self.input.max_length = 5
         self._set_input_visual(active=True)
 

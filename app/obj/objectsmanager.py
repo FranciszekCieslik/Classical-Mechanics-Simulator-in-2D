@@ -1,10 +1,10 @@
 import math
-from concurrent.futures import ThreadPoolExecutor
-from typing import List, Optional, Tuple, Union
+from typing import Callable, List, Optional, Tuple, Union
 
 import pygame
 from Box2D import b2CircleShape, b2PolygonShape, b2Vec2, b2World
 from obj.camera import Camera
+from obj.guielements.stoper import Stoper
 from obj.impulsecollector import ImpulseCollector
 from obj.physicobject import Features
 
@@ -31,7 +31,8 @@ class ObjectsManager:
         self.time: float = 0.00
         self.selected_obj: Optional[RealObject] = None
         self.selected_obj_is_being_dragged: bool = False
-
+        self.stoper: Optional[Stoper] = None
+        self.un_play: Optional[Callable[[], None]] = None
         self.collector = ImpulseCollector()
         self.world.contactListener = self.collector
 
@@ -62,6 +63,15 @@ class ObjectsManager:
         self.objects.append(new_object)
 
     def step_simulation(self) -> None:
+        if self.stoper:
+            val = self.stoper.value
+            if val != 0 and val <= self.time:
+                self.is_simulation_running = False
+                self.time = round(self.time, 1)
+                if self.un_play:
+                    self.un_play()
+                return
+
         if self.is_simulation_running:
             self._apply_forces()
             self.world.Step(
@@ -80,6 +90,7 @@ class ObjectsManager:
     def reset_simulation(self) -> None:
         # with ThreadPoolExecutor(max_workers=8) as executor:
         #     list(executor.map(lambda obj: obj.reset(), self.objects))
+        self.remove_dust()
         for obj in self.objects:
             obj.reset()
         self.time = 0.0
