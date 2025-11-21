@@ -142,14 +142,31 @@ class Panel_GUI:
             sim_buttons.append(btn)
 
         self.group_simulation = tp.Group(sim_buttons, "h")
-
         self.gravity_input = NumberInputOnCheckbox(
             checkbox_text="GRAVITY",
             input_text="9.81 ",
             fun=self.objects_manager.set_gravity_force,
             input_placeholder="9.81 ",
         )
-        self.group_ext = tp.Group([self.gravity_input.get()], "v", gap=5, align="right")
+        self.stop_simulation_at_collision = tp.Checkbox()
+
+        def stop_at_collision():
+            if self.stop_simulation_at_collision.value:
+                self.objects_manager.is_simulation_running = False
+                self.button_play.set_value(False)
+
+        self.objects_manager.collector.function = stop_at_collision
+        group = tp.Group(
+            [
+                self.stop_simulation_at_collision,
+                tp.Text("Stop simulation at collision", font_size=14),
+            ],
+            'h',
+        )
+        self.group_ext = tp.Group(
+            [self.gravity_input.get(), group], "v", gap=5, align="left"
+        )
+        # --- Color Palette ---
         self.color_palette = ColorPalette()
         self.group_color = self.color_palette.get()
         # --- Save ---
