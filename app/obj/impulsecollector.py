@@ -8,6 +8,7 @@ class ImpulseCollector(b2ContactListener):
         super().__init__()
         self.impulses = {}  # body -> dict with normal/tangent
         self.function: Optional[Callable[[], None]] = None
+        self.collision_detected = False
 
     def PostSolve(self, contact, impulse):
         bodyA = contact.fixtureA.body
@@ -26,5 +27,4 @@ class ImpulseCollector(b2ContactListener):
         self.impulses.setdefault(bodyB, []).append(FB)
 
     def BeginContact(self, contact):
-        if self.function:
-            self.function()
+        self.collision_detected = True

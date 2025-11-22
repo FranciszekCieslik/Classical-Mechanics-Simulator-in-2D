@@ -84,6 +84,13 @@ class RealObject:
             self.physics.body,
             self.vector_manager.forcemanager,
         )
+
+        body = self.physics.body
+        self._prev_pos = body.position.copy()
+        self._prev_angle = body.angle
+        self._prev_linear_velocity = body.linearVelocity.copy()
+        self._prev_angular_velocity = body.angularVelocity
+
         self.sync()
 
     def destroy(self):
@@ -215,3 +222,17 @@ class RealObject:
                 "show_velocity_x": self.vector_manager.lineral_velocity.vec_x.visible,
                 "show_velocity_y": self.vector_manager.lineral_velocity.vec_y.visible,
             }
+
+    def save_state_before_step(self):
+        body = self.physics.body
+        self._prev_pos = body.position.copy()
+        self._prev_angle = body.angle
+        self._prev_linear_velocity = body.linearVelocity.copy()
+        self._prev_angular_velocity = body.angularVelocity
+
+    def restore_state(self):
+        body = self.physics.body
+        body.position = self._prev_pos
+        body.angle = self._prev_angle
+        body.linearVelocity = self._prev_linear_velocity
+        body.angularVelocity = self._prev_angular_velocity

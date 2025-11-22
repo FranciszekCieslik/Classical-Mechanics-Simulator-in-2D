@@ -150,15 +150,6 @@ class Panel_GUI:
         )
         self.stop_simulation_at_collision = tp.Checkbox()
 
-        def stop_at_collision():
-            if self.stop_simulation_at_collision.value:
-                self.objects_manager.is_simulation_running = False
-                self.objects_manager.time = (
-                    round(self.objects_manager.time, 2) - self.objects_manager.time_step
-                )
-                self.button_play.set_value(False)
-
-        self.objects_manager.collector.function = stop_at_collision
         group = tp.Group(
             [
                 self.stop_simulation_at_collision,
@@ -275,6 +266,9 @@ class Panel_GUI:
         self.draw_assistance.set_color(self.color_palette.selected_color)
         self.color_palette.update_color_preview()
         self.simulation_timer.update()
+        self.objects_manager.stop_simulation_at_collision = (
+            self.stop_simulation_at_collision.value
+        )
 
     def set_screen_recursive(self, element, new_surface):
         if element is None:

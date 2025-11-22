@@ -25,6 +25,7 @@ class ObjectsManager:
         self.cell_size: int = cell_size
         self.objects: list[RealObject] = []
         self.is_simulation_running: bool = False
+        self.stop_simulation_at_collision: bool = False
         self.time_step: float = 1.0 / 100.0
         self.velocity_iterations: int = 8
         self.position_iterations: int = 3
@@ -63,6 +64,22 @@ class ObjectsManager:
         self.objects.append(new_object)
 
     def step_simulation(self) -> None:
+
+        if self.collector.collision_detected and self.stop_simulation_at_collision:
+            self.is_simulation_running = False
+            self.collector.collision_detected = False
+            self.time = round(self.time, 2) - self.time_step
+            if self.un_play:
+                self.un_play()
+            for obj in self.objects:
+                obj.restore_state()
+                obj.sync()
+            return
+        else:
+            self.collector.collision_detected = False
+            for obj in self.objects:
+                obj.save_state_before_step()
+
         if self.stoper:
             val = self.stoper.value
             if val != 0 and val <= self.time:
@@ -82,14 +99,10 @@ class ObjectsManager:
             self.time += self.time_step
 
     def draw_objects(self) -> None:
-        # with ThreadPoolExecutor(max_workers=8) as executor:
-        #     list(executor.map(lambda obj: obj.draw(), self.objects))
         for obj in self.objects:
             obj.draw()
 
     def reset_simulation(self) -> None:
-        # with ThreadPoolExecutor(max_workers=8) as executor:
-        #     list(executor.map(lambda obj: obj.reset(), self.objects))
         self.remove_dust()
         for obj in self.objects:
             obj.reset()
