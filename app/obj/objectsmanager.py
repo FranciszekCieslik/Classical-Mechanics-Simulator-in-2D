@@ -25,7 +25,7 @@ class ObjectsManager:
         self.cell_size: int = cell_size
         self.objects: list[RealObject] = []
         self.is_simulation_running: bool = False
-        self.time_step: float = 1.0 / 60.0
+        self.time_step: float = 1.0 / 100.0
         self.velocity_iterations: int = 8
         self.position_iterations: int = 3
         self.time: float = 0.00

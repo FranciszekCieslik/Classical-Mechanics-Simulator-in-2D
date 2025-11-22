@@ -250,7 +250,7 @@ class App:
             self.pop_info.tick()
             self.on_render()
             pygame.display.flip()
-            self.clock.tick(60)
+            self.clock.tick(100)
 
         self.on_cleanup()
 

@@ -153,6 +153,7 @@ class Panel_GUI:
         def stop_at_collision():
             if self.stop_simulation_at_collision.value:
                 self.objects_manager.is_simulation_running = False
+                self.objects_manager.time -= self.objects_manager.time_step
                 self.button_play.set_value(False)
 
         self.objects_manager.collector.function = stop_at_collision

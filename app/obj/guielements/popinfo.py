@@ -23,7 +23,7 @@ class PopInfo:
         self.pos = Vector2(0, 0)
         self.offset = Vector2(10, -10)
 
-        self.cooldown = 15 * 60
+        self.cooldown = 10 * 60
         self.time_left = self.cooldown
 
         self.tp_text = tp.Text("Object", font_size=12)

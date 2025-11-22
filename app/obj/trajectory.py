@@ -3,8 +3,8 @@ from typing import Any, Optional
 import pygame
 import pygame.gfxdraw
 from Box2D import b2Vec2
-from obj.forcemanager import ForceManager
 from obj.camera import Camera
+from obj.forcemanager import ForceManager
 
 
 def _vectors_are_close(
@@ -73,7 +73,7 @@ class Trajectory:
         w, h = self.surface.get_size()
         return 0 <= screen_pos.x <= w and 0 <= screen_pos.y <= h
 
-    def _predict_trajectory(self, body: Any, dt: float = 1 / 60, steps: int = 60):
+    def _predict_trajectory(self, body: Any, dt: float = 1 / 100, steps: int = 100):
         if not body.awake:
             return None
 
@@ -94,7 +94,6 @@ class Trajectory:
             trajectory.append(pos.copy())
 
         return trajectory
-
 
     def draw_predict_trajectory(self, skip: int = 2):
         """
