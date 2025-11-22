@@ -351,9 +351,9 @@ class SideBar:
         camera = rlobjct.visual.camera
         obj_type = self.selectortype.checkboxpool.get_value()
         shape_type = self.obj.shape_type
-        position = b2Vec2(safe_float(self.x_pos.value), -1 * safe_float(self.y_pos.value))
-
-        # --- rozmiar obiektu ---
+        position = b2Vec2(
+            safe_float(self.x_pos.value), -1 * safe_float(self.y_pos.value)
+        )
         size: Optional[Union[float, tuple[float, float], list[tuple[float, float]]]] = (
             None
         )
@@ -395,31 +395,22 @@ class SideBar:
 
         features = None
         if obj_type == 'dynamic':
+
             start_linearVelocity = (
                 safe_float(self.featurespanel.start_velocity_x.value),
                 -1 * safe_float(self.featurespanel.start_velocity_y.value),
             )
+
             start_angularVelocity = safe_float(
                 self.featurespanel.start_angular_velocity.value
             )
 
-            # lv = (
-            #     safe_float(self.featurespanel.curr_velocity_x.value),
-            #     -1 * safe_float(self.featurespanel.curr_velocity_y.value),
-            # )
-            # av = safe_float(self.featurespanel.curr_angular_velocity.value)
             mass = safe_float(self.featurespanel.mass.value, 0.0)
             d = safe_float(self.featurespanel.density.value, 1.0)
             f = safe_float(self.featurespanel.friction.value, 0.5)
             r = safe_float(self.featurespanel.restitution.value, 0.0)
 
             features = Features(
-                # linearVelocity=(
-                #     lv if self.objectmanager.time != 0.0 else start_linearVelocity
-                # ),
-                # angularVelocity=(
-                #     av if self.objectmanager.time != 0.0 else start_angularVelocity
-                # ),
                 linearVelocity=(start_linearVelocity),
                 angularVelocity=(start_angularVelocity),
                 density=d,
@@ -441,7 +432,10 @@ class SideBar:
             self.objectmanager.collector,
             features,
         )
-        new_obj.start_position = position if self.objectmanager.time == 0.0 else rlobjct.start_position
+        new_obj.start_position = (
+            position if self.objectmanager.time == 0.0 else rlobjct.start_position
+        )
+
         if new_obj.physics.body is None:
             return None
 
@@ -490,5 +484,4 @@ class SideBar:
                         self.objectmanager.objects.pop(i)
                         self.objectmanager.objects.append(new_obj)
                         break
-        # self.objectmanager.reset_simulation()
         self.hide()
