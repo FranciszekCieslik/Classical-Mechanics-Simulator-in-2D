@@ -67,7 +67,7 @@ class ObjectsManager:
             val = self.stoper.value
             if val != 0 and val <= self.time:
                 self.is_simulation_running = False
-                self.time = round(self.time, 1)
+                self.time = round(self.time, 2)
                 if self.un_play:
                     self.un_play()
                 return
