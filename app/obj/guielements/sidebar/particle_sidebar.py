@@ -361,7 +361,7 @@ class PointParticleSideBar:
             features,
         )
         new_obj.start_position = (
-            position if self.objectmanager.time == 0.0 else rlobjct.start_position
+            position if self.objectmanager.time == 0 else rlobjct.start_position
         )
 
         if mass != 0:

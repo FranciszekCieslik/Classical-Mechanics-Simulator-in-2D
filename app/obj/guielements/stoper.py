@@ -4,7 +4,7 @@ import thorpy as tp
 
 class Stoper:
     def __init__(self) -> None:
-        self.value: float = 0.00
+        self.value: int = 0
         # --- Btn-Up ---
         img = pygame.image.load("app/assets/icons/arrow-up.svg")
         img = pygame.transform.smoothscale(img, (25, 25))
@@ -55,42 +55,31 @@ class Stoper:
             'h',
         )
 
-    def _prep_text(self, val: float) -> str:
-        val = round(val, 2)
-        whole = int(val)
-        cents = int(round((val - whole) * 100))
-        return f"{whole:02d}.{cents:02d}s"
+    def _prep_text(self, val: int) -> str:
+        seconds = val // 1000
+        cents = (val % 1000) // 10
+        return f"{seconds:02d}.{cents:02d}s"
 
     def get(self):
         return self.metagroup
 
     def _val_up(self) -> None:
-        self.value += 1
-        txt = self._prep_text(self.value)
-        self.display.set_value(txt)
+
+        self.value += 1000
+        self.display.set_value(self._prep_text(self.value))
 
     def _val_down(self) -> None:
-        if self.value <= 1:
-            self.value = 0
-        else:
-            self.value -= 1
-        txt = self._prep_text(self.value)
-        self.display.set_value(txt)
+        self.value = max(0, self.value - 1000)
+        self.display.set_value(self._prep_text(self.value))
 
     def _cs_val_up(self) -> None:
-        self.value += 0.01
-        txt = self._prep_text(self.value)
-        self.display.set_value(txt)
+        self.value += 10
+        self.display.set_value(self._prep_text(self.value))
 
     def _cs_val_down(self) -> None:
-        if self.value <= 0.00001:
-            self.value = 0
-            return
-        self.value -= 0.01
-        txt = self._prep_text(self.value)
-        self.display.set_value(txt)
+        self.value = max(0, self.value - 10)
+        self.display.set_value(self._prep_text(self.value))
 
     def _reset(self):
-        self.value = 0.00
-        txt = self._prep_text(self.value)
-        self.display.set_value(txt)
+        self.value = 0
+        self.display.set_value(self._prep_text(self.value))

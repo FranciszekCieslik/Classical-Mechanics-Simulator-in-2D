@@ -433,7 +433,7 @@ class SideBar:
             features,
         )
         new_obj.start_position = (
-            position if self.objectmanager.time == 0.0 else rlobjct.start_position
+            position if self.objectmanager.time == 0 else rlobjct.start_position
         )
 
         if new_obj.physics.body is None:

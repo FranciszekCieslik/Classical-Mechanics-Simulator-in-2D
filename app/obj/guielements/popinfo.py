@@ -51,10 +51,11 @@ class PopInfo:
         dep = body.mass * vector_to_scalar(body.world.gravity) * -1 * pos.y
         I = body.inertia
         er = 0.5 * I * av * av
+        y = -1 * pos.y if pos.y != 0.00 else 0.00
         return (
-            f"Object at position: ({pos.x:.2f}, {-pos.y:.2f}) m\n"
+            f"Object at position: ({pos.x:.2f}, {y:.2f}) m\n"
             f"Linear velocity: {lv:.3f} m/s\n"
-            f"Acceleration: {acc:.3f} m/s²\n"
+            f"Acceleration: {acc:.2f} m/s²\n"
             f"Angular velocity: {av:.3f} rad/s\n"
             f"Kinetic energy: {ek:.3f} J\n"
             f"Rotational energy: {er:.3f} J\n"
