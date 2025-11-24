@@ -26,7 +26,7 @@ class ObjectsManager:
         self.objects: list[RealObject] = []
         self.is_simulation_running: bool = False
         self.stop_simulation_at_collision: bool = False
-        self.time_step: float = 1 / 100  # 100 FPS
+        self.time_step: float = 1 / 500  # 400 FPS
         self.velocity_iterations: int = 8
         self.position_iterations: int = 3
         self.time: int = 0
@@ -36,6 +36,8 @@ class ObjectsManager:
         self.un_play: Optional[Callable[[], None]] = None
         self.collector = ImpulseCollector()
         self.world.contactListener = self.collector
+        self.skip_force: bool = True
+        self._time_ms_carry: int = 0
 
     def add_object(
         self,
@@ -64,42 +66,52 @@ class ObjectsManager:
         self.objects.append(new_object)
 
     def step_simulation(self) -> None:
+        next_time = self.time + 2
 
-        if self.stoper:
-            val = self.stoper.value
-            if val != 0 and val <= self.time:
+        if self.stoper and self.stoper.value != 0:
+            if next_time > self.stoper.value:
+                remaining_ms = self.stoper.value - self.time
+                final_dt = remaining_ms / 1000.0
+
+                if final_dt > 0:
+                    self._apply_forces()
+
+                    self.world.Step(
+                        final_dt,
+                        self.velocity_iterations,
+                        self.position_iterations,
+                    )
+
+                self.time = self.stoper.value
                 self.is_simulation_running = False
                 if self.un_play:
                     self.un_play()
-                # if self.time - val >= self.time_step:
-                #     for obj in self.objects:
-                #         obj.restore_state()
-                #         obj.sync()
                 return
 
-        if self.collector.collision_detected and self.stop_simulation_at_collision:
-            self.is_simulation_running = False
-            self.collector.collision_detected = False
-            self.time -= 10
-            if self.un_play:
-                self.un_play()
-            for obj in self.objects:
-                obj.restore_state()
-                obj.sync()
-            return
-
-        self.collector.collision_detected = False
-        for obj in self.objects:
-            obj.save_state_before_step()
-
         if self.is_simulation_running:
+            for obj in self.objects:
+                obj.save_state_before_step()
             self._apply_forces()
             self.world.Step(
                 self.time_step,
                 self.velocity_iterations,
                 self.position_iterations,
             )
-            self.time += 10
+            self.time += 2
+
+        if self.collector.collision_detected and self.stop_simulation_at_collision:
+            self.is_simulation_running = False
+            self.collector.collision_detected = False
+            if self.un_play:
+                self.un_play()
+            for obj in self.objects:
+                obj.restore_state()
+                obj.sync()
+            self.skip_force = True
+            self.time -= 2
+            return
+
+        self.collector.collision_detected = False
 
     def draw_objects(self) -> None:
         for obj in self.objects:
@@ -170,6 +182,9 @@ class ObjectsManager:
                 self.objects.pop(i)
 
     def _apply_forces(self):
+        if self.skip_force:
+            self.skip_force = False
+            return
         for obj in self.objects:
             if obj.vector_manager:
                 obj.vector_manager.forcemanager.apply_force()

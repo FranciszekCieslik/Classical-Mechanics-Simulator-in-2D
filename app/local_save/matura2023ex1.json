@@ -10,7 +10,7 @@
             "shape_type": "point_particle",
             "size": 10.0,
             "position": [
-                0.0,
+                40.0,
                 -0.0
             ],
             "angle": 0.0,
@@ -86,7 +86,7 @@
             ],
             "angular_velocity": 0.0,
             "applied_force": [
-                0.0,
+                6.0,
                 -0.0
             ],
             "show_trajectory": false,
