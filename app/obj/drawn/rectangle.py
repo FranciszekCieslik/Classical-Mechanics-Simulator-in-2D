@@ -138,7 +138,8 @@ class Rectangle:
         """Checks if a given screen point (x, y) is inside the rectangle."""
         if not self.is_visible:
             return False
-
+        if not self.points_screen or len(self.points_screen) < 2:
+            return False
         x, y = point
         n = len(self.points_screen)
         inside = False

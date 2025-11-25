@@ -116,6 +116,8 @@ class Triangle:
 
         # Using barycentric coordinates to check if the point is inside the triangle
         p = pygame.Vector2(point)
+        if not self.screen_points or len(self.screen_points) < 3:
+            return False
         a, b, c = self.screen_points
 
         # Vectors

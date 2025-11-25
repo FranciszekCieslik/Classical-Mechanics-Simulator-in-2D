@@ -133,7 +133,7 @@ class App:
 
         # --- MOUSE EVENTS ---
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-            obj = self.objmanager.select_object_at_position(event.pos)
+            obj = self.objmanager.selected_obj
             if obj:
                 if obj.shape_type != "point_particle":
                     self.objsidebar.get_data_from_real_obj(obj)
@@ -152,13 +152,10 @@ class App:
 
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.panelgui.is_rubber_on:
-                selected = self.objmanager.select_object_at_position(
-                    pygame.mouse.get_pos()
-                )
-                if selected:
-                    self.objmanager.objects.remove(selected)
+                if self.objmanager.selected_obj:
+                    self.objmanager.objects.remove(self.objmanager.selected_obj)
                     self.panelgui.is_rubber_on = False
-            elif self.draw_assistance.is_drawing:
+            if self.draw_assistance.is_drawing:
                 if self.draw_assistance.start_pos is None:
                     self.draw_assistance.set_start_position(event.pos)
                 elif (
@@ -166,9 +163,13 @@ class App:
                     and self.draw_assistance.third_triangel_point is None
                 ):
                     self.draw_assistance.set_third_triangle_point(event.pos)
+            elif self.panelgui.is_rubber_on:
+                if self.objmanager.selected_obj:
+                    self.objmanager.objects.remove(self.objmanager.selected_obj)
+                    self.panelgui.is_rubber_on = False
             else:
                 now = pygame.time.get_ticks()
-                obj = self.objmanager.select_object_at_position(pygame.mouse.get_pos())
+                obj = self.objmanager.selected_obj
                 if obj:
                     if now - self.last_click_time <= self.DOUBLE_CLICK_TIME:
                         self.pop_info.update(obj)
@@ -216,7 +217,9 @@ class App:
             self.camera.zoom_at(factor, pygame.mouse.get_pos())
 
     def on_update(self) -> None:
-        current_mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
+        pos = pygame.mouse.get_pos()
+        current_mouse_pos = pygame.Vector2(pos)
+        self.objmanager.select_object_at_position(pos)
         if self.objmanager.selected_obj_is_being_dragged and self.prev_mouse_pos:
             if current_mouse_pos != self.prev_mouse_pos:
                 delta = current_mouse_pos - self.prev_mouse_pos
@@ -231,6 +234,7 @@ class App:
                 delta = current_mouse_pos - self.prev_mouse_pos
                 self.camera.move(delta.x, delta.y)
                 self.prev_mouse_pos = current_mouse_pos
+
         self.objmanager.step_simulation()
 
     def draw_panels(self):

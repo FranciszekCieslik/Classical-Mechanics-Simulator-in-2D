@@ -140,9 +140,8 @@ class RealObject:
         self.sync()
 
     def is_point_inside(self, position) -> bool:
-        """
-        Checks if a given point (in pixels) is inside the drawn object.
-        """
+        if not position or len(position) < 2:
+            return False
         return self.visual.is_point_inside(position)
 
     def get_self_if_point_inside(self, position) -> Optional["RealObject"]:

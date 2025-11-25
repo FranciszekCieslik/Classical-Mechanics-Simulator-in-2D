@@ -141,6 +141,8 @@ class ObjectsManager:
             if obj.is_point_inside(position):
                 self.selected_obj = obj
                 return obj
+        if not self.selected_obj_is_being_dragged:
+            self.selected_obj = None
         return None
 
     def end_dragging_obj(self):
