@@ -150,7 +150,7 @@ class App:
                     ):
                         self.point_particle_sidebar.show()
 
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.panelgui.is_rubber_on:
                 selected = self.objmanager.select_object_at_position(
                     pygame.mouse.get_pos()
@@ -169,13 +169,24 @@ class App:
             else:
                 now = pygame.time.get_ticks()
                 obj = self.objmanager.select_object_at_position(pygame.mouse.get_pos())
-                if now - self.last_click_time <= self.DOUBLE_CLICK_TIME:
-                    if obj:
+                if obj:
+                    if now - self.last_click_time <= self.DOUBLE_CLICK_TIME:
+                        self.pop_info.update(obj)
+                        self.objmanager.selected_obj_is_being_dragged = False
+                    else:
                         self.objmanager.selected_obj_is_being_dragged = True
                         self.prev_mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
-                else:
-                    self.pop_info.update(obj)
                 self.last_click_time = now
+            # Kliknięcie ŚRODKOWYM (Button 2) - Kamera
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
+            self.dragging = True
+            # Używamy tej samej zmiennej co przy obiektach dla spójności
+            self.prev_mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
+
+            # Puszczenie ŚRODKOWEGO (Button 2)
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 2:
+            self.dragging = False
+            self.prev_mouse_pos = None
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             result = self.draw_assistance.deactivate_drawing(
                 self.camera, self.grid.base_cell_size
@@ -194,16 +205,9 @@ class App:
             #  --- dragging obj ---
             self.objmanager.end_dragging_obj()
             self.prev_mouse_pos = None
-        elif event.type == pygame.MOUSEMOTION and self.draw_assistance.is_drawing:
-            self.draw_assistance.set_current_position(event.pos)
-
-            # --- POSITION UPDATE ---
-        if self.objmanager.selected_obj_is_being_dragged:
-            pos = pygame.Vector2(pygame.mouse.get_pos())
-            if pos != self.prev_mouse_pos and self.objmanager.selected_obj:
-                d = self.prev_mouse_pos - pygame.Vector2(pos)
-                self.objmanager.move_selected_obj(d)
-                self.prev_mouse_pos = pos
+        elif event.type == pygame.MOUSEMOTION:
+            if self.draw_assistance.is_drawing:
+                self.draw_assistance.set_current_position(event.pos)
 
         if event.type == pygame.MOUSEWHEEL:
             factor = (
@@ -211,15 +215,22 @@ class App:
             )
             self.camera.zoom_at(factor, pygame.mouse.get_pos())
 
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
-            pygame.mouse.get_rel()
-            self.dragging = True
-        elif event.type == pygame.MOUSEBUTTONUP and event.button == 2:
-            self.dragging = False
-        elif event.type == pygame.MOUSEMOTION and self.dragging:
-            self.camera.move(*pygame.mouse.get_rel())
-
     def on_update(self) -> None:
+        current_mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
+        if self.objmanager.selected_obj_is_being_dragged and self.prev_mouse_pos:
+            if current_mouse_pos != self.prev_mouse_pos:
+                delta = current_mouse_pos - self.prev_mouse_pos
+                diff = self.camera.screen_to_world(
+                    self.prev_mouse_pos
+                ) - self.camera.screen_to_world(current_mouse_pos)
+                self.objmanager.move_selected_obj(diff * self.camera.zoom)
+                if not self.dragging:
+                    self.prev_mouse_pos = current_mouse_pos
+        if self.dragging and self.prev_mouse_pos:
+            if current_mouse_pos != self.prev_mouse_pos:
+                delta = current_mouse_pos - self.prev_mouse_pos
+                self.camera.move(delta.x, delta.y)
+                self.prev_mouse_pos = current_mouse_pos
         self.objmanager.step_simulation()
 
     def draw_panels(self):

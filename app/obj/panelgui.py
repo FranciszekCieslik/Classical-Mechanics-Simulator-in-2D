@@ -192,9 +192,10 @@ class Panel_GUI:
         def on_load():
             save_dir = "./app/local_save"
             data = self.save_manager.load_from_json(save_dir)
-            self.gravity_input.input.value = str(round(data.get("gravity")[1], 4))
-            self.objects_manager.load_from_json(data)
-            self.objects_manager.reset_simulation()
+            if data:
+                self.gravity_input.input.value = str(round(data.get("gravity")[1], 4))
+                self.objects_manager.load_from_json(data)
+                self.objects_manager.reset_simulation()
 
         btn_load.default_at_unclick = on_load
         save_group = tp.Group([btn_save, btn_load], 'h', gap=10)
