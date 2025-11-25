@@ -27,8 +27,8 @@ class ObjectsManager:
         self.is_simulation_running: bool = False
         self.stop_simulation_at_collision: bool = False
         self.time_step: float = 1 / 100
-        self.velocity_iterations: int = 10
-        self.position_iterations: int = 5
+        self.velocity_iterations: int = 8
+        self.position_iterations: int = 3
         self.time: int = 0
         self.selected_obj: Optional[RealObject] = None
         self.selected_obj_is_being_dragged: bool = False
@@ -181,6 +181,7 @@ class ObjectsManager:
 
         for i, obj in enumerate(self.objects):
             if body_area(obj.physics.body) < 0.000004:
+                self.objects[i].destroy()
                 self.objects.pop(i)
 
     def _apply_forces(self):

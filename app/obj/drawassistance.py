@@ -56,6 +56,8 @@ class DrawAssistance:
         self.start_pos = pos
 
     def set_current_position(self, pos: tuple[int, int]):
+        if self.start_pos is None:
+            return
         self.current_pos = pos
 
     def draw_rectangle(self):
