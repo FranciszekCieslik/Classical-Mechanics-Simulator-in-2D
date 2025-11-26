@@ -165,7 +165,9 @@ class RealObject:
         world_vec = vec / (self.cell_size * zoom)
 
         body = self.physics.body
-
+        if body is None:
+            return
+        
         new_pos = body.position - (world_vec.x, world_vec.y)
         body.position = new_pos
 

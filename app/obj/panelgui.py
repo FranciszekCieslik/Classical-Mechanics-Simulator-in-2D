@@ -15,7 +15,7 @@ from obj.savemanager import SaveManager
 class Panel_GUI:
     def __init__(
         self,
-        objmanager: ObjectsManager,
+        objectsmanager: ObjectsManager,
         draw_assistance: DrawAssistance,
     ):
         self.screen: pygame.Surface = pygame.display.get_surface()
@@ -31,7 +31,7 @@ class Panel_GUI:
 
         self.helpers: list[tp.Helper] = []
 
-        self.objects_manager = objmanager
+        self.objectsmanager = objectsmanager
         self.draw_assistance = draw_assistance
         self.button_play: ToggleImageButton
         self.is_rubber_on: bool = False
@@ -125,13 +125,13 @@ class Panel_GUI:
                     img_pressed_hover=img_stop_hover,
                     no_copy=False,
                     value=False,
-                    on_toggle=self.objects_manager.run_simulation,
+                    on_toggle=self.objectsmanager.run_simulation,
                 )
                 btn = self.button_play
             else:
                 btn = tp.ImageButton("", img.copy(), img_hover=variant)
             if label == "Reset":
-                btn._at_click = self.objects_manager.reset_simulation
+                btn._at_click = self.objectsmanager.reset_simulation
             elif "point" in icon_path:
                 btn._at_click = lambda: self.draw_assistance.active_drawing(
                     "point_particle"
@@ -145,7 +145,7 @@ class Panel_GUI:
         self.gravity_input = NumberInputOnCheckbox(
             checkbox_text="GRAVITY",
             input_text="9.81 ",
-            fun=self.objects_manager.set_gravity_force,
+            fun=self.objectsmanager.set_gravity_force,
             input_placeholder="9.81 ",
         )
         self.stop_simulation_at_collision = tp.Checkbox()
@@ -174,7 +174,7 @@ class Panel_GUI:
         helper.set_font_size(12)
 
         def on_save():
-            data = self.objects_manager.transfer_to_json()
+            data = self.objectsmanager.transfer_to_json()
             save_dir = "./app/local_save"
             self.save_manager.save_to_json(data, save_dir)
 
@@ -194,8 +194,8 @@ class Panel_GUI:
             data = self.save_manager.load_from_json(save_dir)
             if data:
                 self.gravity_input.input.value = str(round(data.get("gravity")[1], 4))
-                self.objects_manager.load_from_json(data)
-                self.objects_manager.reset_simulation()
+                self.objectsmanager.load_from_json(data)
+                self.objectsmanager.reset_simulation()
 
         btn_load.default_at_unclick = on_load
         save_group = tp.Group([btn_save, btn_load], 'h', gap=10)
@@ -210,9 +210,10 @@ class Panel_GUI:
         helper.set_font_size(12)
 
         def clear_all():
-            for obj in self.objects_manager.objects:
+            for obj in self.objectsmanager.objects:
                 obj.destroy()
-            self.objects_manager.objects.clear()
+            self.objectsmanager.objects.clear()
+            self.objectsmanager.reset_simulation()
 
         btn_clr.default_at_unclick = clear_all
         # --- Info ---
@@ -244,7 +245,7 @@ class Panel_GUI:
 
         btn_info.default_at_unclick = show_info
         # ------
-        self.simulation_timer = Timer(self.objects_manager)
+        self.simulation_timer = Timer(self.objectsmanager)
         self.stoper = Stoper()
         # ------
         self.metagroup = tp.Group(
@@ -269,7 +270,7 @@ class Panel_GUI:
         self.draw_assistance.set_color(self.color_palette.selected_color)
         self.color_palette.update_color_preview()
         self.simulation_timer.update()
-        self.objects_manager.stop_simulation_at_collision = (
+        self.objectsmanager.stop_simulation_at_collision = (
             self.stop_simulation_at_collision.value
         )
 

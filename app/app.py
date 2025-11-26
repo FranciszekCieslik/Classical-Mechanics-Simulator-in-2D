@@ -43,7 +43,7 @@ class App:
         self.axes: Axes = Axes(screen=self.screen, grid=self.grid)
 
         # --- OBJECTS MANAGER ---
-        self.objmanager: ObjectsManager = ObjectsManager(
+        self.objectsmanager: ObjectsManager = ObjectsManager(
             surface=self.screen,
             camera=self.camera,
             cell_size=self.grid.base_cell_size,
@@ -59,17 +59,17 @@ class App:
 
         # --- GUI PANEL ---
         self.panelgui: Panel_GUI = Panel_GUI(
-            objmanager=self.objmanager, draw_assistance=self.draw_assistance
+            objectsmanager=self.objectsmanager, draw_assistance=self.draw_assistance
         )
-        self.objmanager.stoper = self.panelgui.stoper
-        self.objmanager.un_play = lambda: self.panelgui.button_play.set_value(False)
+        self.objectsmanager.stoper = self.panelgui.stoper
+        self.objectsmanager.un_play = lambda: self.panelgui.button_play.set_value(False)
         # --- Side Bar ---
-        self.objsidebar: SideBar = SideBar(self.objmanager)
+        self.objsidebar: SideBar = SideBar(self.objectsmanager)
         self.point_particle_sidebar: PointParticleSideBar = PointParticleSideBar(
-            self.objmanager
+            self.objectsmanager
         )
         # --- Pop Inf ---
-        self.pop_info = PopInfo(self.camera, self.objmanager)
+        self.pop_info = PopInfo(self.camera, self.objectsmanager)
 
         # --- Thorpy Launcher ---
         self.panels = tp.Group(
@@ -107,9 +107,14 @@ class App:
         # --- MOUSE EVENTS ---
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.panelgui.is_rubber_on:
-                if self.objmanager.selected_obj:
-                    self.objmanager.objects.remove(self.objmanager.selected_obj)
-                    self.panelgui.is_rubber_on = False
+                if self.panelgui.is_rubber_on:
+                    if self.objectsmanager.selected_obj:
+                        for i, old_obj in enumerate(self.objectsmanager.objects):
+                            if old_obj == self.objectsmanager.selected_obj:
+                                self.objectsmanager.objects[i].destroy()
+                                self.objectsmanager.objects.pop(i)
+                        self.objectsmanager.selected_obj = None
+                        self.panelgui.is_rubber_on = False
             elif self.draw_assistance.is_drawing:
                 if self.draw_assistance.start_pos is None:
                     self.draw_assistance.set_start_position(pygame.mouse.get_pos())
@@ -120,32 +125,27 @@ class App:
                     self.draw_assistance.set_third_triangle_point(
                         pygame.mouse.get_pos()
                     )
-            elif self.panelgui.is_rubber_on:
-                if self.objmanager.selected_obj:
-                    self.objmanager.selected_obj.destroy()
-                    self.objmanager.objects.remove(self.objmanager.selected_obj)
-                    self.panelgui.is_rubber_on = False
             else:
-                obj = self.objmanager.selected_obj
+                obj = self.objectsmanager.selected_obj
                 if obj:
-                    self.objmanager.selected_obj_is_being_dragged = True
+                    self.objectsmanager.selected_obj_is_being_dragged = True
                     self.prev_mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
                 else:
-                    self.objmanager.end_dragging_obj()
-                    self.objmanager.selected_obj = None
+                    self.objectsmanager.end_dragging_obj()
+                    self.objectsmanager.selected_obj = None
                     if not self.draw_assistance.is_drawing:
                         self.dragging = True
                         self.prev_mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             self.dragging = False
-            self.objmanager.end_dragging_obj()
+            self.objectsmanager.end_dragging_obj()
             self.prev_mouse_pos = None
             result = self.draw_assistance.deactivate_drawing(
                 self.camera, self.grid.base_cell_size
             )
             if result is not None:
                 state, pos, size, color = result
-                self.objmanager.add_object(
+                self.objectsmanager.add_object(
                     obj_type="static",
                     shape_type=state,
                     size=size,
@@ -155,16 +155,16 @@ class App:
                     features=None,
                 )
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
-            obj = self.objmanager.selected_obj
+            obj = self.objectsmanager.selected_obj
             if obj:
                 self.pop_info.update(obj)
-                self.objmanager.selected_obj_is_being_dragged = False
+                self.objectsmanager.selected_obj_is_being_dragged = False
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 2:
             self.dragging = False
             self.prev_mouse_pos = None
-            self.objmanager.end_dragging_obj()
+            self.objectsmanager.end_dragging_obj()
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-            obj = self.objmanager.selected_obj
+            obj = self.objectsmanager.selected_obj
             if obj:
                 if obj.shape_type != "point_particle":
                     self.objsidebar.get_data_from_real_obj(obj)
@@ -181,7 +181,7 @@ class App:
                     ):
                         self.point_particle_sidebar.show()
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
-            self.objmanager.end_dragging_obj()
+            self.objectsmanager.end_dragging_obj()
             pass
         elif event.type == pygame.MOUSEMOTION:
             if self.draw_assistance.is_drawing:
@@ -199,17 +199,17 @@ class App:
         pos = pygame.mouse.get_pos()
         current_mouse_pos = pygame.Vector2(pos)
         if (
-            not self.objmanager.selected_obj_is_being_dragged
+            not self.objectsmanager.selected_obj_is_being_dragged
             and not self.draw_assistance.is_drawing
         ):
-            self.objmanager.select_object_at_position(pos)
-        if self.objmanager.selected_obj_is_being_dragged and self.prev_mouse_pos:
+            self.objectsmanager.select_object_at_position(pos)
+        if self.objectsmanager.selected_obj_is_being_dragged and self.prev_mouse_pos:
             if current_mouse_pos != self.prev_mouse_pos:
                 delta = current_mouse_pos - self.prev_mouse_pos
                 diff = self.camera.screen_to_world(
                     self.prev_mouse_pos
                 ) - self.camera.screen_to_world(current_mouse_pos)
-                self.objmanager.move_selected_obj(diff * self.camera.zoom)
+                self.objectsmanager.move_selected_obj(diff * self.camera.zoom)
                 if not self.dragging:
                     self.prev_mouse_pos = current_mouse_pos
         if self.dragging and self.prev_mouse_pos:
@@ -218,7 +218,7 @@ class App:
                 self.camera.move(delta.x, delta.y)
                 self.prev_mouse_pos = current_mouse_pos
 
-        self.objmanager.step_simulation()
+        self.objectsmanager.step_simulation()
 
     def draw_panels(self):
         self.objsidebar.update()
@@ -230,7 +230,7 @@ class App:
         self.screen.fill((220, 220, 220))
         self.grid.draw()
         self.axes.draw()
-        self.objmanager.draw_objects()
+        self.objectsmanager.draw_objects()
         self.draw_assistance.draw()
         self.draw_panels()
 
@@ -250,4 +250,4 @@ class App:
         self.on_cleanup()
 
     def toggle_simulation(self, running: bool) -> None:
-        self.objmanager.is_simulation_running = running
+        self.objectsmanager.is_simulation_running = running
