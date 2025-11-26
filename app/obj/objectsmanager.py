@@ -115,6 +115,7 @@ class ObjectsManager:
         self.collector.collision_detected = False
 
     def draw_objects(self) -> None:
+        self._vectors_scale()
         for obj in self.objects:
             obj.draw()
 
@@ -325,3 +326,34 @@ class ObjectsManager:
                 obj.vector_manager.lineral_velocity.vec_y.visible = vis.get(
                     "show_velocity_y", False
                 )
+
+    def _vectors_scale(self):
+        vals = []
+        vals_v = []
+        for obj in self.objects:
+            if obj.vector_manager:
+                vecs = [
+                    obj.vector_manager.gravity_force,
+                    obj.vector_manager.applied_force,
+                    obj.vector_manager.total_force,
+                ]
+                for vec in vecs:
+                    vals.append(vec.vector._vector_value(vec.vector.value))
+                    vals.append(vec.vector._vector_value(vec.vec_x.value))
+                    vals.append(vec.vector._vector_value(vec.vec_y.value))
+                vel = obj.vector_manager.lineral_velocity
+                vals_v.append(vel.vector._vector_value(vel.vector.value))
+                vals_v.append(vel.vector._vector_value(vel.vec_x.value))
+                vals_v.append(vel.vector._vector_value(vel.vec_y.value))
+        screen_height = pygame.display.get_surface().get_height()
+        limit = screen_height * 0.45
+        max_val = max(vals) if vals else 1.0
+        d = max_val * self.cell_size * self.camera.zoom
+        scale_factor = limit / d if d != 0 else 1.0
+        max_val_v = max(vals_v) if vals_v else 1.0
+        dv = max_val_v * self.cell_size * self.camera.zoom
+        scale_factor_v = limit / dv if dv != 0 else 1.0
+        for obj in self.objects:
+            if obj.vector_manager:
+                obj.vector_manager.scale_forces(scale_factor)
+                obj.vector_manager.scale_velocity(scale_factor_v)

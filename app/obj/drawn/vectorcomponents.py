@@ -66,3 +66,11 @@ class VectorComponents:
     def show(self):
         self.show_components()
         self.show_vector()
+
+    def scale(self, factor: float):
+        self.vector.scale_factor = factor
+        self.vec_x.scale_factor = factor
+        self.vec_y.scale_factor = factor
+
+    def set_unit(self, unit: str):
+        self.vector.unit = self.vec_x.unit = self.vec_y.unit = unit

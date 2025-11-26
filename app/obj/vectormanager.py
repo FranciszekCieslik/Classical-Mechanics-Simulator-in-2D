@@ -17,6 +17,7 @@ class VectorManager:
             obj.visual.camera,
             obj.visual.cell_size,
         )
+        self.lineral_velocity.set_unit("m/s")
         self.lineral_velocity.set_components_color(Color(0, 0, 0))
         self.forcemanager = ForceManager(self.obj, impulse_collector)
 
@@ -27,6 +28,7 @@ class VectorManager:
             obj.visual.camera,
             obj.visual.cell_size,
         )
+        self.gravity_force.set_unit("N")
         self.applied_force = VectorComponents(
             b2Vec2(self.obj.worldCenter),
             b2Vec2(self.forcemanager.applied_force),
@@ -34,6 +36,7 @@ class VectorManager:
             obj.visual.camera,
             obj.visual.cell_size,
         )
+        self.applied_force.set_unit("N")
         self.total_force = VectorComponents(
             b2Vec2(self.obj.worldCenter),
             b2Vec2(self.forcemanager.total_force),
@@ -41,6 +44,7 @@ class VectorManager:
             obj.visual.camera,
             obj.visual.cell_size,
         )
+        self.total_force.set_unit("N")
 
     def update(self):
         self.lineral_velocity.update(
@@ -62,3 +66,17 @@ class VectorManager:
         self.gravity_force.draw()
         self.applied_force.draw()
         self.total_force.draw()
+
+    def scale(self, factor: float):
+        self.lineral_velocity.scale(factor)
+        self.gravity_force.scale(factor)
+        self.applied_force.scale(factor)
+        self.total_force.scale(factor)
+
+    def scale_forces(self, factor: float):
+        self.gravity_force.scale(factor)
+        self.applied_force.scale(factor)
+        self.total_force.scale(factor)
+
+    def scale_velocity(self, factor: float):
+        self.lineral_velocity.scale(factor)

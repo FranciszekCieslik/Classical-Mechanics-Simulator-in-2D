@@ -21,6 +21,13 @@ class VisualVector:
         self.visible: bool = False
         self.line_thikness: int = 3
 
+        self.scale_factor: float = 1.0
+        self.label: str = ""
+        self.unit: str = "Unit"
+
+        # <-- ADDED: preloaded font
+        self.font = pygame.font.SysFont("consolas", 14)
+
     def set_value(self, val: b2Vec2) -> None:
         self.value = val
 
@@ -37,6 +44,7 @@ class VisualVector:
             pygame.Vector2(self.value.x, self.value.y)
             * self.base_cell_size
             * self.camera.zoom
+            * self.scale_factor
         )
 
         end_screen = start_screen + scaled_value
@@ -54,8 +62,8 @@ class VisualVector:
             direction = arrow_vec.normalize()
             perp = pygame.Vector2(-direction.y, direction.x)
 
-            head_length = 12 * self.camera.zoom
-            head_width = 7 * self.camera.zoom
+            head_length = 12
+            head_width = 7
 
             left_head = end_screen - direction * head_length + perp * head_width
             right_head = end_screen - direction * head_length - perp * head_width
@@ -69,7 +77,23 @@ class VisualVector:
                     (int(right_head.x), int(right_head.y)),
                 ],
             )
+        self._prep_label()
+        if self.label:
+            text_surface = self.font.render(self.label, True, self.color)
+            offset = pygame.Vector2(10, -10)
+            label_pos = end_screen + offset
+            bg = pygame.Surface(text_surface.get_size(), pygame.SRCALPHA)
+            bg.fill((255, 255, 255, 120))  # półprzezroczyste tło
+            self.screen.blit(bg, label_pos)
+            self.screen.blit(text_surface, label_pos)
 
     def update(self, att_point: b2Vec2, value: b2Vec2) -> None:
         self.value = value
         self.attachment_point = att_point
+
+    def _prep_label(self):
+        value_magnitude = self._vector_value(self.value)
+        self.label = f"{value_magnitude:.2f} {self.unit}"
+
+    def _vector_value(self, vec: b2Vec2) -> float:
+        return (vec.x**2 + vec.y**2) ** 0.5

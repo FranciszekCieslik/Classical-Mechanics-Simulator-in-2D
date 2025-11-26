@@ -230,8 +230,8 @@ class App:
         self.screen.fill((220, 220, 220))
         self.grid.draw()
         self.axes.draw()
-        self.objectsmanager.draw_objects()
         self.draw_assistance.draw()
+        self.objectsmanager.draw_objects()
         self.draw_panels()
 
     def on_cleanup(self) -> None:
