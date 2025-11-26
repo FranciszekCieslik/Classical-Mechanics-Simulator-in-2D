@@ -161,7 +161,7 @@ class PhysicObject:
         elif shape_type == "circle":
             return b2CircleShape(radius=size)
         elif shape_type == "point_particle":
-            return b2CircleShape(radius=1e-4)
+            return b2CircleShape(radius=1e-3)
         else:
             raise ValueError(f"Unknown shape type: {shape_type}")
 

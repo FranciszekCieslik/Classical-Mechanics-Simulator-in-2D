@@ -73,7 +73,7 @@ class Trajectory:
         w, h = self.surface.get_size()
         return 0 <= screen_pos.x <= w and 0 <= screen_pos.y <= h
 
-    def _predict_trajectory(self, body: Any, dt: float = 1 / 100, steps: int = 100):
+    def _predict_trajectory(self, body: Any, dt: float = 1 / 200, steps: int = 200):
         if not body.awake:
             return None
 

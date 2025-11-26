@@ -26,7 +26,7 @@ class ObjectsManager:
         self.objects: list[RealObject] = []
         self.is_simulation_running: bool = False
         self.stop_simulation_at_collision: bool = False
-        self.time_step: float = 1 / 100
+        self.time_step: float = 1 / 200
         self.velocity_iterations: int = 10
         self.position_iterations: int = 5
         self.time: int = 0
@@ -68,7 +68,7 @@ class ObjectsManager:
     def step_simulation(self) -> None:
 
         if self.stoper and self.stoper.value != 0:
-            next_time = self.time + 10
+            next_time = self.time + 5
             if next_time > self.stoper.value:
                 remaining_ms = self.stoper.value - self.time
                 final_dt = remaining_ms / 1000.0
@@ -98,7 +98,7 @@ class ObjectsManager:
                 self.velocity_iterations,
                 self.position_iterations,
             )
-            self.time += 10
+            self.time += 5
 
         if self.collector.collision_detected and self.stop_simulation_at_collision:
             self.is_simulation_running = False
@@ -109,7 +109,7 @@ class ObjectsManager:
                 obj.restore_state()
                 obj.sync()
             self.skip_force = True
-            self.time -= 10
+            self.time -= 5
             return
 
         self.collector.collision_detected = False
