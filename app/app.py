@@ -122,6 +122,7 @@ class App:
                     )
             elif self.panelgui.is_rubber_on:
                 if self.objmanager.selected_obj:
+                    self.objmanager.selected_obj.destroy()
                     self.objmanager.objects.remove(self.objmanager.selected_obj)
                     self.panelgui.is_rubber_on = False
             else:
