@@ -4,6 +4,7 @@
         0.0,
         9.8100004196167
     ],
+    "stoper": 0,
     "objects": [
         {
             "obj_type": "dynamic",

@@ -117,6 +117,9 @@ class SaveManager:
 
         self.save_at_unclick()
         file_name = str(self.get_value()).strip()
+        if len(file_name) == 0:
+            return
+
         if not file_name.endswith(".json"):
             file_name += ".json"
         if file_name:

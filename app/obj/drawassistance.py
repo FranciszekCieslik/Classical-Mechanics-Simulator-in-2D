@@ -107,9 +107,10 @@ class DrawAssistance:
 
         point1 = pygame.Vector2(x1, y1)
         point2 = pygame.Vector2(x2, y2)
-        point3 = pygame.Vector2(x2, y1)
         if self.third_triangel_point is not None:
             point3 = self.third_triangel_point
+        else:
+            point3 = pygame.Vector2(x2, y1)
 
         corners = [point1, point2, point3]
 
@@ -118,7 +119,7 @@ class DrawAssistance:
         pygame.gfxdraw.aapolygon(self.surface, corners, self.border_color)
 
     def set_third_triangle_point(self, pos: tuple[int, int] | None):
-        if self.state != 'triangle':
+        if self.state != 'triangle' or self.third_triangel_point:
             return
         if pos is not None and self.start_pos is not None:
             self.third_triangel_point = (pos[0], self.start_pos[1])

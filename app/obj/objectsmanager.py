@@ -27,8 +27,8 @@ class ObjectsManager:
         self.is_simulation_running: bool = False
         self.stop_simulation_at_collision: bool = False
         self.time_step: float = 1 / 100
-        self.velocity_iterations: int = 8
-        self.position_iterations: int = 3
+        self.velocity_iterations: int = 10
+        self.position_iterations: int = 5
         self.time: int = 0
         self.selected_obj: Optional[RealObject] = None
         self.selected_obj_is_being_dragged: bool = False
@@ -66,9 +66,9 @@ class ObjectsManager:
         self.objects.append(new_object)
 
     def step_simulation(self) -> None:
-        next_time = self.time + 10
 
         if self.stoper and self.stoper.value != 0:
+            next_time = self.time + 10
             if next_time > self.stoper.value:
                 remaining_ms = self.stoper.value - self.time
                 final_dt = remaining_ms / 1000.0
@@ -82,7 +82,8 @@ class ObjectsManager:
                         self.position_iterations,
                     )
 
-                self.time = self.stoper.value
+                if self.is_simulation_running and self.time < self.stoper.value:
+                    self.time = self.stoper.value
                 self.is_simulation_running = False
                 if self.un_play:
                     self.un_play()
@@ -196,6 +197,7 @@ class ObjectsManager:
         return {
             "cell_size": self.cell_size,
             "gravity": tuple(self.world.gravity),
+            "stoper": self.stoper.value if self.stoper else None,
             "objects": [obj.transfer_to_json() for obj in self.objects],
         }
 
@@ -207,14 +209,18 @@ class ObjectsManager:
         # -----------------------------
         # Wczytaj parametry managera
         # -----------------------------
+
+        cell_size = data.get("cell_size")
+        self.cell_size = int(cell_size) if isinstance(cell_size, (int, float)) else 100
+
         gravity = data.get("gravity")
         if isinstance(gravity, (list, tuple)) and len(gravity) > 1:
             g = gravity[1]
             self.set_gravity_force(round(g, 4))
 
-        cell_size = data.get("cell_size")
-        self.cell_size = int(cell_size) if isinstance(cell_size, (int, float)) else 100
-
+        stoper_val = data.get("stoper")
+        if self.stoper is not None:
+            self.stoper.value = int(stoper_val) if isinstance(stoper_val, (int)) else 0
         # -----------------------------
         # Wczytaj każdy obiekt
         # -----------------------------

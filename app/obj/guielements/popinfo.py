@@ -42,24 +42,38 @@ class PopInfo:
 
         body = rlobj.physics.body
         pos = body.position
+
         lv = vector_to_scalar(body.linearVelocity)
+        lv = lv if lv != 0.00 else 0.00
+
         av = body.fixtures[0].body.angularVelocity
+        av = av if av != 0.00 else 0.00
+
         acc = (
             vector_to_scalar(rlobj.vector_manager.forcemanager.total_force) / body.mass
         )
+        acc = acc if acc != 0.00 else 0.00
+
         ek = 0.5 * body.mass * lv * lv
+        ek = ek if ek != 0.00 else 0.00
+
         dep = body.mass * vector_to_scalar(body.world.gravity) * -1 * pos.y
+        dep = dep if dep != 0.00 else 0.00
+
         I = body.inertia
         er = 0.5 * I * av * av
+        er = er if er != 0.00 else 0.00
+
         y = -1 * pos.y if pos.y != 0.00 else 0.00
+
         return (
             f"Object at position: ({pos.x:.2f}, {y:.2f}) m\n"
-            f"Linear velocity: {lv:.3f} m/s\n"
+            f"Linear velocity: {lv:.2f} m/s\n"
             f"Acceleration: {acc:.2f} m/s²\n"
-            f"Angular velocity: {av:.3f} rad/s\n"
-            f"Kinetic energy: {ek:.3f} J\n"
-            f"Rotational energy: {er:.3f} J\n"
-            f"Potential energy: {dep:.3f} J\n"
+            f"Angular velocity: {av:.2f} rad/s\n"
+            f"Kinetic energy: {ek:.2f} J\n"
+            f"Rotational energy: {er:.2f} J\n"
+            f"Potential energy: {dep:.2f} J\n"
         )
 
     def _position(self):

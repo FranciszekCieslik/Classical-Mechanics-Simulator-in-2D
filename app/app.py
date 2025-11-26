@@ -1,5 +1,3 @@
-import threading
-import time
 from typing import Optional
 
 import pygame  # type: ignore
@@ -86,38 +84,13 @@ class App:
         self.panels_launcher = self.panels.get_updater()
         # --- TIMING ---
         self.clock: Clock = Clock()
-        self._resize_lock: threading.Lock = threading.Lock()
-        self._last_resize: float = 0.0
-        self._resize_cooldown: float = 0.2
-        self.DOUBLE_CLICK_TIME = 550  # maksymalny odstęp (ms) między kliknięciami
-        self.last_click_time = 0.0
 
         # --- FLAGS ---
         self._running: bool = True
         self.dragging: bool = False
-        self.minimized: bool = False
 
         # --- PREV MOUSE POS ---
         self.prev_mouse_pos: Optional[pygame.Vector2] = None
-
-    def resize(self, event) -> None:
-        now = time.time()
-        if now - getattr(self, "_last_resize", 0) < self._resize_cooldown:
-            return
-        self._last_resize = now
-
-        # ustal rozmiar okna niezależnie od typu eventu
-        if hasattr(event, "size"):
-            width, height = event.size
-        elif hasattr(event, "data1") and hasattr(event, "data2"):
-            width, height = event.data1, event.data2
-        else:
-            return
-
-        with self._resize_lock:
-            flags = pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE
-            self.size = (width, height)
-            self.screen = pygame.display.set_mode(self.size, flags)
 
     def on_event(self, event) -> None:
         # --- WINDOW EVENTS ---
@@ -132,31 +105,12 @@ class App:
             return
 
         # --- MOUSE EVENTS ---
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-            obj = self.objmanager.selected_obj
-            if obj:
-                if obj.shape_type != "point_particle":
-                    self.objsidebar.get_data_from_real_obj(obj)
-                    if (
-                        not self.objsidebar.visible
-                        and not self.point_particle_sidebar.visible
-                    ):
-                        self.objsidebar.show()
-                elif obj.shape_type == "point_particle":
-                    self.point_particle_sidebar.get_data_from_real_obj(obj)
-                    if (
-                        not self.objsidebar.visible
-                        and not self.point_particle_sidebar.visible
-                    ):
-                        self.point_particle_sidebar.show()
-
-        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            self.dragging = False
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.panelgui.is_rubber_on:
                 if self.objmanager.selected_obj:
                     self.objmanager.objects.remove(self.objmanager.selected_obj)
                     self.panelgui.is_rubber_on = False
-            if self.draw_assistance.is_drawing:
+            elif self.draw_assistance.is_drawing:
                 if self.draw_assistance.start_pos is None:
                     self.draw_assistance.set_start_position(pygame.mouse.get_pos())
                 elif (
@@ -171,26 +125,18 @@ class App:
                     self.objmanager.objects.remove(self.objmanager.selected_obj)
                     self.panelgui.is_rubber_on = False
             else:
-                now = pygame.time.get_ticks()
                 obj = self.objmanager.selected_obj
                 if obj:
-                    if now - self.last_click_time <= self.DOUBLE_CLICK_TIME:
-                        self.pop_info.update(obj)
-                        self.objmanager.selected_obj_is_being_dragged = False
-                    else:
-                        self.objmanager.selected_obj_is_being_dragged = True
+                    self.objmanager.selected_obj_is_being_dragged = True
+                    self.prev_mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
+                else:
+                    self.objmanager.end_dragging_obj()
+                    self.objmanager.selected_obj = None
+                    if not self.draw_assistance.is_drawing:
+                        self.dragging = True
                         self.prev_mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
-                self.last_click_time = now
-        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
-            self.dragging = True
-            self.objmanager.end_dragging_obj()
-            self.objmanager.selected_obj = None
-            self.prev_mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
-        elif event.type == pygame.MOUSEBUTTONUP and event.button == 2:
-            self.dragging = False
-            self.prev_mouse_pos = None
-            self.objmanager.end_dragging_obj()
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            self.dragging = False
             self.objmanager.end_dragging_obj()
             self.prev_mouse_pos = None
             result = self.draw_assistance.deactivate_drawing(
@@ -207,20 +153,55 @@ class App:
                     color=color,
                     features=None,
                 )
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
+            obj = self.objmanager.selected_obj
+            if obj:
+                self.pop_info.update(obj)
+                self.objmanager.selected_obj_is_being_dragged = False
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 2:
+            self.dragging = False
+            self.prev_mouse_pos = None
+            self.objmanager.end_dragging_obj()
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+            obj = self.objmanager.selected_obj
+            if obj:
+                if obj.shape_type != "point_particle":
+                    self.objsidebar.get_data_from_real_obj(obj)
+                    if (
+                        not self.objsidebar.visible
+                        and not self.point_particle_sidebar.visible
+                    ):
+                        self.objsidebar.show()
+                elif obj.shape_type == "point_particle":
+                    self.point_particle_sidebar.get_data_from_real_obj(obj)
+                    if (
+                        not self.objsidebar.visible
+                        and not self.point_particle_sidebar.visible
+                    ):
+                        self.point_particle_sidebar.show()
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
+            self.objmanager.end_dragging_obj()
+            pass
         elif event.type == pygame.MOUSEMOTION:
             if self.draw_assistance.is_drawing:
                 self.draw_assistance.set_current_position(pygame.mouse.get_pos())
-
-        if event.type == pygame.MOUSEWHEEL:
-            factor = (
-                self.camera.zoom_speed if event.y > 0 else 1.0 / self.camera.zoom_speed
-            )
-            self.camera.zoom_at(factor, pygame.mouse.get_pos())
+        elif event.type == pygame.MOUSEWHEEL:
+            if not self.draw_assistance.is_drawing:
+                factor = (
+                    self.camera.zoom_speed
+                    if event.y > 0
+                    else 1.0 / self.camera.zoom_speed
+                )
+                self.camera.zoom_at(factor, pygame.mouse.get_pos())
 
     def on_update(self) -> None:
         pos = pygame.mouse.get_pos()
         current_mouse_pos = pygame.Vector2(pos)
-        self.objmanager.select_object_at_position(pos)
+        if (
+            not self.objmanager.selected_obj_is_being_dragged
+            and not self.draw_assistance.is_drawing
+        ):
+            self.objmanager.select_object_at_position(pos)
         if self.objmanager.selected_obj_is_being_dragged and self.prev_mouse_pos:
             if current_mouse_pos != self.prev_mouse_pos:
                 delta = current_mouse_pos - self.prev_mouse_pos
@@ -245,9 +226,6 @@ class App:
         self.panels_launcher.update(func_after=self.panelgui.after_update)
 
     def on_render(self) -> None:
-        if getattr(self, "minimized", False):
-            return
-
         self.screen.fill((220, 220, 220))
         self.grid.draw()
         self.axes.draw()
