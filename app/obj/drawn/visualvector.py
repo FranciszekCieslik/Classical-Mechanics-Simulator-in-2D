@@ -77,15 +77,15 @@ class VisualVector:
                     (int(right_head.x), int(right_head.y)),
                 ],
             )
-        self._prep_label()
-        if self.label:
-            text_surface = self.font.render(self.label, True, self.color)
-            offset = pygame.Vector2(10, -10)
-            label_pos = end_screen + offset
-            bg = pygame.Surface(text_surface.get_size(), pygame.SRCALPHA)
-            bg.fill((255, 255, 255, 120))  # półprzezroczyste tło
-            self.screen.blit(bg, label_pos)
-            self.screen.blit(text_surface, label_pos)
+            self._prep_label()
+            if self.label:
+                text_surface = self.font.render(self.label, True, self.color)
+                offset = pygame.Vector2(10, -10)
+                label_pos = end_screen + offset
+                bg = pygame.Surface(text_surface.get_size(), pygame.SRCALPHA)
+                bg.fill((255, 255, 255, 120))  # półprzezroczyste tło
+                self.screen.blit(bg, label_pos)
+                self.screen.blit(text_surface, label_pos)
 
     def update(self, att_point: b2Vec2, value: b2Vec2) -> None:
         self.value = value

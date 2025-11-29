@@ -100,6 +100,15 @@ class App:
         elif event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
             if event.key == pygame.K_ESCAPE:
                 pygame.display.iconify()
+            elif event.key == pygame.K_UP:
+                self.camera.move(dy=10)
+            elif event.key == pygame.K_DOWN:
+                self.camera.move(dy=-10)
+            elif event.key == pygame.K_LEFT:
+                self.camera.move(dx=10)
+            elif event.key == pygame.K_RIGHT:
+                self.camera.move(dx=-10)
+
             # --- MOUSE EVENTS ---
         elif (
             event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.MOUSEBUTTONUP
@@ -192,7 +201,7 @@ class App:
             self.pop_info.tick()
             self.on_render()
             pygame.display.flip()
-            self.clock.tick(60)
+            self.clock.tick(100)
 
         self.on_cleanup()
 

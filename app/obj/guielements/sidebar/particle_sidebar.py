@@ -82,8 +82,6 @@ class PointParticleSideBar:
         self.mass: NumberInput
         self.start_velocity_x: NumberInput
         self.start_velocity_y: NumberInput
-        # self.curr_velocity_x: NumberInput
-        # self.curr_velocity_y: NumberInput
         self.applied_force_x: NumberInput
         self.applied_force_y: NumberInput
 
@@ -92,8 +90,6 @@ class PointParticleSideBar:
             "mass",
             "start_velocity_x",
             "start_velocity_y",
-            # "curr_velocity_x",
-            # "curr_velocity_y",
             "applied_force_x",
             "applied_force_y",
         ]
@@ -175,16 +171,6 @@ class PointParticleSideBar:
                             ],
                             "h",
                         ),
-                        # tp.Group(
-                        #     [
-                        #         tp.Text("Current", font_size=14),
-                        #         tp.Text("x:", font_size=14),
-                        #         self.curr_velocity_x,
-                        #         tp.Text("y:", font_size=14),
-                        #         self.curr_velocity_y,
-                        #     ],
-                        #     "h",
-                        # ),
                     ],
                     'v',
                     align='right',
@@ -287,19 +273,6 @@ class PointParticleSideBar:
             else 00.00
         )
         self.start_velocity_y.value = str(vy)
-        # self.curr_velocity_x.value = (
-        #     str(round(body.linearVelocity.x, 3))
-        #     if self.objectmanager.time != 0
-        #     else self.start_velocity_x.value
-        # )
-        # vy = (
-        #     -1 * round(body.linearVelocity.y, 3)
-        #     if round(body.linearVelocity.y, 3) != 0
-        #     else 00.00
-        # )
-        # self.curr_velocity_y.value = (
-        #     str(vy) if self.objectmanager.time != 0 else self.start_velocity_y.value
-        # )
 
         if rlobjct.trajectory and rlobjct.vector_manager:
             self.show_trajectory.value = rlobjct.trajectory.visible
@@ -344,7 +317,7 @@ class PointParticleSideBar:
             -1 * safe_float(self.start_velocity_y.value),
         )
 
-        features = Features(linearVelocity=(start_linearVelocity))
+        features = Features(linearVelocity=start_linearVelocity)
 
         new_obj = RealObject(
             world,
@@ -362,6 +335,11 @@ class PointParticleSideBar:
         )
         new_obj.start_position = (
             position if self.objectmanager.time == 0 else rlobjct.start_position
+        )
+        new_obj.physics.body.linearVelocity = (
+            start_linearVelocity
+            if self.objectmanager.time == 0
+            else rlobjct.physics.body.linearVelocity
         )
 
         if mass != 0:
@@ -401,7 +379,6 @@ class PointParticleSideBar:
                         self.objectmanager.objects.pop(i)
                         self.objectmanager.objects.append(new_obj)
                         break
-                self.objectmanager.objects[-1].reset()
         self.hide()
 
     def reset_inputs(self) -> None:
@@ -409,8 +386,6 @@ class PointParticleSideBar:
 
         self.start_velocity_x.value = ""
         self.start_velocity_y.value = ""
-        # self.curr_velocity_x.value = ""
-        # self.curr_velocity_y.value = ""
 
         self.applied_force_x.value = ""
         self.applied_force_y.value = ""
