@@ -4,7 +4,7 @@ import pygame  # type: ignore
 class Camera:
     def __init__(self) -> None:
         x, y = pygame.display.get_window_size()
-        self.offset = pygame.Vector2(int(x / 2), (y / 2))
+        self.offset = pygame.Vector2(int(x / 2), int(y / 2))
         self.zoom: float = 1.0
         self.min_zoom: float = 0.01
         self.max_zoom: float = 100.0

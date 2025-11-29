@@ -92,7 +92,7 @@ class App:
         # --- PREV MOUSE POS ---
         self.prev_mouse_pos: Optional[pygame.Vector2] = None
 
-    def on_event(self, event, pos) -> None:
+    def on_event(self, event) -> None:
         # --- WINDOW EVENTS ---
         if event.type == pygame.QUIT:
             self._running = False
@@ -101,63 +101,19 @@ class App:
             if event.key == pygame.K_ESCAPE:
                 pygame.display.iconify()
             # --- MOUSE EVENTS ---
-        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            print("Mouse Left Button Down at", pos)
-            if self.panelgui.is_rubber_on:
-                if self.objectsmanager.selected_obj:
-                    for i, old_obj in enumerate(self.objectsmanager.objects):
-                        if old_obj == self.objectsmanager.selected_obj:
-                            self.objectsmanager.objects[i].destroy()
-                            self.objectsmanager.objects.pop(i)
-                    self.objectsmanager.selected_obj = None
-                    self.panelgui.is_rubber_on = False
-            elif self.draw_assistance.is_drawing:
-                if self.draw_assistance.start_pos is None:
-                    self.draw_assistance.set_start_position(pos)
-                elif (
-                    self.draw_assistance.state == 'triangle'
-                    and self.draw_assistance.third_triangel_point is None
-                ):
-                    self.draw_assistance.set_third_triangle_point(pos)
-            else:
-                obj = self.objectsmanager.selected_obj
-                self.prev_mouse_pos = pygame.Vector2(pos)
-                if obj:
-                    self.objectsmanager.selected_obj_is_being_dragged = True
-                elif not self.dragging:
-                    self.objectsmanager.end_dragging_obj()
-                    self.dragging = True
-                    print("Start dragging camera")
-                else:
-                    self.objectsmanager.end_dragging_obj()
-                    self.dragging = False
-                    self.prev_mouse_pos = None
-        elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-            print("Mouse Left Button Up at", pos)
-            self.dragging = False
-            self.prev_mouse_pos = None
-            self.objectsmanager.end_dragging_obj()
-            result = self.draw_assistance.deactivate_drawing(
-                self.camera, self.grid.base_cell_size
-            )
-            if result is not None:
-                state, pos, size, color = result
-                self.objectsmanager.add_object(
-                    obj_type="static",
-                    shape_type=state,
-                    size=size,
-                    position=pos,
-                    angle=0.00,
-                    color=color,
-                    features=None,
-                )
-        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
+        elif (
+            event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.MOUSEBUTTONUP
+        ) and event.button == 1:
+            self._at_left_mouse_button()
+        elif (
+            event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.MOUSEBUTTONUP
+        ) and event.button == 2:
             obj = self.objectsmanager.selected_obj
             if obj:
                 self.pop_info.update(obj)
-        elif event.type == pygame.MOUSEBUTTONUP and event.button == 2:
-            pass
-        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+        elif (
+            event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.MOUSEBUTTONUP
+        ) and event.button == 3:
             obj = self.objectsmanager.selected_obj
             if obj:
                 if obj.shape_type != "point_particle":
@@ -174,8 +130,6 @@ class App:
                         and not self.point_particle_sidebar.visible
                     ):
                         self.point_particle_sidebar.show()
-        elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
-            pass
         elif event.type == pygame.MOUSEMOTION:
             pass
         elif event.type == pygame.MOUSEWHEEL:
@@ -185,14 +139,14 @@ class App:
                     if event.y > 0
                     else 1.0 / self.camera.zoom_speed
                 )
-                self.camera.zoom_at(factor, pos)
+                self.camera.zoom_at(factor, pygame.mouse.get_pos())
         else:
-            print("Unhandled event:", event)
             self.dragging = False
             self.prev_mouse_pos = None
             self.objectsmanager.end_dragging_obj()
 
-    def on_update(self, pos) -> None:
+    def on_update(self) -> None:
+        pos = pygame.mouse.get_pos()
         current_mouse_pos = pygame.Vector2(pos)
         if not self.objectsmanager.selected_obj_is_being_dragged:
             self.objectsmanager.select_object_at_position(pos)
@@ -203,12 +157,13 @@ class App:
             delta = current_mouse_pos - self.prev_mouse_pos
             if self.dragging:
                 self.camera.move(delta.x, delta.y)
+                self.prev_mouse_pos = current_mouse_pos
             elif self.objectsmanager.selected_obj_is_being_dragged:
                 diff = self.camera.screen_to_world(
                     self.prev_mouse_pos
                 ) - self.camera.screen_to_world(current_mouse_pos)
                 self.objectsmanager.move_selected_obj(diff * self.camera.zoom)
-            self.prev_mouse_pos = current_mouse_pos
+                self.prev_mouse_pos = current_mouse_pos
 
         self.objectsmanager.step_simulation()
 
@@ -231,10 +186,9 @@ class App:
 
     def on_execute(self) -> None:
         while self._running:
-            pos = pygame.mouse.get_pos()
             for event in pygame.event.get():
-                self.on_event(event, pos)
-            self.on_update(pos)
+                self.on_event(event)
+            self.on_update()
             self.pop_info.tick()
             self.on_render()
             pygame.display.flip()
@@ -244,3 +198,55 @@ class App:
 
     def toggle_simulation(self, running: bool) -> None:
         self.objectsmanager.is_simulation_running = running
+
+    def _at_left_mouse_button(self) -> None:
+        if self.panelgui.is_rubber_on:
+            if self.objectsmanager.selected_obj:
+                for i, old_obj in enumerate(self.objectsmanager.objects):
+                    if old_obj == self.objectsmanager.selected_obj:
+                        self.objectsmanager.objects[i].destroy()
+                        self.objectsmanager.objects.pop(i)
+                self.objectsmanager.selected_obj = None
+                self.panelgui.is_rubber_on = False
+            self.objectsmanager.end_dragging_obj()
+            self.dragging = False
+        elif self.draw_assistance.is_drawing:
+            if self.draw_assistance.start_pos is None:
+                self.draw_assistance.set_start_position(pygame.mouse.get_pos())
+            elif (
+                self.draw_assistance.state == 'triangle'
+                and self.draw_assistance.third_triangel_point is None
+            ):
+                self.draw_assistance.set_third_triangle_point(pygame.mouse.get_pos())
+            else:
+                self.prev_mouse_pos = None
+                result = self.draw_assistance.deactivate_drawing(
+                    self.camera, self.grid.base_cell_size
+                )
+                if result is not None:
+                    state, position, size, color = result
+                    self.objectsmanager.add_object(
+                        obj_type="static",
+                        shape_type=state,
+                        size=size,
+                        position=position,
+                        angle=0.00,
+                        color=color,
+                        features=None,
+                    )
+        else:
+            if self.objectsmanager.selected_obj_is_being_dragged:
+                self.objectsmanager.end_dragging_obj()
+                self.prev_mouse_pos = None
+            else:
+                obj = self.objectsmanager.selected_obj
+                self.prev_mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
+                if obj:
+                    self.objectsmanager.selected_obj_is_being_dragged = True
+                elif not self.dragging:
+                    self.objectsmanager.end_dragging_obj()
+                    self.dragging = True
+                else:
+                    self.objectsmanager.end_dragging_obj()
+                    self.dragging = False
+                    self.prev_mouse_pos = None
