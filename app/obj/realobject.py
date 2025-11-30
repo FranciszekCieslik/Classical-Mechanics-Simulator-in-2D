@@ -36,7 +36,7 @@ class RealObject:
 
         self.shape_type = shape_type
         self.obj_type = obj_type if shape_type != "point_particle" else 'dynamic'
-        self.size = size
+        self.size = self._round_size(size)
         self.start_angle = angle
         self.color = color
         self.cell_size = cell_size
@@ -167,7 +167,7 @@ class RealObject:
         body = self.physics.body
         if body is None:
             return
-        
+
         new_pos = body.position - (world_vec.x, world_vec.y)
         body.position = new_pos
 
@@ -237,3 +237,14 @@ class RealObject:
         body.angle = self._prev_angle
         body.linearVelocity = self._prev_linear_velocity
         body.angularVelocity = self._prev_angular_velocity
+
+    def _round_size(
+        self, size
+    ) -> Union[Tuple[float, float], float, List[Tuple[float, float]]]:
+        if self.shape_type == "rectangle" and isinstance(size, tuple):
+            return (round(size[0], 3), round(size[1], 3))
+        elif self.shape_type == "circle" and isinstance(size, (int, float)):
+            return round(size, 3)
+        elif self.shape_type == "polygon" and isinstance(size, list):
+            return [(round(v[0], 3), round(v[1], 3)) for v in size]
+        return size

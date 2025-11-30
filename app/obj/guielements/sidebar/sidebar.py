@@ -435,16 +435,6 @@ class SideBar:
         new_obj.start_position = (
             position if self.objectmanager.time == 0 else rlobjct.start_position
         )
-        new_obj.physics.body.linearVelocity = (
-            start_linearVelocity
-            if self.objectmanager.time == 0
-            else rlobjct.physics.body.linearVelocity
-        )
-        new_obj.physics.body.angularVelocity = (
-            start_angularVelocity
-            if self.objectmanager.time == 0
-            else rlobjct.physics.body.angularVelocity
-        )
 
         if new_obj.physics.body is None:
             return None
@@ -455,6 +445,16 @@ class SideBar:
             new_obj.start_angle = rlobjct.start_angle
 
         if obj_type == 'dynamic':
+            new_obj.physics.body.linearVelocity = (
+                start_linearVelocity
+                if self.objectmanager.time == 0
+                else rlobjct.physics.body.linearVelocity
+            )
+            new_obj.physics.body.angularVelocity = (
+                start_angularVelocity
+                if self.objectmanager.time == 0
+                else rlobjct.physics.body.angularVelocity
+            )
             if mass != 0:
                 new_obj.physics.body.fixtures[0].density = (
                     new_obj.physics.body.fixtures[0].density

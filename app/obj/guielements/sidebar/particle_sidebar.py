@@ -96,7 +96,7 @@ class PointParticleSideBar:
 
         # automatyczna inicjalizacja
         for name in fields:
-            text_input = NumberInput("", placeholder="00.00")
+            text_input = NumberInput("", placeholder="00.000")
             if not "velocity" in name and not "force" in name:
                 text_input.set_only_non_negative()
             text_input.max_length = 5
@@ -270,7 +270,7 @@ class PointParticleSideBar:
         vy = (
             -1 * round(linearVelocity[1], 3)
             if round(linearVelocity[1], 3) != 0
-            else 00.00
+            else 00.000
         )
         self.start_velocity_y.value = str(vy)
 
@@ -290,7 +290,7 @@ class PointParticleSideBar:
             )
             af = rlobjct.vector_manager.forcemanager.applied_force
             self.applied_force_x.value = str(round(af.x, 3))
-            afy = -1 * round(af.y, 3) if round(af.y, 3) != 0 else 00.00
+            afy = -1 * round(af.y, 3) if round(af.y, 3) != 0 else 00.000
             self.applied_force_y.value = str(afy)
 
     def apply_to_real_obj(self, rlobjct: RealObject) -> Optional[RealObject]:

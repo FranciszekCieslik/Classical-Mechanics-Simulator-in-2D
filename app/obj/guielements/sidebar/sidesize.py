@@ -12,7 +12,7 @@ def clamp_angle(value: float) -> float:
 
 
 def positive_min(value: float) -> float:
-    return max(0.01, value)
+    return max(0.001, value)
 
 
 class SideSize:
@@ -27,9 +27,9 @@ class SideSize:
         self.top_margin: Optional[int] = None
 
         if shape_type == "triangle":
-            self.angle1 = NumberInput("", placeholder="00.00")
-            self.edge = NumberInput("", placeholder="00.00")
-            self.angle2 = NumberInput("", placeholder="00.00")
+            self.angle1 = NumberInput("", placeholder="00.000")
+            self.edge = NumberInput("", placeholder="00.000")
+            self.angle2 = NumberInput("", placeholder="00.000")
             self.angle1.set_only_non_negative()
             self.edge.set_only_non_negative()
             self.angle2.set_only_non_negative()
@@ -51,7 +51,7 @@ class SideSize:
             self.group = tp.Group([self.group1, self.group2])
         else:
             if shape_type == "circle":
-                self.radius = NumberInput("", placeholder="00.00")
+                self.radius = NumberInput("", placeholder="00.000")
                 self.radius.set_only_non_negative()
                 self.radius.max_length = 5
                 self.group1 = tp.Group(
@@ -64,8 +64,8 @@ class SideSize:
                 self.group2 = tp.Group([tp.Text("", font_size=14)])
                 self.group = tp.Group([self.group1, self.group2])
             elif shape_type == "rectangle":
-                self.w = NumberInput("", placeholder="00.00")
-                self.h = NumberInput("", placeholder="00.00")
+                self.w = NumberInput("", placeholder="00.000")
+                self.h = NumberInput("", placeholder="00.000")
                 self.w.set_only_non_negative()
                 self.h.set_only_non_negative()
                 self.w.max_length = 5
@@ -110,7 +110,7 @@ class SideSize:
             radius = positive_min(radius)
 
             if hasattr(self, "radius"):
-                self.radius.value = f"{radius:.2f}"
+                self.radius.value = f"{radius:.3f}"
 
         elif self.shape_type == "rectangle" and isinstance(shape, b2PolygonShape):
             poly = cast(b2PolygonShape, shape)
@@ -123,9 +123,9 @@ class SideSize:
             height = positive_min(abs(max(ys) - min(ys)))
 
             if hasattr(self, "w"):
-                self.w.value = f"{width:.2f}"
+                self.w.value = f"{width:.3f}"
             if hasattr(self, "h"):
-                self.h.value = f"{height:.2f}"
+                self.h.value = f"{height:.3f}"
 
         elif self.shape_type == "triangle" and isinstance(shape, b2PolygonShape):
             verts = list(shape.vertices)
@@ -162,7 +162,7 @@ class SideSize:
             angle2_val = angle(b_len, a_len, c_len)  # przy B
 
             if hasattr(self, "edge"):
-                self.edge.value = f"{edge_val:.2f}"
+                self.edge.value = f"{edge_val:.3f}"
             if hasattr(self, "angle1"):
                 self.angle1.value = f"{angle1_val:.2f}"
             if hasattr(self, "angle2"):
