@@ -3,10 +3,11 @@ import math
 import pygame
 import pygame.gfxdraw
 from obj.camera import Camera
+from obj.grid import nice_world_step
 
 
 class DrawAssistance:
-    def __init__(self, surface: pygame.Surface):
+    def __init__(self, surface: pygame.Surface, cam: Camera, cell_size: int):
         self.surface: pygame.Surface = surface
         self.is_drawing: bool = False
         self.state: str = "empty"
@@ -16,6 +17,8 @@ class DrawAssistance:
         self.third_triangel_point: tuple[int, int] | None = None
         self.color: tuple[int, int, int] = (0, 255, 0)
         self.border_color: tuple[int, int, int] = (0, 200, 0)
+        self.camera = cam
+        self.cell_size = cell_size
 
     def draw(self):
         if self.state == "empty":
@@ -34,13 +37,13 @@ class DrawAssistance:
         self.is_drawing = True
         self.state = state
 
-    def deactivate_drawing(self, cam: Camera, cell_size: float):
+    def deactivate_drawing(self):
         '''Deactivate drawing mode.'''
         if self.start_pos is None or self.current_pos is None:
             return None
         if self.state == 'triangle' and self.third_triangel_point is None:
             return None
-        data = self._prep_data(cam, cell_size)
+        data = self._prep_data()
         if data is None:
             return None
         pos, size = data
@@ -53,12 +56,12 @@ class DrawAssistance:
         return state, pos, size, self.color
 
     def set_start_position(self, pos: tuple[int, int]):
-        self.start_pos = pos
+        self.start_pos = self.snap_to_grid(pos)
 
     def set_current_position(self, pos: tuple[int, int]):
         if self.start_pos is None:
             return
-        self.current_pos = pos
+        self.current_pos = self.snap_to_grid(pos)
 
     def draw_rectangle(self):
         if self.start_pos is None or self.current_pos is None:
@@ -138,7 +141,7 @@ class DrawAssistance:
         self.color = color
         self.border_color = pygame.Vector3(color / 2)
 
-    def _prep_data(self, cam: Camera, cell_size: float):
+    def _prep_data(self):
         if self.state == "empty":
             return None
 
@@ -149,23 +152,31 @@ class DrawAssistance:
         x2, y2 = self.current_pos
         if self.state == "circle":
             r = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
-            world_pos_px = (pygame.Vector2(x1, y1) - cam.offset) / cam.zoom
-            world_radius_px = r / cam.zoom
-            position = world_pos_px / cell_size
-            radius = world_radius_px / cell_size
+            world_pos_px = (
+                pygame.Vector2(x1, y1) - self.camera.offset
+            ) / self.camera.zoom
+            world_radius_px = r / self.camera.zoom
+            position = world_pos_px / self.cell_size
+            radius = world_radius_px / self.cell_size
             return position, radius
 
         elif self.state == "point_particle":
-            world_pos_px = (pygame.Vector2(x2, y2) - cam.offset) / cam.zoom
-            position = world_pos_px / cell_size
+            world_pos_px = (
+                pygame.Vector2(x2, y2) - self.camera.offset
+            ) / self.camera.zoom
+            position = world_pos_px / self.cell_size
             radius = 10
             return position, radius
 
         elif self.state == "line":
-            world_p1_px = (pygame.Vector2(self.start_pos) - cam.offset) / cam.zoom
-            world_p2_px = (pygame.Vector2(self.current_pos) - cam.offset) / cam.zoom
-            world_p1 = world_p1_px / cell_size
-            world_p2 = world_p2_px / cell_size
+            world_p1_px = (
+                pygame.Vector2(self.start_pos) - self.camera.offset
+            ) / self.camera.zoom
+            world_p2_px = (
+                pygame.Vector2(self.current_pos) - self.camera.offset
+            ) / self.camera.zoom
+            world_p1 = world_p1_px / self.cell_size
+            world_p2 = world_p2_px / self.cell_size
             return world_p1, world_p2
 
         elif self.state == "rectangle":
@@ -176,7 +187,8 @@ class DrawAssistance:
                 pygame.Vector2(x1, y2),
             ]
             world_points = [
-                (p - cam.offset) / cam.zoom / cell_size for p in screen_points
+                (p - self.camera.offset) / self.camera.zoom / self.cell_size
+                for p in screen_points
             ]
             min_x = min(p.x for p in world_points)
             max_x = max(p.x for p in world_points)
@@ -196,7 +208,8 @@ class DrawAssistance:
             points = [point1, point2, point3]
             screen_points = points
             world_points = [
-                (p - cam.offset) / cam.zoom / cell_size for p in screen_points
+                (p - self.camera.offset) / self.camera.zoom / self.cell_size
+                for p in screen_points
             ]
             position = sum(world_points, pygame.Vector2()) / 3
             vertices = [wp - position for wp in world_points]
@@ -215,3 +228,47 @@ class DrawAssistance:
         pygame.gfxdraw.filled_circle(self.surface, x1, y1, radius, self.color)
         pygame.gfxdraw.aacircle(self.surface, x1, y1, radius, self.color)
         pygame.gfxdraw.aacircle(self.surface, x1, y1, radius, self.border_color)
+
+    def snap_to_grid(self, pos: tuple[int, int]) -> tuple[int, int]:
+        """
+        Zaokrągla podany punkt ekranu (px) do najbliższej linii głównej
+        lub pomocniczej siatki rysowanej przez Grid.
+        """
+
+        x, y = pos
+        ox, oy = self.camera.offset
+        zoom = self.camera.zoom
+
+        # --- to samo co w Grid.draw() ---
+        world_step = self.cell_size  # base_cell_size = pixel przy zoom=1
+        world_step = self.cell_size
+        world_step = self.cell_size
+
+        # używamy tego samego algorytmu
+        step_world_unit = nice_world_step(self.cell_size, zoom, target_px=100)
+        step_px = self.cell_size * zoom * step_world_unit
+
+        helper_count = 5
+        helper_px = step_px / helper_count if step_px >= 80 else None
+
+        # --- snapowanie do linii ---
+        def snap_axis(v, offset, step, helper):
+            # pozycja w "przestrzeni siatki"
+            grid_space = (v - offset) / step
+
+            if helper is None:
+                # tylko linie główne
+                nearest_index = round(grid_space)
+                snapped = offset + nearest_index * step
+                return int(snapped)
+
+            # linie pomocnicze = step/5 → czyli 1/5 indeksu jednostki
+            fine_index = grid_space * helper_count
+            nearest_fine = round(fine_index)
+            snapped = offset + (nearest_fine / helper_count) * step
+            return int(snapped)
+
+        snap_x = snap_axis(x, ox, step_px, helper_px)
+        snap_y = snap_axis(y, oy, step_px, helper_px)
+
+        return (snap_x, snap_y)

@@ -51,7 +51,9 @@ class App:
         )
 
         # --- Draw Assistance ---
-        self.draw_assistance = DrawAssistance(self.screen)
+        self.draw_assistance = DrawAssistance(
+            self.screen, self.camera, self.grid.base_cell_size
+        )
 
         # --- Thorpy Init ---
         tp.init(self.screen, theme=tp.theme_text_dark)
@@ -229,9 +231,7 @@ class App:
                 self.draw_assistance.set_third_triangle_point(pygame.mouse.get_pos())
             else:
                 self.prev_mouse_pos = None
-                result = self.draw_assistance.deactivate_drawing(
-                    self.camera, self.grid.base_cell_size
-                )
+                result = self.draw_assistance.deactivate_drawing()
                 if result is not None:
                     state, position, size, color = result
                     self.objectsmanager.add_object(
