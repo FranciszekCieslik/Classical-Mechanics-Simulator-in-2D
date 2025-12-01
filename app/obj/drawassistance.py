@@ -1,9 +1,39 @@
 import math
+from decimal import Decimal, getcontext
 
 import pygame
 import pygame.gfxdraw
 from obj.camera import Camera
 from obj.grid import nice_world_step
+
+getcontext().prec = 28
+
+
+def decimal_places_for_step(step: float) -> int:
+    d = Decimal(str(step))
+    exponent = int(d.as_tuple().exponent)  # 👈 KLUCZOWE
+
+    if exponent < 0:
+        return -exponent
+    return 0
+
+
+def snap_value(val: float, zoom, cell_size) -> float:
+    main_step = nice_world_step(cell_size, zoom, target_px=100)
+
+    main_step_dec = Decimal(str(main_step))
+    helper_step = main_step_dec / Decimal("5")
+
+    val_dec = Decimal(str(val))
+
+    snapped_units = (val_dec / helper_step).quantize(
+        Decimal('1'), rounding="ROUND_HALF_UP"
+    )
+    snapped_dec = snapped_units * helper_step
+
+    snapped_3 = snapped_dec.quantize(Decimal("0.001"), rounding="ROUND_HALF_UP")
+
+    return float(snapped_3)
 
 
 class DrawAssistance:
@@ -158,7 +188,7 @@ class DrawAssistance:
             world_radius_px = r / self.camera.zoom
             position = world_pos_px / self.cell_size
             radius = world_radius_px / self.cell_size
-            return position, radius
+            return position, snap_value(radius, self.camera.zoom, self.cell_size)
 
         elif self.state == "point_particle":
             world_pos_px = (
@@ -196,6 +226,8 @@ class DrawAssistance:
             max_y = max(p.y for p in world_points)
             width = max_x - min_x
             height = max_y - min_y
+            width = snap_value(width, self.camera.zoom, self.cell_size)
+            height = snap_value(height, self.camera.zoom, self.cell_size)
             position = pygame.Vector2((min_x + max_x) / 2, (min_y + max_y) / 2)
             return position, (width, height)
 

@@ -5,6 +5,7 @@ import pygame  # type: ignore
 from Box2D import b2Vec2, b2World
 from obj.camera import Camera
 from obj.drawn.drawnobject import DrawnObject
+from obj.grid import nice_world_step
 from obj.impulsecollector import ImpulseCollector
 from obj.physicobject import Features, PhysicObject
 from obj.trajectory import Trajectory
@@ -36,7 +37,7 @@ class RealObject:
 
         self.shape_type = shape_type
         self.obj_type = obj_type if shape_type != "point_particle" else 'dynamic'
-        self.size = self._round_size(size)
+        self.size = self._round_size(size, camera.zoom, cell_size)
         self.start_angle = angle
         self.color = color
         self.cell_size = cell_size
@@ -239,7 +240,7 @@ class RealObject:
         body.angularVelocity = self._prev_angular_velocity
 
     def _round_size(
-        self, size
+        self, size, zoom, cell_size
     ) -> Union[Tuple[float, float], float, List[Tuple[float, float]]]:
         if self.shape_type == "rectangle" and isinstance(size, tuple):
             return (round(size[0], 3), round(size[1], 3))
