@@ -1,3 +1,5 @@
+import math
+
 import pygame
 from Box2D import b2Vec2
 from obj.camera import Camera
@@ -48,6 +50,15 @@ class VisualVector:
         )
 
         end_screen = start_screen + scaled_value
+
+        if (
+            not math.isfinite(start_screen.x)
+            or not math.isfinite(start_screen.y)
+            or not math.isfinite(end_screen.x)
+            or not math.isfinite(end_screen.y)
+        ):
+            print("INVALID VECTOR:", start_screen, scaled_value, end_screen, self.value)
+            return
 
         pygame.draw.line(
             self.screen,

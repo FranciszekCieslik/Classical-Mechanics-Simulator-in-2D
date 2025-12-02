@@ -154,12 +154,16 @@ class ObjectsManager:
         self.selected_obj = None
 
     def move_selected_obj(self, vec: pygame.Vector2):
+        if self.selected_obj is None:
+            return
+
         obj = self.selected_obj
-        if obj:
-            obj.move(vec)
-            if self.time == 0:
-                obj.start_position = obj.physics.body.position.copy()
-                obj.sync()
+        if obj.physics is None or obj.physics.body is None:
+            print("Selected object has no physics body (deleted?)")
+            return
+        obj.start_position = obj.physics.body.position.copy()
+        obj.move(vec)
+        obj.sync()
 
     def set_gravity_force(self, val: float = 0.0):
         self.world.gravity = b2Vec2(0.0, val)

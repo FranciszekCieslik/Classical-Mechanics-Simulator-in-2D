@@ -1,0 +1,215 @@
+{
+    "cell_size": 100,
+    "gravity": [
+        0.0,
+        9.8100004196167
+    ],
+    "stoper": 820,
+    "objects": [
+        {
+            "obj_type": "static",
+            "shape_type": "triangle",
+            "size": [
+                [
+                    0.924,
+                    0.26673582436560694
+                ],
+                [
+                    -0.4619999999999998,
+                    0.2667358243656071
+                ],
+                [
+                    -0.46200000000000013,
+                    -0.533471648731214
+                ]
+            ],
+            "position": [
+                0.462169349193573,
+                -0.2664666473865509
+            ],
+            "angle": 0.0,
+            "color": [
+                150.0,
+                150.0,
+                255.0
+            ],
+            "features": null
+        },
+        {
+            "obj_type": "dynamic",
+            "shape_type": "rectangle",
+            "size": [
+                0.1,
+                0.1
+            ],
+            "position": [
+                0.06800000369548798,
+                -0.8190000057220459
+            ],
+            "angle": 0.5235987755982988,
+            "color": [
+                255.0,
+                165.0,
+                0.0
+            ],
+            "features": {
+                "linearVelocity": [
+                    0.0,
+                    -0.0
+                ],
+                "angularVelocity": 0.0,
+                "linearDamping": 0.0,
+                "angularDamping": 0.0,
+                "density": 100.0,
+                "friction": 0.0,
+                "restitution": 0.0,
+                "fixedRotation": false,
+                "active": true
+            },
+            "mass": 0.9999999403953552,
+            "linear_velocity": [
+                0.0,
+                -0.0
+            ],
+            "angular_velocity": 0.0,
+            "applied_force": [
+                0.0,
+                -0.0
+            ],
+            "show_trajectory": false,
+            "show_gravity_force": false,
+            "show_applied_force": false,
+            "show_total_force": false,
+            "show_velocity": true,
+            "show_velocity_x": false,
+            "show_velocity_y": false
+        },
+        {
+            "obj_type": "static",
+            "shape_type": "triangle",
+            "size": [
+                [
+                    0.8166666666666668,
+                    0.40833333333333327
+                ],
+                [
+                    -0.40833333333333327,
+                    0.40833333333333344
+                ],
+                [
+                    -0.40833333333333344,
+                    -0.8166666666666667
+                ]
+            ],
+            "position": [
+                2.409853219985962,
+                -0.4037132263183594
+            ],
+            "angle": 0.0,
+            "color": [
+                80.0,
+                255.0,
+                80.0
+            ],
+            "features": null
+        },
+        {
+            "obj_type": "dynamic",
+            "shape_type": "rectangle",
+            "size": [
+                0.1,
+                0.1
+            ],
+            "position": [
+                2.072000026702881,
+                -1.2209999561309814
+            ],
+            "angle": 0.7853981633974483,
+            "color": [
+                255.0,
+                165.0,
+                0.0
+            ],
+            "features": {
+                "linearVelocity": [
+                    0.0,
+                    -0.0
+                ],
+                "angularVelocity": 0.0,
+                "linearDamping": 0.0,
+                "angularDamping": 0.0,
+                "density": 100.0,
+                "friction": 0.0,
+                "restitution": 0.0,
+                "fixedRotation": false,
+                "active": true
+            },
+            "mass": 0.9999999403953552,
+            "linear_velocity": [
+                0.0,
+                -0.0
+            ],
+            "angular_velocity": 0.0,
+            "applied_force": [
+                0.0,
+                -0.0
+            ],
+            "show_trajectory": false,
+            "show_gravity_force": false,
+            "show_applied_force": false,
+            "show_total_force": false,
+            "show_velocity": true,
+            "show_velocity_x": false,
+            "show_velocity_y": false
+        },
+        {
+            "obj_type": "dynamic",
+            "shape_type": "rectangle",
+            "size": [
+                0.1,
+                0.1
+            ],
+            "position": [
+                3.549999952316284,
+                -1.600000023841858
+            ],
+            "angle": 0.0,
+            "color": [
+                255.0,
+                165.0,
+                0.0
+            ],
+            "features": {
+                "linearVelocity": [
+                    0.0,
+                    -0.0
+                ],
+                "angularVelocity": 0.0,
+                "linearDamping": 0.0,
+                "angularDamping": 0.0,
+                "density": 100.0,
+                "friction": 0.0,
+                "restitution": 0.0,
+                "fixedRotation": false,
+                "active": true
+            },
+            "mass": 0.9999999403953552,
+            "linear_velocity": [
+                0.0,
+                -0.0
+            ],
+            "angular_velocity": 0.0,
+            "applied_force": [
+                0.0,
+                -0.0
+            ],
+            "show_trajectory": false,
+            "show_gravity_force": false,
+            "show_applied_force": false,
+            "show_total_force": false,
+            "show_velocity": true,
+            "show_velocity_x": false,
+            "show_velocity_y": false
+        }
+    ]
+}

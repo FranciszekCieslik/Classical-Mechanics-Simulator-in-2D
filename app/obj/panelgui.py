@@ -196,6 +196,10 @@ class Panel_GUI:
                 self.gravity_input.input.value = str(round(data.get("gravity")[1], 4))
                 self.objectsmanager.load_from_json(data)
                 self.objectsmanager.reset_simulation()
+                if self.stoper:
+                    self.stoper.display.set_value(
+                        self.stoper._prep_text(self.stoper.value)
+                    )
 
         btn_load.default_at_unclick = on_load
         save_group = tp.Group([btn_save, btn_load], 'h', gap=10)

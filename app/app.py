@@ -115,7 +115,7 @@ class App:
         elif (
             event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.MOUSEBUTTONUP
         ) and event.button == 1:
-            self._at_left_mouse_button()
+            self._at_left_mouse_button(event)
         elif (
             event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.MOUSEBUTTONUP
         ) and event.button == 2:
@@ -210,7 +210,7 @@ class App:
     def toggle_simulation(self, running: bool) -> None:
         self.objectsmanager.is_simulation_running = running
 
-    def _at_left_mouse_button(self) -> None:
+    def _at_left_mouse_button(self, event) -> None:
         if self.panelgui.is_rubber_on:
             if self.objectsmanager.selected_obj:
                 for i, old_obj in enumerate(self.objectsmanager.objects):
@@ -222,7 +222,10 @@ class App:
             self.objectsmanager.end_dragging_obj()
             self.dragging = False
         elif self.draw_assistance.is_drawing:
-            if self.draw_assistance.start_pos is None:
+            if (
+                self.draw_assistance.start_pos is None
+                and event.type == pygame.MOUSEBUTTONDOWN
+            ):
                 self.draw_assistance.set_start_position(pygame.mouse.get_pos())
             elif (
                 self.draw_assistance.state == 'triangle'
