@@ -4,9 +4,10 @@ from typing import Tuple
 import pygame  # type: ignore
 import pygame.gfxdraw
 from obj.camera import Camera
+from obj.drawn.empty import Empty
 
 
-class Circle:
+class Circle(Empty):
     def __init__(
         self,
         surface: pygame.Surface,
@@ -55,7 +56,8 @@ class Circle:
 
         start = pygame.Vector2(self.screen_center)
         end = pygame.Vector2(start.x + radius_px, start.y)
-
+        if self.angle is None:
+            self.angle = 0.0
         # Obrót względem środka (zgodnie z konwencją Pygame)
         end = self.rotate_point(end, start, self.angle)
 
@@ -84,6 +86,8 @@ class Circle:
 
     def rotate(self, delta_angle: float) -> None:
         """Rotates the circle by a given angle (in degrees)."""
+        if self.angle is None:
+            self.angle = 0.0
         self.angle = (self.angle + delta_angle) % 360
 
     def set_angle(self, angle: float) -> None:

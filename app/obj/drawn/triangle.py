@@ -4,9 +4,10 @@ from typing import Tuple
 import pygame  # type: ignore
 import pygame.gfxdraw
 from obj.camera import Camera
+from obj.drawn.empty import Empty
 
 
-class Triangle:
+class Triangle(Empty):
     def __init__(
         self,
         surface: pygame.Surface,

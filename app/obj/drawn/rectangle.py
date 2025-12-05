@@ -4,9 +4,10 @@ from typing import Tuple
 import pygame
 import pygame.gfxdraw
 from obj.camera import Camera
+from obj.drawn.empty import Empty
 
 
-class Rectangle:
+class Rectangle(Empty):
     def __init__(
         self,
         surface: pygame.Surface,
@@ -61,6 +62,16 @@ class Rectangle:
         Returns False if the rectangle is outside the screen view.
         """
         # --- convert to pixels ---
+        if (
+            self.position is None
+            or self.size is None
+            or self.surface is None
+            or self.base_cell_size_world is None
+            or self.cam is None
+            or self.angle is None
+        ):
+            return False
+
         world_pos_px = self.position * self.base_cell_size_world
         world_size_px = self.size * self.base_cell_size_world
 
