@@ -6,7 +6,7 @@ from obj.impulsecollector import ImpulseCollector
 
 class ForceManager:
     def __init__(
-        self, body: Any, impulse_collector: ImpulseCollector, dt: float = 1 / 100
+        self, body: Any, impulse_collector: ImpulseCollector, dt: float = 1 / 200
     ):
         self.body = body
         self.dt = dt

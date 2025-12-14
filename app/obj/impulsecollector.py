@@ -1,5 +1,3 @@
-from typing import Callable, Optional
-
 from Box2D import b2ContactListener, b2Vec2
 
 

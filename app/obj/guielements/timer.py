@@ -29,7 +29,6 @@ class Timer:
         return self.timer
 
     def update(self):
-        # czas już jest w milisekundach (int)
         total_ms = self.objectsmanager.time
 
         ms = total_ms % 1000

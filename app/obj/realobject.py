@@ -119,6 +119,8 @@ class RealObject:
 
     # -------------------------------------------------------
     def draw(self) -> None:
+        if self.physics.body is None:
+            return
         self.sync()
         self.visual.draw()
         if self.trajectory:

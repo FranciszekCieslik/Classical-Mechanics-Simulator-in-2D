@@ -227,7 +227,7 @@ class Panel_GUI:
             img, img.get_at((0, 0)), (100, 100, 100)
         )
         btn_info = tp.ImageButton("", img.copy(), img_hover=variant)
-        helper = tp.Helper('Load file', btn_info, countdown=30, offset=(0, 40))
+        helper = tp.Helper('Info', btn_info, countdown=30, offset=(0, 40))
         helper.set_font_size(12)
 
         text = """

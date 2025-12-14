@@ -11,7 +11,7 @@ getcontext().prec = 28
 
 def decimal_places_for_step(step: float) -> int:
     d = Decimal(str(step))
-    exponent = int(d.as_tuple().exponent)  # 👈 KLUCZOWE
+    exponent = int(d.as_tuple().exponent)
 
     if exponent < 0:
         return -exponent
@@ -271,30 +271,24 @@ class DrawAssistance:
         ox, oy = self.camera.offset
         zoom = self.camera.zoom
 
-        # --- to samo co w Grid.draw() ---
-        world_step = self.cell_size  # base_cell_size = pixel przy zoom=1
+        world_step = self.cell_size
         world_step = self.cell_size
         world_step = self.cell_size
 
-        # używamy tego samego algorytmu
         step_world_unit = nice_world_step(self.cell_size, zoom, target_px=100)
         step_px = self.cell_size * zoom * step_world_unit
 
         helper_count = 5
         helper_px = step_px / helper_count if step_px >= 80 else None
 
-        # --- snapowanie do linii ---
         def snap_axis(v, offset, step, helper):
-            # pozycja w "przestrzeni siatki"
             grid_space = (v - offset) / step
 
             if helper is None:
-                # tylko linie główne
                 nearest_index = round(grid_space)
                 snapped = offset + nearest_index * step
                 return int(snapped)
 
-            # linie pomocnicze = step/5 → czyli 1/5 indeksu jednostki
             fine_index = grid_space * helper_count
             nearest_fine = round(fine_index)
             snapped = offset + (nearest_fine / helper_count) * step

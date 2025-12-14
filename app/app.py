@@ -84,6 +84,7 @@ class App:
             mode=None,
         )
         self.panels_launcher = self.panels.get_updater()
+
         # --- TIMING ---
         self.clock: Clock = Clock()
 

@@ -198,7 +198,7 @@ class FeaturesPanel:
                     ),
                     tp.Group(
                         [
-                            tp.Text("Show resutant force", font_size=14),
+                            tp.Text("Show resultant force", font_size=14),
                             self.show_resultant_force,
                         ],
                         "h",
