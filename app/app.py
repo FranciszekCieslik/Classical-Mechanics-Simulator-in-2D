@@ -176,8 +176,8 @@ class App:
                 ) - self.camera.screen_to_world(current_mouse_pos)
                 self.objectsmanager.move_selected_obj(diff * self.camera.zoom)
                 self.prev_mouse_pos = current_mouse_pos
-
         self.objectsmanager.step_simulation()
+        self.pop_info.tick()
 
     def draw_panels(self):
         self.objsidebar.update()
@@ -201,7 +201,6 @@ class App:
             for event in pygame.event.get():
                 self.on_event(event)
             self.on_update()
-            self.pop_info.tick()
             self.on_render()
             pygame.display.flip()
             self.clock.tick(100)

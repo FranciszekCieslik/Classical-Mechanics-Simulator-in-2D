@@ -118,7 +118,7 @@ class FeaturesPanel:
                 align='right',
             ),
             tp.Line("h", 360),
-            tp.Text("Lineral Velocity", font_size=16),
+            tp.Text("Linear Velocity", font_size=16),
             tp.Line("h", 360),
             tp.Group(
                 [
