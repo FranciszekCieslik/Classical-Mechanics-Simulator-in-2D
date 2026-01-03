@@ -41,6 +41,8 @@ class PopInfo:
             return 'Static object'
 
         body = rlobj.physics.body
+        if not body:
+            return 'No physics body'
         pos = body.position
 
         lv = vector_to_scalar(body.linearVelocity)
