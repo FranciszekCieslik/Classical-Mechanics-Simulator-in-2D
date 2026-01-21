@@ -198,11 +198,11 @@ class App:
 
     def on_execute(self) -> None:
         while self._running:
-            for event in pygame.event.get():
-                self.on_event(event)
             self.on_update()
             self.on_render()
             pygame.display.flip()
+            for event in pygame.event.get():
+                self.on_event(event)
             self.clock.tick(100)
 
         self.on_cleanup()
