@@ -10,6 +10,8 @@ The system is designed to:
 - provide clear and intuitive visualization of simulations,
 - support easy extension with new models and experimental conditions.
 
+https://github.com/user-attachments/assets/2915ed67-a2ae-486f-bb67-7f88ef67acfa
+
 ## Installation Guide
 
 This guide explains how to install and run the **Classical Mechanics Simulator in 2D** written in Python.
